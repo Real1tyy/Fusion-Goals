@@ -1,10 +1,7 @@
 import type { Core } from "cytoscape";
 import type { App } from "obsidian";
 import { TFile } from "obsidian";
-import type { EdgeContextMenu } from "./edge-context-menu";
-import type { NodeContextMenu } from "./node-context-menu";
 import type { PropertyTooltip } from "./property-tooltip";
-import type { RelationshipAdder } from "./relationship-adder";
 
 export interface GraphInteractionConfig {
 	getCy: () => Core;
@@ -23,9 +20,6 @@ export class GraphInteractionHandler {
 	constructor(
 		private readonly app: App,
 		private readonly propertyTooltip: PropertyTooltip,
-		private readonly nodeContextMenu: NodeContextMenu,
-		private readonly edgeContextMenu: EdgeContextMenu,
-		private readonly relationshipAdder: RelationshipAdder,
 		private readonly config: GraphInteractionConfig
 	) {}
 
@@ -42,8 +36,7 @@ export class GraphInteractionHandler {
 		this.setupNodeHoverPreview();
 		this.setupNodeClickHandler();
 		this.setupEdgeClickHandler();
-		this.setupNodeContextMenu();
-		this.setupEdgeContextMenu();
+		// Context menus removed - no property management
 		this.setupDoubleClickZoom();
 		this.addSparkleAnimations();
 	}
@@ -94,12 +87,6 @@ export class GraphInteractionHandler {
 			const originalEvent = evt.originalEvent as MouseEvent;
 
 			if (file instanceof TFile) {
-				// Check if we're in relationship selection mode
-				if (this.relationshipAdder.isSelectionActive()) {
-					this.relationshipAdder.completeSelection(filePath);
-					return;
-				}
-
 				if (originalEvent && (originalEvent.ctrlKey || originalEvent.metaKey)) {
 					this.app.workspace.getLeaf("tab").openFile(file);
 					return;
@@ -123,32 +110,7 @@ export class GraphInteractionHandler {
 		});
 	}
 
-	private setupNodeContextMenu(): void {
-		this.cy.on("cxttap", "node", (evt) => {
-			const node = evt.target;
-			const filePath = node.id();
-			const originalEvent = evt.originalEvent as MouseEvent;
-
-			// Cancel relationship selection if right-clicking during selection
-			if (this.relationshipAdder.isSelectionActive()) {
-				this.relationshipAdder.cancel();
-			}
-
-			this.nodeContextMenu.show(originalEvent, filePath);
-		});
-	}
-
-	private setupEdgeContextMenu(): void {
-		this.cy.on("cxttap", "edge", (evt) => {
-			const edge = evt.target;
-			const sourceId = edge.data("source");
-			const targetId = edge.data("target");
-			const originalEvent = evt.originalEvent as MouseEvent;
-			const isRelatedView = this.config.isRelatedView();
-
-			this.edgeContextMenu.show(originalEvent, sourceId, targetId, isRelatedView);
-		});
-	}
+	// Context menu methods removed - no property management
 
 	private setupDoubleClickZoom(): void {
 		// Double left-click (double tap) on background zooms in toward clicked position

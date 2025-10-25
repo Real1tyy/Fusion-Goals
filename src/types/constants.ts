@@ -14,6 +14,14 @@ export const SETTINGS_DEFAULTS = {
 	DEFAULT_GOAL_PROP: "goal",
 	DEFAULT_PROJECT_PROP: "project",
 
+	// Legacy properties (for backward compatibility)
+	DEFAULT_PARENT_PROP: "Parent",
+	DEFAULT_CHILDREN_PROP: "Child",
+	DEFAULT_RELATED_PROP: "Related",
+	DEFAULT_DIRECTORIES: ["*"],
+	DEFAULT_AUTO_LINK_SIBLINGS: false,
+	DEFAULT_ZETTEL_ID_PROP: "_ZettelID",
+
 	DEFAULT_HIDE_EMPTY_PROPERTIES: true,
 	DEFAULT_HIDE_UNDERSCORE_PROPERTIES: true,
 
@@ -39,11 +47,39 @@ export const SETTINGS_DEFAULTS = {
 	DEFAULT_NODE_COLOR: "#e9f2ff",
 
 	// Node creation defaults
-	DEFAULT_EXCLUDED_PROPERTIES: ["goal", "project"],
+	DEFAULT_EXCLUDED_PROPERTIES: ["goal", "project", "Parent", "Child", "Related", "_ZettelID"],
 } as const;
 
 export const SCAN_CONCURRENCY = 10;
 
+// Legacy relationship types (kept for backward compatibility)
+export type RelationshipType = "parent" | "children" | "related";
+
+export interface RelationshipConfig {
+	type: RelationshipType;
+	getProp: (settings: FusionGoalsSettings) => string;
+	getReverseProp: (settings: FusionGoalsSettings) => string;
+}
+
+export const RELATIONSHIP_CONFIGS: RelationshipConfig[] = [
+	{
+		type: "parent",
+		getProp: (s) => s.parentProp,
+		getReverseProp: (s) => s.childrenProp,
+	},
+	{
+		type: "children",
+		getProp: (s) => s.childrenProp,
+		getReverseProp: (s) => s.parentProp,
+	},
+	{
+		type: "related",
+		getProp: (s) => s.relatedProp,
+		getReverseProp: (s) => s.relatedProp,
+	},
+];
+
+// New hierarchical structure (will replace legacy relationships)
 export type HierarchyLevel = "goal" | "project" | "task";
 
 export interface HierarchyConfig {

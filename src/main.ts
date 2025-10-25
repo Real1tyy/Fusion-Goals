@@ -7,10 +7,12 @@ import { SettingsStore } from "./core/settings-store";
 /**
  * Fusion Goals Plugin
  *
- * Manages a hierarchical goal system with three levels:
+ * Visualizes a hierarchical goal system with three levels:
  * - Goals (top level)
  * - Projects (linked to goals via "goal" property)
  * - Tasks (linked to projects via "project" property)
+ *
+ * Note: This plugin focuses on visualization. Property management is manual.
  */
 export default class FusionGoalsPlugin extends Plugin {
 	settingsStore!: SettingsStore;

@@ -40,6 +40,17 @@ export const FusionGoalsSettingsSchema = z.object({
 	goalProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_GOAL_PROP),
 	projectProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_PROJECT_PROP),
 
+	// Legacy properties (kept for backward compatibility during refactoring)
+	parentProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_PARENT_PROP),
+	childrenProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_CHILDREN_PROP),
+	relatedProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_RELATED_PROP),
+	directories: z
+		.array(z.string())
+		.optional()
+		.default([...SETTINGS_DEFAULTS.DEFAULT_DIRECTORIES]),
+	autoLinkSiblings: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_AUTO_LINK_SIBLINGS),
+	zettelIdProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_ZETTEL_ID_PROP),
+
 	// UI settings
 	showRibbonIcon: z.boolean().optional().default(true),
 

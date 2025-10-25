@@ -1,5 +1,5 @@
 import { SettingsUIBuilder } from "@real1ty-obsidian-plugins/utils";
-import { type App, PluginSettingTab, Setting } from "obsidian";
+import { type App, Notice, PluginSettingTab, Setting } from "obsidian";
 import type { FusionGoalsSettingsSchema } from "src/types/settings";
 import type FusionGoalsPlugin from "../main";
 import { SETTINGS_DEFAULTS } from "../types/constants";
@@ -719,7 +719,8 @@ export class FusionGoalsSettingsTab extends PluginSettingTab {
 						button.setButtonText("Rescanning...");
 
 						try {
-							await this.plugin.triggerFullRescan();
+							// Property management removed - manual sync only
+							new Notice("Property management has been removed from this plugin");
 							button.setButtonText("✓ Complete!");
 							setTimeout(() => {
 								button.setButtonText("Rescan Everything");

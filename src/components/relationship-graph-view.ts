@@ -6,7 +6,6 @@ import { GraphBuilder } from "../core/graph-builder";
 import type { Indexer } from "../core/indexer";
 import type FusionGoalsPlugin from "../main";
 import { isFolderNote } from "../utils/file";
-import { EdgeContextMenu } from "./edge-context-menu";
 import { GraphFilter } from "./graph-filter";
 import { GraphFilterPresetSelector } from "./graph-filter-preset-selector";
 import { GraphHeader } from "./graph-header";
@@ -15,9 +14,7 @@ import { GraphSearch } from "./graph-search";
 import { GraphZoomManager } from "./graph-zoom-manager";
 import { GraphZoomPreview } from "./graph-zoom-preview";
 import { GraphLayoutManager } from "./layout/graph-layout-manager";
-import { NodeContextMenu } from "./node-context-menu";
 import { PropertyTooltip } from "./property-tooltip";
-import { RelationshipAdder } from "./relationship-adder";
 
 cytoscape.use(cytoscapeDagre);
 
@@ -32,9 +29,7 @@ export class RelationshipGraphView extends ItemView {
 	private ignoreTopmostParent = false;
 	private renderRelated = false;
 	private includeAllRelated = false;
-	private nodeContextMenu: NodeContextMenu;
-	private edgeContextMenu: EdgeContextMenu;
-	private relationshipAdder: RelationshipAdder;
+	// Context menus removed - no property management
 	private resizeObserver: ResizeObserver | null = null;
 	private resizeDebounceTimer: number | null = null;
 	private isEnlarged = false;
@@ -57,13 +52,7 @@ export class RelationshipGraphView extends ItemView {
 		private readonly plugin: FusionGoalsPlugin
 	) {
 		super(leaf);
-		this.relationshipAdder = new RelationshipAdder(this.app, this.plugin.settingsStore);
-		this.nodeContextMenu = new NodeContextMenu(this.app, this.plugin.settingsStore, {
-			onStartRelationship: (sourceNodePath, relationshipType) => {
-				this.relationshipAdder.startSelection(sourceNodePath, relationshipType);
-			},
-		});
-		this.edgeContextMenu = new EdgeContextMenu(this.app, this.plugin.settingsStore);
+		// Context menus and relationship adder removed - visualization only
 		this.graphBuilder = new GraphBuilder(this.app, this.indexer, this.plugin.settingsStore);
 
 		this.zoomManager = new GraphZoomManager(this.app, {
@@ -87,36 +76,29 @@ export class RelationshipGraphView extends ItemView {
 			isZoomMode: () => this.zoomManager.isInZoomMode(),
 		});
 
-		this.interactionHandler = new GraphInteractionHandler(
-			this.app,
-			this.propertyTooltip,
-			this.nodeContextMenu,
-			this.edgeContextMenu,
-			this.relationshipAdder,
-			{
-				getCy: () => {
-					if (!this.cy) throw new Error("Cytoscape not yet initialized");
-					return this.cy;
-				},
-				viewType: VIEW_TYPE_RELATIONSHIP_GRAPH,
-				getCurrentFile: () => this.currentFile,
-				getGraphContainerEl: () => this.graphContainerEl,
-				onNodeClick: (filePath, _event) => {
-					if (this.zoomManager.isInZoomMode()) {
-						this.focusOnNode(filePath);
-					} else {
-						this.enterZoomMode(filePath);
-					}
-				},
-				onEdgeClick: (nodeToFocus, _sourceId) => {
-					this.focusOnNode(nodeToFocus);
-				},
-				isZoomMode: () => this.zoomManager.isInZoomMode(),
-				isRelatedView: () => this.renderRelated,
-				focusedNodeId: () => this.zoomManager.getFocusedNodeId(),
-				isUpdating: () => this.isUpdating,
-			}
-		);
+		this.interactionHandler = new GraphInteractionHandler(this.app, this.propertyTooltip, {
+			getCy: () => {
+				if (!this.cy) throw new Error("Cytoscape not yet initialized");
+				return this.cy;
+			},
+			viewType: VIEW_TYPE_RELATIONSHIP_GRAPH,
+			getCurrentFile: () => this.currentFile,
+			getGraphContainerEl: () => this.graphContainerEl,
+			onNodeClick: (filePath, _event) => {
+				if (this.zoomManager.isInZoomMode()) {
+					this.focusOnNode(filePath);
+				} else {
+					this.enterZoomMode(filePath);
+				}
+			},
+			onEdgeClick: (nodeToFocus, _sourceId) => {
+				this.focusOnNode(nodeToFocus);
+			},
+			isZoomMode: () => this.zoomManager.isInZoomMode(),
+			isRelatedView: () => this.renderRelated,
+			focusedNodeId: () => this.zoomManager.getFocusedNodeId(),
+			isUpdating: () => this.isUpdating,
+		});
 
 		this.layoutManager = new GraphLayoutManager({
 			getCy: () => {
