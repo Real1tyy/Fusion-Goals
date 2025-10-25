@@ -1,7 +1,7 @@
 import type { App } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { SettingsStore } from "../core/settings-store";
-import type { NexusPropertiesSettings } from "../types/settings";
+import type { FusionGoalsSettings } from "../types/settings";
 import { extractDisplayName, getFileContext } from "../utils/file";
 import { filterSpecificProperties, formatValue, parseInlineWikiLinks } from "../utils/frontmatter-value";
 
@@ -15,7 +15,7 @@ export interface PropertyTooltipOptions {
 export class PropertyTooltip {
 	private tooltipEl: HTMLElement | null = null;
 	private hideTimer: number | null = null;
-	private settings: NexusPropertiesSettings;
+	private settings: FusionGoalsSettings;
 	private settingsSubscription: Subscription | null = null;
 
 	constructor(

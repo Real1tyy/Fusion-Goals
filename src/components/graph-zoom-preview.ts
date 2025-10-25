@@ -1,7 +1,7 @@
 import { type App, Component, MarkdownRenderer, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { SettingsStore } from "../core/settings-store";
-import type { NexusPropertiesSettings } from "../types/settings";
+import type { FusionGoalsSettings } from "../types/settings";
 import { filterPropertiesForDisplay } from "../utils/frontmatter-value";
 import { PropertyRenderer } from "./property-renderer";
 
@@ -22,7 +22,7 @@ export class GraphZoomPreview {
 	private hideContentCheckbox: HTMLInputElement | null = null;
 	private frontmatterSection: HTMLElement | null = null;
 	private contentSection: HTMLElement | null = null;
-	private settings: NexusPropertiesSettings;
+	private settings: FusionGoalsSettings;
 	private propertyRenderer: PropertyRenderer;
 	private markdownComponent: Component;
 	private settingsSubscription: Subscription | null = null;

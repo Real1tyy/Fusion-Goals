@@ -1,14 +1,14 @@
 import { SettingsUIBuilder } from "@real1ty-obsidian-plugins/utils";
 import { type App, PluginSettingTab, Setting } from "obsidian";
-import type { NexusPropertiesSettingsSchema } from "src/types/settings";
-import type NexusPropertiesPlugin from "../main";
+import type { FusionGoalsSettingsSchema } from "src/types/settings";
+import type FusionGoalsPlugin from "../main";
 import { SETTINGS_DEFAULTS } from "../types/constants";
 
-export class NexusPropertiesSettingsTab extends PluginSettingTab {
-	plugin: NexusPropertiesPlugin;
-	private uiBuilder: SettingsUIBuilder<typeof NexusPropertiesSettingsSchema>;
+export class FusionGoalsSettingsTab extends PluginSettingTab {
+	plugin: FusionGoalsPlugin;
+	private uiBuilder: SettingsUIBuilder<typeof FusionGoalsSettingsSchema>;
 
-	constructor(app: App, plugin: NexusPropertiesPlugin) {
+	constructor(app: App, plugin: FusionGoalsPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 		this.uiBuilder = new SettingsUIBuilder(this.plugin.settingsStore);
@@ -18,7 +18,7 @@ export class NexusPropertiesSettingsTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl("h1", { text: "Nexus Properties Settings" });
+		containerEl.createEl("h1", { text: "Fusion Goals Settings" });
 
 		this.addUserInterfaceSettings(containerEl);
 		this.addGraphSettings(containerEl);

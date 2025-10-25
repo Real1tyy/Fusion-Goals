@@ -1,6 +1,6 @@
 import type { FileRelationships } from "../core/indexer";
 import type { RELATIONSHIP_CONFIGS } from "../types/constants";
-import type { NexusPropertiesSettings } from "../types/settings";
+import type { FusionGoalsSettings } from "../types/settings";
 import { parsePropertyLinks } from "./link-parser";
 
 export interface RelationshipContext {
@@ -24,7 +24,7 @@ export interface RelationshipDiff {
 export function getRelationshipContext(
 	config: (typeof RELATIONSHIP_CONFIGS)[number],
 	relationships: FileRelationships,
-	settings: NexusPropertiesSettings
+	settings: FusionGoalsSettings
 ): RelationshipContext {
 	return {
 		propName: config.getProp(settings),
@@ -41,7 +41,7 @@ export function getRelationshipDiff(
 	config: (typeof RELATIONSHIP_CONFIGS)[number],
 	oldRelationships: FileRelationships,
 	newRelationships: FileRelationships,
-	settings: NexusPropertiesSettings
+	settings: FusionGoalsSettings
 ): RelationshipDiff & RelationshipContext {
 	const oldPaths = parsePropertyLinks(oldRelationships[config.type]);
 	const newPaths = parsePropertyLinks(newRelationships[config.type]);

@@ -4,7 +4,7 @@ import { ItemView, TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import { GraphBuilder } from "../core/graph-builder";
 import type { Indexer } from "../core/indexer";
-import type NexusPropertiesPlugin from "../main";
+import type FusionGoalsPlugin from "../main";
 import { isFolderNote } from "../utils/file";
 import { EdgeContextMenu } from "./edge-context-menu";
 import { GraphFilter } from "./graph-filter";
@@ -54,7 +54,7 @@ export class RelationshipGraphView extends ItemView {
 	constructor(
 		leaf: any,
 		private readonly indexer: Indexer,
-		private readonly plugin: NexusPropertiesPlugin
+		private readonly plugin: FusionGoalsPlugin
 	) {
 		super(leaf);
 		this.relationshipAdder = new RelationshipAdder(this.app, this.plugin.settingsStore);

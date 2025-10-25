@@ -1,10 +1,10 @@
 import { BehaviorSubject } from "rxjs";
 import { describe, expect, it } from "vitest";
-import { type NexusPropertiesSettings, NexusPropertiesSettingsSchema } from "../src/types/settings";
+import { type FusionGoalsSettings, FusionGoalsSettingsSchema } from "../src/types/settings";
 import { FilterEvaluator } from "../src/utils/filters";
 
-function makeSettings(expressions: string[]): NexusPropertiesSettings {
-	return NexusPropertiesSettingsSchema.parse({ filterExpressions: expressions });
+function makeSettings(expressions: string[]): FusionGoalsSettings {
+	return FusionGoalsSettingsSchema.parse({ filterExpressions: expressions });
 }
 
 describe("FilterEvaluator", () => {

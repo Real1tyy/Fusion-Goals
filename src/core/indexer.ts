@@ -12,7 +12,7 @@ import {
 } from "rxjs";
 import { debounceTime, filter, groupBy, map, mergeMap, switchMap, toArray } from "rxjs/operators";
 import { RELATIONSHIP_CONFIGS, SCAN_CONCURRENCY } from "../types/constants";
-import type { Frontmatter, NexusPropertiesSettings } from "../types/settings";
+import type { Frontmatter, FusionGoalsSettings } from "../types/settings";
 import { normalizeProperty, parseWikiLink } from "../utils/frontmatter-value";
 
 export interface FileRelationships {
@@ -37,7 +37,7 @@ type VaultEvent = "create" | "modify" | "delete" | "rename";
 type FileIntent = { kind: "changed"; file: TFile; path: string } | { kind: "deleted"; path: string };
 
 export class Indexer {
-	private settings: NexusPropertiesSettings;
+	private settings: FusionGoalsSettings;
 	private fileSub: Subscription | null = null;
 	private settingsSubscription: Subscription | null = null;
 	private vault: Vault;
@@ -47,7 +47,7 @@ export class Indexer {
 
 	public readonly events$: Observable<IndexerEvent>;
 
-	constructor(app: App, settingsStore: BehaviorSubject<NexusPropertiesSettings>) {
+	constructor(app: App, settingsStore: BehaviorSubject<FusionGoalsSettings>) {
 		this.vault = app.vault;
 		this.metadataCache = app.metadataCache;
 		this.settings = settingsStore.value;

@@ -1,14 +1,14 @@
 import { type App, Modal, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { SettingsStore } from "../core/settings-store";
-import type { NexusPropertiesSettings } from "../types/settings";
+import type { FusionGoalsSettings } from "../types/settings";
 import { filterPropertiesForDisplay } from "../utils/frontmatter-value";
 import { PropertyRenderer } from "./property-renderer";
 
 export class NodePreviewModal extends Modal {
 	private file: TFile;
 	private frontmatter: Record<string, unknown> = {};
-	private settings: NexusPropertiesSettings;
+	private settings: FusionGoalsSettings;
 	private settingsSubscription?: Subscription;
 	private propertyRenderer: PropertyRenderer;
 

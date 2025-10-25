@@ -2,7 +2,7 @@ import { generateZettelId } from "@real1ty-obsidian-plugins/utils/generate";
 import type { App, TFile } from "obsidian";
 import type { BehaviorSubject } from "rxjs";
 import { RELATIONSHIP_CONFIGS, type RelationshipType } from "../types/constants";
-import type { Frontmatter, NexusPropertiesSettings } from "../types/settings";
+import type { Frontmatter, FusionGoalsSettings } from "../types/settings";
 import { ExcludedPropertiesEvaluator } from "../utils/excluded-properties";
 import { getUniqueFilePath } from "../utils/file";
 import { normalizeProperty } from "../utils/frontmatter-value";
@@ -12,11 +12,11 @@ type NodeCreationType = "parent" | "child" | "related";
 
 export class NodeCreator {
 	private excludedPropertiesEvaluator: ExcludedPropertiesEvaluator;
-	private settings: NexusPropertiesSettings;
+	private settings: FusionGoalsSettings;
 
 	constructor(
 		private app: App,
-		settingsObservable: BehaviorSubject<NexusPropertiesSettings>
+		settingsObservable: BehaviorSubject<FusionGoalsSettings>
 	) {
 		this.excludedPropertiesEvaluator = new ExcludedPropertiesEvaluator(settingsObservable);
 		this.settings = settingsObservable.value;

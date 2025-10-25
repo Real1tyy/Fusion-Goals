@@ -1,7 +1,7 @@
 {
-	"name": "nexus-properties",
+	"name": "fusion-goals",
 	"version": "1.0.0",
-	"description": "Automated property management plugin for Obsidian that syncs parent-child and related relationships bidirectionally with recursive tree properties.",
+	"description": "A hierarchical goal management plugin for Obsidian that visualizes goals, projects, and tasks in an interactive relationship graph.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
@@ -20,11 +20,12 @@
 	},
 	"keywords": [
 		"obsidian",
-		"properties",
+		"goals",
+		"projects",
+		"tasks",
 		"plugin",
-		"frontmatter",
-		"relationships",
-		"automation"
+		"visualization",
+		"hierarchy"
 	],
 	"funding": {
 		"type": "github",

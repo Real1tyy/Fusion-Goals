@@ -1,10 +1,10 @@
-import type { NexusPropertiesSettings } from "../types/settings";
+import type { FusionGoalsSettings } from "../types/settings";
 import { BaseEvaluator, type BaseRule } from "./base-evaluator";
 
 export interface FilterRule extends BaseRule {}
 
-export class FilterEvaluator extends BaseEvaluator<FilterRule, NexusPropertiesSettings> {
-	protected extractRules(settings: NexusPropertiesSettings): FilterRule[] {
+export class FilterEvaluator extends BaseEvaluator<FilterRule, FusionGoalsSettings> {
+	protected extractRules(settings: FusionGoalsSettings): FilterRule[] {
 		return settings.filterExpressions.map((expression, index) => ({
 			id: `filter-${index}`,
 			expression: expression.trim(),

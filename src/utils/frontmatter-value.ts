@@ -1,4 +1,4 @@
-import type { Frontmatter, NexusPropertiesSettings } from "../types/settings";
+import type { Frontmatter, FusionGoalsSettings } from "../types/settings";
 
 // ============================================================================
 // Value Checking
@@ -324,7 +324,7 @@ export function formatArrayCompact(items: string[], maxLength: number): string {
  */
 export function filterPropertiesForDisplay(
 	frontmatter: Frontmatter,
-	settings: NexusPropertiesSettings
+	settings: FusionGoalsSettings
 ): Array<[string, unknown]> {
 	const entries = Object.entries(frontmatter);
 
@@ -350,7 +350,7 @@ export function filterPropertiesForDisplay(
 export function filterSpecificProperties(
 	frontmatter: Frontmatter,
 	propertyNames: string[],
-	settings: NexusPropertiesSettings
+	settings: FusionGoalsSettings
 ): Array<{ key: string; value: unknown }> {
 	const result: Array<{ key: string; value: unknown }> = [];
 

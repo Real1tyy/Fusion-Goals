@@ -1,23 +1,21 @@
-# Nexus Properties
+# Fusion Goals
 
-An Obsidian plugin that automatically manages bidirectional property relationships and recursive tree properties.
+An Obsidian plugin for hierarchical goal management with interactive graph visualization.
 
 ## Features
 
-- **Bidirectional Sync**: When you assign a child to a parent, the parent property is automatically updated
-- **Recursive Tree Properties**: Automatically computes `allChildren`, `allParents`, and `allRelated` properties
-- **Automatic Cleanup**: Maintains consistency when files are deleted or relationships change
-- **Fully Configurable**: Customize all property names to match your workflow
+- **Hierarchical Structure**: Goals → Projects → Tasks in a clear three-level hierarchy
+- **Interactive Graph**: Visualize your goals, projects, and tasks in an interactive relationship graph
+- **Automatic Relationships**: Projects automatically link to their parent goals, tasks to their parent projects
+- **Visual Separation**: Clear visual distinction between goals, projects, and tasks in the graph
+- **Flexible Navigation**: Filter, search, and explore your goal hierarchy
 
 ## Settings
 
-Configure the property names used for relationship management:
-- `parent` - Property for parent reference
-- `children` - Property for children references
-- `related` - Property for related files
-- `allParents` - Computed property for all recursive parents
-- `allChildren` - Computed property for all recursive children
-- `allRelated` - Computed property for all related files
+Configure directories for each level of your hierarchy:
+- **Goals Directory** - Folder containing your goal files
+- **Projects Directory** - Folder containing your project files
+- **Tasks Directory** - Folder containing your task files
 
 ## License
 

@@ -1,31 +1,39 @@
-import { Notice, Plugin, TFile } from "obsidian";
-import { NexusPropertiesSettingsTab } from "./components";
+import { Notice, Plugin } from "obsidian";
+import { FusionGoalsSettingsTab } from "./components";
 import { RelationshipGraphView, VIEW_TYPE_RELATIONSHIP_GRAPH } from "./components/relationship-graph-view";
 import { Indexer } from "./core/indexer";
-import { NodeCreator } from "./core/node-creator";
-import { PropertiesManager } from "./core/properties-manager";
 import { SettingsStore } from "./core/settings-store";
 
-export default class NexusPropertiesPlugin extends Plugin {
+/**
+ * Fusion Goals Plugin
+ *
+ * Manages a hierarchical goal system with three levels:
+ * - Goals (top level)
+ * - Projects (linked to goals via "goal" property)
+ * - Tasks (linked to projects via "project" property)
+ */
+export default class FusionGoalsPlugin extends Plugin {
 	settingsStore!: SettingsStore;
 	indexer!: Indexer;
-	propertiesManager!: PropertiesManager;
-	nodeCreator!: NodeCreator;
 
 	async onload() {
+		console.log("🎯 Loading Fusion Goals plugin...");
+
 		this.settingsStore = new SettingsStore(this);
 		await this.settingsStore.loadSettings();
 
-		this.addSettingTab(new NexusPropertiesSettingsTab(this.app, this));
+		this.addSettingTab(new FusionGoalsSettingsTab(this.app, this));
 
+		// Main command to show the hierarchical graph
 		this.addCommand({
-			id: "toggle-relationship-graph",
-			name: "Show Relationship Graph",
+			id: "show-goals-graph",
+			name: "Show Goals Hierarchy Graph",
 			callback: () => this.toggleRelationshipGraphView(),
 		});
 
+		// Graph manipulation commands
 		this.addCommand({
-			id: "enlarge-relationship-graph",
+			id: "enlarge-graph",
 			name: "Enlarge Graph",
 			callback: () => this.executeGraphViewMethod("toggleEnlargement"),
 		});
@@ -48,39 +56,19 @@ export default class NexusPropertiesPlugin extends Plugin {
 			callback: () => this.executeGraphViewMethod("toggleFilterPreset"),
 		});
 
+		// Zoom preview commands
 		this.addCommand({
-			id: "hide-focus-node-content",
+			id: "toggle-focus-content",
 			name: "Toggle Focus Content (Zoom Preview)",
 			callback: () =>
-				this.executeGraphViewMethod("toggleHideContent", "Open the Relationship Graph to toggle content visibility"),
+				this.executeGraphViewMethod("toggleHideContent", "Open the Goals Graph to toggle content visibility"),
 		});
 
 		this.addCommand({
-			id: "hide-focus-node-frontmatter",
+			id: "toggle-focus-frontmatter",
 			name: "Toggle Focus Frontmatter (Zoom Preview)",
 			callback: () =>
-				this.executeGraphViewMethod(
-					"toggleHideFrontmatter",
-					"Open the Relationship Graph to toggle frontmatter visibility"
-				),
-		});
-
-		this.addCommand({
-			id: "create-parent-node",
-			name: "Create Parent Node",
-			checkCallback: (checking: boolean) => this.handleNodeCreationCommand(checking, "parent"),
-		});
-
-		this.addCommand({
-			id: "create-child-node",
-			name: "Create Child Node",
-			checkCallback: (checking: boolean) => this.handleNodeCreationCommand(checking, "child"),
-		});
-
-		this.addCommand({
-			id: "create-related-node",
-			name: "Create Related Node",
-			checkCallback: (checking: boolean) => this.handleNodeCreationCommand(checking, "related"),
+				this.executeGraphViewMethod("toggleHideFrontmatter", "Open the Goals Graph to toggle frontmatter visibility"),
 		});
 
 		this.initializePlugin();
@@ -99,31 +87,20 @@ export default class NexusPropertiesPlugin extends Plugin {
 			});
 		}
 
+		// Initialize indexer to scan goals, projects, and tasks directories
 		this.indexer = new Indexer(this.app, this.settingsStore.settings$);
-
-		this.propertiesManager = new PropertiesManager(this.app, this.settingsStore.settings$.value);
-		this.propertiesManager.start(this.indexer.events$);
-
-		this.nodeCreator = new NodeCreator(this.app, this.settingsStore.settings$);
-
 		await this.indexer.start();
 
+		// Register the graph view
 		this.registerView(VIEW_TYPE_RELATIONSHIP_GRAPH, (leaf) => new RelationshipGraphView(leaf, this.indexer, this));
+
+		console.log("✅ Fusion Goals plugin loaded successfully");
 	}
 
 	async onunload() {
-		this.propertiesManager?.stop();
+		console.log("👋 Unloading Fusion Goals plugin...");
 		this.indexer?.stop();
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_RELATIONSHIP_GRAPH);
-	}
-
-	async triggerFullRescan(): Promise<void> {
-		if (!this.propertiesManager || !this.indexer) {
-			console.error("❌ Cannot trigger rescan: Plugin not fully initialized");
-			return;
-		}
-
-		await this.propertiesManager.rescanAndAssignPropertiesForAllFiles(this.indexer);
 	}
 
 	private async toggleRelationshipGraphView(): Promise<void> {
@@ -162,43 +139,6 @@ export default class NexusPropertiesPlugin extends Plugin {
 
 		if (noticeMessage) {
 			new Notice(noticeMessage);
-		}
-	}
-
-	private handleNodeCreationCommand(checking: boolean, type: "parent" | "child" | "related"): boolean {
-		const activeFile = this.app.workspace.getActiveFile();
-		if (!activeFile || !(activeFile instanceof TFile)) {
-			return false;
-		}
-
-		if (!this.indexer?.shouldIndexFile(activeFile.path)) {
-			return false;
-		}
-
-		if (checking) {
-			return true;
-		}
-
-		this.createNodeAndOpen(activeFile, type);
-		return true;
-	}
-
-	private async createNodeAndOpen(sourceFile: TFile, type: "parent" | "child" | "related"): Promise<void> {
-		const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
-
-		try {
-			const newFile = await this.nodeCreator.createRelatedNode(sourceFile, type);
-
-			if (newFile) {
-				const leaf = this.app.workspace.getLeaf("tab");
-				await leaf.openFile(newFile);
-				new Notice(`✅ Created ${typeLabel} node: ${newFile.basename}`);
-			} else {
-				new Notice(`❌ Failed to create ${typeLabel} node`);
-			}
-		} catch (error) {
-			console.error(`Error creating ${typeLabel} node:`, error);
-			new Notice(`❌ Error creating ${typeLabel} node: ${error}`);
 		}
 	}
 }

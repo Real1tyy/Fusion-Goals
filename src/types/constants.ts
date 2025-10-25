@@ -1,20 +1,21 @@
-import type { NexusPropertiesSettings } from "./settings";
+import type { FusionGoalsSettings } from "./settings";
 
-export const PLUGIN_ID = "nexus-properties";
+export const PLUGIN_ID = "fusion-goals";
 
 export const SETTINGS_VERSION = 1;
 
 export const SETTINGS_DEFAULTS = {
-	DEFAULT_PARENT_PROP: "Parent",
-	DEFAULT_CHILDREN_PROP: "Child",
-	DEFAULT_RELATED_PROP: "Related",
+	// Hierarchical directories
+	DEFAULT_GOALS_DIRECTORY: "Goals",
+	DEFAULT_PROJECTS_DIRECTORY: "Projects",
+	DEFAULT_TASKS_DIRECTORY: "Tasks",
 
-	DEFAULT_DIRECTORIES: ["*"],
-	DEFAULT_AUTO_LINK_SIBLINGS: true,
+	// Property names for linking
+	DEFAULT_GOAL_PROP: "goal",
+	DEFAULT_PROJECT_PROP: "project",
+
 	DEFAULT_HIDE_EMPTY_PROPERTIES: true,
 	DEFAULT_HIDE_UNDERSCORE_PROPERTIES: true,
-
-	DEFAULT_ZETTEL_ID_PROP: "_ZettelID",
 
 	DEFAULT_GRAPH_ENLARGED_WIDTH_PERCENT: 75,
 	DEFAULT_GRAPH_ZOOM_PREVIEW_HEIGHT: 280,
@@ -38,33 +39,35 @@ export const SETTINGS_DEFAULTS = {
 	DEFAULT_NODE_COLOR: "#e9f2ff",
 
 	// Node creation defaults
-	DEFAULT_EXCLUDED_PROPERTIES: ["Parent", "Child", "Related", "_ZettelID"],
+	DEFAULT_EXCLUDED_PROPERTIES: ["goal", "project"],
 } as const;
 
 export const SCAN_CONCURRENCY = 10;
 
-export type RelationshipType = "parent" | "children" | "related";
+export type HierarchyLevel = "goal" | "project" | "task";
 
-export interface RelationshipConfig {
-	type: RelationshipType;
-	getProp: (settings: NexusPropertiesSettings) => string;
-	getReverseProp: (settings: NexusPropertiesSettings) => string;
+export interface HierarchyConfig {
+	level: HierarchyLevel;
+	directory: (settings: FusionGoalsSettings) => string;
+	parentProp?: (settings: FusionGoalsSettings) => string;
+	parentLevel?: HierarchyLevel;
 }
 
-export const RELATIONSHIP_CONFIGS: RelationshipConfig[] = [
+export const HIERARCHY_CONFIGS: HierarchyConfig[] = [
 	{
-		type: "parent",
-		getProp: (s) => s.parentProp,
-		getReverseProp: (s) => s.childrenProp,
+		level: "goal",
+		directory: (s) => s.goalsDirectory,
 	},
 	{
-		type: "children",
-		getProp: (s) => s.childrenProp,
-		getReverseProp: (s) => s.parentProp,
+		level: "project",
+		directory: (s) => s.projectsDirectory,
+		parentProp: (s) => s.goalProp,
+		parentLevel: "goal",
 	},
 	{
-		type: "related",
-		getProp: (s) => s.relatedProp,
-		getReverseProp: (s) => s.relatedProp,
+		level: "task",
+		directory: (s) => s.tasksDirectory,
+		parentProp: (s) => s.projectProp,
+		parentLevel: "project",
 	},
 ];

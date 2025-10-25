@@ -1,5 +1,5 @@
 import type { BehaviorSubject } from "rxjs";
-import type { NexusPropertiesSettings, PathExcludedProperties } from "../types/settings";
+import type { FusionGoalsSettings, PathExcludedProperties } from "../types/settings";
 
 /**
  * Evaluator for determining which frontmatter properties to exclude when creating new nodes.
@@ -14,8 +14,8 @@ export class ExcludedPropertiesEvaluator {
 	private defaultExcludedProperties: string[];
 	private pathRules: PathExcludedProperties[];
 
-	constructor(settingsObservable: BehaviorSubject<NexusPropertiesSettings>) {
-		const assignSettings = (settings: NexusPropertiesSettings) => {
+	constructor(settingsObservable: BehaviorSubject<FusionGoalsSettings>) {
+		const assignSettings = (settings: FusionGoalsSettings) => {
 			this.defaultExcludedProperties = settings.defaultExcludedProperties;
 			this.pathRules = settings.pathExcludedProperties.filter((rule) => rule.enabled);
 		};

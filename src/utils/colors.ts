@@ -1,15 +1,15 @@
 import type { BehaviorSubject } from "rxjs";
-import type { NexusPropertiesSettings } from "../types/settings";
+import type { FusionGoalsSettings } from "../types/settings";
 import { BaseEvaluator, type BaseRule } from "./base-evaluator";
 
 export interface ColorRule extends BaseRule {
 	color: string;
 }
 
-export class ColorEvaluator extends BaseEvaluator<ColorRule, NexusPropertiesSettings> {
+export class ColorEvaluator extends BaseEvaluator<ColorRule, FusionGoalsSettings> {
 	private defaultColor: string;
 
-	constructor(settingsStore: BehaviorSubject<NexusPropertiesSettings>) {
+	constructor(settingsStore: BehaviorSubject<FusionGoalsSettings>) {
 		super(settingsStore);
 		this.defaultColor = settingsStore.value.defaultNodeColor;
 
@@ -20,7 +20,7 @@ export class ColorEvaluator extends BaseEvaluator<ColorRule, NexusPropertiesSett
 		});
 	}
 
-	protected extractRules(settings: NexusPropertiesSettings): ColorRule[] {
+	protected extractRules(settings: FusionGoalsSettings): ColorRule[] {
 		return settings.colorRules;
 	}
 

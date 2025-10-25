@@ -28,25 +28,17 @@ export const PathExcludedPropertiesSchema = z.object({
 
 export type PathExcludedProperties = z.infer<typeof PathExcludedPropertiesSchema>;
 
-export const NexusPropertiesSettingsSchema = z.object({
+export const FusionGoalsSettingsSchema = z.object({
 	version: z.number().int().positive().optional().default(SETTINGS_VERSION),
 
-	// Property names for direct relationships
-	parentProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_PARENT_PROP),
-	childrenProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_CHILDREN_PROP),
-	relatedProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_RELATED_PROP),
+	// Hierarchical directory structure
+	goalsDirectory: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_GOALS_DIRECTORY),
+	projectsDirectory: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_PROJECTS_DIRECTORY),
+	tasksDirectory: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_TASKS_DIRECTORY),
 
-	// Directories to scan - ["*"] means scan all, otherwise only scan specified directories and subdirectories
-	directories: z
-		.array(z.string())
-		.optional()
-		.default([...SETTINGS_DEFAULTS.DEFAULT_DIRECTORIES]),
-
-	// Relationship settings
-	autoLinkSiblings: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_AUTO_LINK_SIBLINGS),
-
-	// Node creation settings
-	zettelIdProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_ZETTEL_ID_PROP),
+	// Property names for linking
+	goalProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_GOAL_PROP),
+	projectProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_PROJECT_PROP),
 
 	// UI settings
 	showRibbonIcon: z.boolean().optional().default(true),
@@ -121,4 +113,4 @@ export const NexusPropertiesSettingsSchema = z.object({
 	pathExcludedProperties: z.array(PathExcludedPropertiesSchema).optional().default([]),
 });
 
-export type NexusPropertiesSettings = z.infer<typeof NexusPropertiesSettingsSchema>;
+export type FusionGoalsSettings = z.infer<typeof FusionGoalsSettingsSchema>;

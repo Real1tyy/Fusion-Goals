@@ -1,7 +1,7 @@
 import type { App } from "obsidian";
 import type { Observable, Subscription } from "rxjs";
 import { RELATIONSHIP_CONFIGS } from "../types/constants";
-import type { NexusPropertiesSettings } from "../types/settings";
+import type { FusionGoalsSettings } from "../types/settings";
 import { getFileContext, withFileContext } from "../utils/file";
 import { formatWikiLink, parsePropertyLinks } from "../utils/link-parser";
 import { addLinkToProperty } from "../utils/property-utils";
@@ -13,7 +13,7 @@ export class PropertiesManager {
 
 	constructor(
 		private app: App,
-		private settings: NexusPropertiesSettings
+		private settings: FusionGoalsSettings
 	) {}
 
 	start(events$: Observable<IndexerEvent>): void {

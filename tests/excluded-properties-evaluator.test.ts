@@ -1,14 +1,14 @@
 import { BehaviorSubject } from "rxjs";
 import { describe, expect, it } from "vitest";
-import type { NexusPropertiesSettings } from "../src/types/settings";
-import { NexusPropertiesSettingsSchema } from "../src/types/settings";
+import type { FusionGoalsSettings } from "../src/types/settings";
+import { FusionGoalsSettingsSchema } from "../src/types/settings";
 import { ExcludedPropertiesEvaluator } from "../src/utils/excluded-properties";
 
 function makeSettings(
 	defaultExcluded: string[],
 	pathRules: Array<{ id: string; path: string; excludedProperties: string[]; enabled: boolean }>
-): NexusPropertiesSettings {
-	return NexusPropertiesSettingsSchema.parse({
+): FusionGoalsSettings {
+	return FusionGoalsSettingsSchema.parse({
 		defaultExcludedProperties: defaultExcluded,
 		pathExcludedProperties: pathRules,
 	});
