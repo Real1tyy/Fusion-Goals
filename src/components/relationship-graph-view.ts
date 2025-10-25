@@ -5,7 +5,6 @@ import type { Subscription } from "rxjs";
 import { GraphBuilder } from "../core/graph-builder";
 import type { Indexer } from "../core/indexer";
 import type FusionGoalsPlugin from "../main";
-import { isFolderNote } from "../utils/file";
 import { GraphFilter } from "./graph-filter";
 import { GraphFilterPresetSelector } from "./graph-filter-preset-selector";
 import { GraphHeader } from "./graph-header";
@@ -27,8 +26,6 @@ export class RelationshipGraphView extends ItemView {
 	private header: GraphHeader | null = null;
 	private currentFile: TFile | null = null;
 	private ignoreTopmostParent = false;
-	private renderRelated = false;
-	private includeAllRelated = false;
 	// Context menus removed - no property management
 	private resizeObserver: ResizeObserver | null = null;
 	private resizeDebounceTimer: number | null = null;
@@ -95,7 +92,7 @@ export class RelationshipGraphView extends ItemView {
 				this.focusOnNode(nodeToFocus);
 			},
 			isZoomMode: () => this.zoomManager.isInZoomMode(),
-			isRelatedView: () => this.renderRelated,
+			isRelatedView: () => false,
 			focusedNodeId: () => this.zoomManager.getFocusedNodeId(),
 			isUpdating: () => this.isUpdating,
 		});
@@ -127,18 +124,7 @@ export class RelationshipGraphView extends ItemView {
 
 		this.header = new GraphHeader(contentEl, {
 			currentFileName: "No file selected",
-			renderRelated: this.renderRelated,
-			includeAllRelated: this.includeAllRelated,
 			startFromCurrent: this.ignoreTopmostParent,
-			isFolderNote: false,
-			onRenderRelatedChange: (value) => {
-				this.renderRelated = value;
-				this.updateGraph();
-			},
-			onIncludeAllRelatedChange: (value) => {
-				this.includeAllRelated = value;
-				this.updateGraph();
-			},
 			onStartFromCurrentChange: (value) => {
 				this.ignoreTopmostParent = value;
 				this.updateGraph();
@@ -541,7 +527,7 @@ export class RelationshipGraphView extends ItemView {
 
 		const { frontmatter } = this.app.metadataCache.getFileCache(file) ?? {};
 
-		if (!frontmatter && !isFolderNote(file.path)) {
+		if (!frontmatter) {
 			this.showEmptyState("This file has no frontmatter properties.");
 			return;
 		}
@@ -578,11 +564,9 @@ export class RelationshipGraphView extends ItemView {
 		this.isUpdating = true;
 
 		try {
-			const isFolder = isFolderNote(this.currentFile.path);
 			if (this.header) {
 				this.header.update({
 					currentFileName: this.currentFile.basename,
-					isFolderNote: isFolder,
 				});
 			}
 
@@ -593,8 +577,6 @@ export class RelationshipGraphView extends ItemView {
 
 			const { nodes, edges } = this.graphBuilder.buildGraph({
 				sourcePath: this.currentFile.path,
-				renderRelated: this.renderRelated,
-				includeAllRelated: this.includeAllRelated,
 				startFromCurrent: this.ignoreTopmostParent,
 				searchQuery: searchQuery,
 				filterEvaluator: filterEvaluator,
@@ -785,13 +767,8 @@ export class RelationshipGraphView extends ItemView {
 		const settings = this.plugin.settingsStore.settings$.value;
 		const animationDuration = settings.graphAnimationDuration;
 
-		const isFolderNoteGraph = Boolean(this.currentFile && isFolderNote(this.currentFile.path));
-
 		this.layoutManager.applyLayout(nodes, edges, {
 			animationDuration,
-			isFolderNote: isFolderNoteGraph,
-			renderRelated: this.renderRelated,
-			includeAllRelated: this.includeAllRelated,
 		});
 	}
 
