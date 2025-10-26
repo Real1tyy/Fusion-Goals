@@ -21,14 +21,12 @@ export class FusionGoalsSettingsTab extends PluginSettingTab {
 		containerEl.createEl("h1", { text: "Fusion Goals Settings" });
 
 		this.addUserInterfaceSettings(containerEl);
+		this.addHierarchySettings(containerEl);
 		this.addGraphSettings(containerEl);
 		this.addPreviewSettings(containerEl);
 		this.addColorSettings(containerEl);
 		this.addFilteringSettings(containerEl);
 		this.addRescanSection(containerEl);
-		this.addDirectorySettings(containerEl);
-		this.addDirectRelationshipSettings(containerEl);
-		this.addNodeCreationSettings(containerEl);
 		this.addExampleSection(containerEl);
 	}
 
@@ -39,6 +37,66 @@ export class FusionGoalsSettingsTab extends PluginSettingTab {
 			key: "showRibbonIcon",
 			name: "Show ribbon icon",
 			desc: "Display the relationship graph icon in the left ribbon. Restart Obsidian after changing this setting.",
+		});
+	}
+
+	private addHierarchySettings(containerEl: HTMLElement): void {
+		new Setting(containerEl).setName("Hierarchical Structure").setHeading();
+
+		containerEl
+			.createDiv("setting-item-description")
+			.setText(
+				"Configure the three-level hierarchy: Goals → Projects → Tasks. Each level must have its own directory."
+			);
+
+		this.uiBuilder.addText(containerEl, {
+			key: "goalsDirectory",
+			name: "Goals directory",
+			desc: "Directory where goal files are stored (required)",
+			placeholder: "Goals",
+		});
+
+		this.uiBuilder.addText(containerEl, {
+			key: "projectsDirectory",
+			name: "Projects directory",
+			desc: "Directory where project files are stored (required)",
+			placeholder: "Projects",
+		});
+
+		this.uiBuilder.addText(containerEl, {
+			key: "tasksDirectory",
+			name: "Tasks directory",
+			desc: "Directory where task files are stored (required)",
+			placeholder: "Tasks",
+		});
+
+		new Setting(containerEl).setName("Hierarchical Properties").setHeading();
+
+		containerEl
+			.createDiv("setting-item-description")
+			.setText(
+				"Property names used to link files in the hierarchy. Projects link to Goals, Tasks link to both Goals and Projects."
+			);
+
+		this.uiBuilder.addText(containerEl, {
+			key: "projectGoalProp",
+			name: "Project → Goal property",
+			desc: "Property name in projects that links to their parent goal",
+			placeholder: "Goal",
+		});
+
+		this.uiBuilder.addText(containerEl, {
+			key: "taskGoalProp",
+			name: "Task → Goal property",
+			desc: "Property name in tasks that links to their goal",
+			placeholder: "Goal",
+		});
+
+		this.uiBuilder.addText(containerEl, {
+			key: "taskProjectProp",
+			name: "Task → Project property",
+			desc: "Property name in tasks that links to their parent project",
+			placeholder: "Project",
 		});
 	}
 
@@ -738,199 +796,6 @@ export class FusionGoalsSettingsTab extends PluginSettingTab {
 			});
 	}
 
-	private addDirectorySettings(containerEl: HTMLElement): void {
-		this.uiBuilder.addArrayManager(containerEl, {
-			key: "directories",
-			name: "Directory scanning",
-			desc: 'Configure which directories to scan for files with relationships. Use "*" to scan all directories, or specify individual directories to limit scanning.',
-			placeholder: "Directory path (e.g., Projects or Notes/Work)",
-			addButtonText: "Add",
-			removeButtonText: "Remove",
-			emptyArrayFallback: "*",
-			preventEmpty: true,
-			itemDescriptionFn: (item: unknown) => {
-				const dir = String(item);
-				return dir === "*" ? "Scan all directories" : `Includes all subdirectories: ${dir}/**`;
-			},
-			onBeforeAdd: async (newItem: unknown, currentItems: unknown[]) => {
-				const newDir = String(newItem);
-				let newDirs = [...currentItems];
-
-				// If adding a specific directory, remove "*" if it exists
-				if (newDir !== "*" && newDirs.includes("*")) {
-					newDirs = newDirs.filter((d) => d !== "*");
-				}
-
-				// Add the new directory if it doesn't exist
-				if (!newDirs.includes(newDir)) {
-					newDirs.push(newDir);
-				}
-
-				return newDirs;
-			},
-			onBeforeRemove: async (itemToRemove: unknown, currentItems: unknown[]) => {
-				const newDirs = currentItems.filter((d) => d !== itemToRemove);
-				// Prevent removing all directories
-				return newDirs.length === 0 ? ["*"] : newDirs;
-			},
-			quickActions: [
-				{
-					name: "Reset to scan all directories",
-					desc: "Clear all specific directories and scan the entire vault",
-					buttonText: "Scan all",
-					condition: (currentItems: unknown[]) => !currentItems.includes("*"),
-					action: async (_currentItems: unknown[]) => ["*"],
-				},
-			],
-		});
-	}
-
-	private addDirectRelationshipSettings(containerEl: HTMLElement): void {
-		new Setting(containerEl).setName("Direct relationship properties").setHeading();
-
-		containerEl
-			.createDiv("setting-item-description")
-			.setText(
-				"Configure property names for direct bidirectional relationships. When you set a relationship in one direction, the plugin automatically updates the reverse relationship."
-			);
-
-		this.uiBuilder.addToggle(containerEl, {
-			key: "autoLinkSiblings",
-			name: "Auto-link siblings",
-			desc: "Automatically mark nodes as related when they share the same parent (siblings are related to each other)",
-		});
-
-		this.uiBuilder.addText(containerEl, {
-			key: "parentProp",
-			name: "Parent property",
-			desc: "Property name for parent reference (bidirectional with children)",
-			placeholder: "parent",
-		});
-
-		this.uiBuilder.addText(containerEl, {
-			key: "childrenProp",
-			name: "Children property",
-			desc: "Property name for children references (bidirectional with parent)",
-			placeholder: "children",
-		});
-
-		this.uiBuilder.addText(containerEl, {
-			key: "relatedProp",
-			name: "Related property",
-			desc: "Property name for related files (bidirectional - automatically syncs between linked files)",
-			placeholder: "related",
-		});
-	}
-
-	private addNodeCreationSettings(containerEl: HTMLElement): void {
-		new Setting(containerEl).setName("Node creation shortcuts").setHeading();
-
-		containerEl
-			.createDiv("setting-item-description")
-			.setText(
-				"Enable quick creation of Parent, Child, and Related nodes from the command palette. New nodes inherit frontmatter properties and automatically establish bidirectional relationships."
-			);
-
-		this.uiBuilder.addText(containerEl, {
-			key: "zettelIdProp",
-			name: "Zettel ID property",
-			desc: "Property name for unique timestamp identifier assigned to new nodes",
-			placeholder: "_ZettelID",
-		});
-
-		const infoBox = containerEl.createDiv("settings-info-box");
-		infoBox.createEl("strong", { text: "How it works:" });
-		const list = infoBox.createEl("ul");
-		list.createEl("li", {
-			text: "New nodes are created in the same folder as the source file",
-		});
-		list.createEl("li", {
-			text: "All frontmatter properties are inherited (except excluded properties)",
-		});
-		list.createEl("li", {
-			text: "A new Zettel ID is generated automatically (timestamp-based)",
-		});
-		list.createEl("li", {
-			text: "Bidirectional relationships are established automatically",
-		});
-		list.createEl("li", {
-			text: "Commands are only available for files in indexed directories",
-		});
-
-		// Excluded properties section
-		new Setting(containerEl).setName("Excluded properties").setHeading();
-
-		this.uiBuilder.addTextArray(containerEl, {
-			key: "defaultExcludedProperties",
-			name: "Default excluded properties",
-			desc: "Comma-separated list of frontmatter properties to ALWAYS exclude from copying when creating new nodes. These are excluded regardless of any rules below.",
-			placeholder: "e.g., Parent, Child, Related, _ZettelID",
-		});
-
-		const excludedPropertiesContainer = containerEl.createDiv();
-
-		const desc = excludedPropertiesContainer.createDiv();
-		desc.createEl("p", {
-			text: "Define path-based rules to exclude ADDITIONAL properties for files in specific directories. The default excluded properties above are always excluded. Rules are evaluated in order - the first matching path's properties are ADDED to the default exclusion list.",
-		});
-
-		const examplesContainer = desc.createDiv("settings-info-box");
-		examplesContainer.createEl("strong", { text: "Example path-based exclusion rules:" });
-		const examplesList = examplesContainer.createEl("ul");
-
-		const examples = [
-			{
-				path: "Projects/",
-				properties: "status, progress",
-				description: "Exclude status and progress from files in Projects/",
-			},
-			{
-				path: "Daily Notes/2024/",
-				properties: "date, weekday",
-				description: "Exclude date fields from files in Daily Notes/2024/",
-			},
-		];
-
-		for (const example of examples) {
-			const li = examplesList.createEl("li", { cls: "color-example-item" });
-			li.createEl("code", { text: example.path, cls: "settings-info-box-example" });
-			li.createSpan({ text: "→", cls: "color-arrow" });
-			li.createEl("code", { text: example.properties, cls: "settings-info-box-example" });
-			li.createSpan({ text: `: ${example.description}`, cls: "color-example-description" });
-		}
-
-		const warningContainer = desc.createDiv("settings-warning-box");
-		warningContainer.createEl("strong", { text: "⚠️ Important:" });
-		warningContainer.createEl("p", {
-			text: "Path matching uses startsWith - a file matches if its path starts with the rule's path. Default excluded properties are ALWAYS excluded. Path rules ADD additional properties to exclude on top of the defaults.",
-		});
-
-		const excludedPropertyRulesListContainer = excludedPropertiesContainer.createDiv();
-		this.renderExcludedPropertyRulesList(excludedPropertyRulesListContainer);
-
-		new Setting(excludedPropertiesContainer)
-			.setName("Add path-based exclusion rule")
-			.setDesc("Add a new rule to exclude properties for files in a specific path")
-			.addButton((button) => {
-				button.setButtonText("Add Rule");
-				button.onClick(async () => {
-					const newRule = {
-						id: `path-excluded-${Date.now()}`,
-						path: "",
-						excludedProperties: [],
-						enabled: true,
-					};
-
-					await this.plugin.settingsStore.updateSettings((s) => ({
-						...s,
-						pathExcludedProperties: [...s.pathExcludedProperties, newRule],
-					}));
-
-					this.renderExcludedPropertyRulesList(excludedPropertyRulesListContainer);
-				});
-			});
-	}
-
 	private addExampleSection(containerEl: HTMLElement): void {
 		const { currentSettings: settings } = this.plugin.settingsStore;
 
@@ -938,57 +803,30 @@ export class FusionGoalsSettingsTab extends PluginSettingTab {
 
 		const exampleContainer = containerEl.createDiv("settings-info-box");
 
-		exampleContainer.createEl("h3", { text: "Bidirectional sync example" });
+		exampleContainer.createEl("h3", { text: "Hierarchical structure example" });
 		exampleContainer.createEl("p", {
-			text: "When you add a child relationship in one file, the parent relationship is automatically created in the other file:",
+			text: "The plugin visualizes a three-level hierarchy: Goals → Projects → Tasks",
 		});
 
-		const beforeAfter = exampleContainer.createDiv("example-grid");
+		const hierarchyExample = exampleContainer.createDiv();
+		hierarchyExample.createEl("h4", { text: "Example structure:" });
+		hierarchyExample.createEl("pre", {
+			text: `# Goal file (in ${settings.goalsDirectory}/)
+---
+title: Complete Master's Degree
+---
 
-		const beforeSection = beforeAfter.createDiv("example-section");
-		beforeSection.createEl("h4", { text: "You write this in parent-note.md:" });
-		beforeSection.createEl("pre", {
-			text: `---
-${settings.childrenProp}:
-  - "[[child-note-1]]"
-  - "[[child-note-2]]"
----`,
-			cls: "settings-info-box-example",
-		});
+# Project file (in ${settings.projectsDirectory}/)
+---
+${settings.projectGoalProp}: "[[Complete Master's Degree]]"
+title: Thesis Research
+---
 
-		const afterSection = beforeAfter.createDiv("example-section");
-		afterSection.createEl("h4", { text: "Plugin automatically updates child-note-1.md:" });
-		afterSection.createEl("pre", {
-			text: `---
-${settings.parentProp}: "[[parent-note]]"
----`,
-			cls: "settings-info-box-example",
-		});
-
-		exampleContainer.createEl("h3", { text: "Recursive tree computation" });
-		exampleContainer.createEl("p", {
-			text: "The plugin automatically computes all recursive relationships in the tree:",
-		});
-
-		const treeExample = exampleContainer.createDiv();
-		treeExample.createEl("h4", { text: "If you have this hierarchy:" });
-		treeExample.createEl("pre", {
-			text: `grandparent.md
-  ${settings.childrenProp}: ["[[parent.md]]"]
-
-parent.md
-  ${settings.parentProp}: "[[grandparent.md]]"
-  ${settings.childrenProp}: ["[[child.md]]"]
-
-child.md
-  ${settings.parentProp}: "[[parent.md]]"`,
-			cls: "settings-info-box-example",
-		});
-
-		treeExample.createEl("h4", { text: "Then child.md will automatically have:" });
-		treeExample.createEl("pre", {
-			text: `---
-${settings.parentProp}: "[[parent.md]]"
+# Task file (in ${settings.tasksDirectory}/)
+---
+${settings.taskGoalProp}: "[[Complete Master's Degree]]"
+${settings.taskProjectProp}: "[[Thesis Research]]"
+title: Literature Review
 ---`,
 			cls: "settings-info-box-example",
 		});
@@ -996,7 +834,7 @@ ${settings.parentProp}: "[[parent.md]]"
 		const infoBox = exampleContainer.createDiv("settings-info-note");
 		infoBox.createEl("strong", { text: "ℹ️ Note: " });
 		infoBox.appendText(
-			"All recursive relationships (like all parents, all children, all related) are computed dynamically in the graph view and are not stored in frontmatter."
+			"The graph view dynamically renders the hierarchy based on these property links. Projects and tasks automatically appear under their linked goals and projects."
 		);
 	}
 }

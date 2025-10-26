@@ -208,11 +208,6 @@ export class GraphZoomPreview {
 			const filteredProperties = filterPropertiesForDisplay(frontmatter, this.settings);
 
 			for (const [key, value] of filteredProperties) {
-				// Skip parent/child properties (visible in graph)
-				if (key === this.settings.parentProp || key === this.settings.childrenProp) {
-					continue;
-				}
-
 				this.propertyRenderer.renderProperty(this.frontmatterSection, key, value);
 			}
 		} else {

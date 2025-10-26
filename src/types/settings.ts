@@ -31,25 +31,15 @@ export type PathExcludedProperties = z.infer<typeof PathExcludedPropertiesSchema
 export const FusionGoalsSettingsSchema = z.object({
 	version: z.number().int().positive().optional().default(SETTINGS_VERSION),
 
-	// Hierarchical directory structure
+	// Hierarchical directory structure (required - must be defined)
 	goalsDirectory: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_GOALS_DIRECTORY),
 	projectsDirectory: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_PROJECTS_DIRECTORY),
 	tasksDirectory: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_TASKS_DIRECTORY),
 
-	// Property names for linking
-	goalProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_GOAL_PROP),
-	projectProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_PROJECT_PROP),
-
-	// Legacy properties (kept for backward compatibility during refactoring)
-	parentProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_PARENT_PROP),
-	childrenProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_CHILDREN_PROP),
-	relatedProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_RELATED_PROP),
-	directories: z
-		.array(z.string())
-		.optional()
-		.default([...SETTINGS_DEFAULTS.DEFAULT_DIRECTORIES]),
-	autoLinkSiblings: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_AUTO_LINK_SIBLINGS),
-	zettelIdProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_ZETTEL_ID_PROP),
+	// Property names for hierarchical linking
+	projectGoalProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_PROJECT_GOAL_PROP),
+	taskGoalProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_TASK_GOAL_PROP),
+	taskProjectProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_TASK_PROJECT_PROP),
 
 	// UI settings
 	showRibbonIcon: z.boolean().optional().default(true),

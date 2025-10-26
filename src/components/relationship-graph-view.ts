@@ -520,8 +520,8 @@ export class RelationshipGraphView extends ItemView {
 			return;
 		}
 
-		if (!this.indexer.shouldIndexFile(file.path)) {
-			this.showEmptyState("This file is not in a configured directory for relationship tracking.");
+		if (!this.indexer.getFileType(file.path)) {
+			this.showEmptyState("This file is not in one of the hierarchical directories (Goals, Projects, or Tasks).");
 			return;
 		}
 

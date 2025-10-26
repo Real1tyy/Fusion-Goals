@@ -23,8 +23,8 @@ interface ValidFileContext extends FileContext {
 }
 
 /**
- * Builds graph data (nodes and edges) from file relationships.
- * Handles hierarchical relationships using top-down dagre layout.
+ * Builds graph data (nodes and edges) from hierarchical relationships.
+ * Uses the hierarchical cache structure: Goals → Projects, Tasks | Projects → Tasks
  */
 export class GraphBuilder {
 	private readonly filterEvaluator: FilterEvaluator;
@@ -46,12 +46,11 @@ export class GraphBuilder {
 		});
 	}
 
-	private resolveValidContexts(wikiLinks: string[], excludePaths: Set<string>): ValidFileContext[] {
-		return wikiLinks
-			.map((wikiLink) => {
-				const path = extractFilePath(wikiLink);
-				const fileContext = getFileContext(this.app, path);
-				return { wikiLink, ...fileContext };
+	private resolveValidContexts(filePaths: string[], excludePaths: Set<string>): ValidFileContext[] {
+		return filePaths
+			.map((filePath) => {
+				const fileContext = getFileContext(this.app, filePath);
+				return { wikiLink: filePath, ...fileContext };
 			})
 			.filter((ctx): ctx is ValidFileContext => {
 				if (ctx.file === null || !ctx.frontmatter || excludePaths.has(ctx.path)) {
@@ -108,14 +107,12 @@ export class GraphBuilder {
 		while (queue.length > 0) {
 			const { path: currentPath, level: currentLevel } = queue.shift()!;
 
-			const { file, frontmatter } = getFileContext(this.app, currentPath);
-			if (!file || !frontmatter) continue;
-
 			// Check if we can add children (next level must be within depth limit)
 			if (currentLevel + 1 >= this.hierarchyMaxDepth) continue;
 
-			const relations = this.indexer.extractRelationships(file, frontmatter);
-			const validChildren = this.resolveValidContexts(relations.children, processedPaths);
+			// Get children based on file type
+			const childPaths = this.getChildrenPaths(currentPath);
+			const validChildren = this.resolveValidContexts(childPaths, processedPaths);
 
 			const childNodes = validChildren.map((ctx) =>
 				this.createNodeElement(ctx.wikiLink, currentLevel + 1, allowSourceHighlight && ctx.path === sourcePath)
@@ -135,6 +132,66 @@ export class GraphBuilder {
 		return { nodes, edges };
 	}
 
+	/**
+	 * Get children paths for a file using hierarchical cache.
+	 */
+	private getChildrenPaths(filePath: string): string[] {
+		const fileType = this.indexer.getFileType(filePath);
+
+		if (fileType === "goal") {
+			// Goals have both projects and tasks as direct children
+			const goalHierarchy = this.indexer.getGoalHierarchy(filePath);
+			if (goalHierarchy) {
+				return [...goalHierarchy.projects, ...goalHierarchy.tasks];
+			}
+		} else if (fileType === "project") {
+			// Projects have tasks as children
+			const projectHierarchy = this.indexer.getProjectHierarchy(filePath);
+			if (projectHierarchy) {
+				return projectHierarchy.tasks;
+			}
+		}
+		// Tasks have no children
+
+		return [];
+	}
+
+	/**
+	 * Get parent path for a file based on frontmatter links.
+	 */
+	private getParentPath(filePath: string): string | null {
+		const { file, frontmatter } = getFileContext(this.app, filePath);
+		if (!file || !frontmatter) return null;
+
+		const fileType = this.indexer.getFileType(filePath);
+		if (!fileType) return null;
+
+		const settings = this.indexer.getSettings();
+
+		if (fileType === "project") {
+			// Projects have goals as parents
+			const goalLink = frontmatter[settings.projectGoalProp];
+			if (goalLink && typeof goalLink === "string") {
+				const parsed = goalLink.match(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/);
+				if (parsed) {
+					return `${parsed[1]}.md`;
+				}
+			}
+		} else if (fileType === "task") {
+			// Tasks have projects as parents
+			const projectLink = frontmatter[settings.taskProjectProp];
+			if (projectLink && typeof projectLink === "string") {
+				const parsed = projectLink.match(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/);
+				if (parsed) {
+					return `${parsed[1]}.md`;
+				}
+			}
+		}
+		// Goals have no parents
+
+		return null;
+	}
+
 	private findTopmostParent(startPath: string, maxDepth = 50): string {
 		const visited = new Set<string>();
 		let topmostParent = startPath;
@@ -149,15 +206,13 @@ export class GraphBuilder {
 				topmostParent = filePath;
 			}
 
-			const { file, frontmatter } = getFileContext(this.app, filePath);
-			if (!file || !frontmatter) return;
-
-			const relations = this.indexer.extractRelationships(file, frontmatter);
-			const validParents = this.resolveValidContexts(relations.parent, visited);
-
-			validParents.forEach((ctx) => {
-				dfsUpwards(ctx.path, currentLevel + 1);
-			});
+			const parentPath = this.getParentPath(filePath);
+			if (parentPath && !visited.has(parentPath)) {
+				const { file, frontmatter } = getFileContext(this.app, parentPath);
+				if (file && frontmatter && this.filterEvaluator.evaluateFilters(frontmatter)) {
+					dfsUpwards(parentPath, currentLevel + 1);
+				}
+			}
 		};
 
 		dfsUpwards(startPath, 0);
