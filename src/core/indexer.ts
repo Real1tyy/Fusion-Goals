@@ -11,7 +11,7 @@ import {
 	type Subscription,
 } from "rxjs";
 import { debounceTime, filter, groupBy, map, mergeMap, switchMap, toArray } from "rxjs/operators";
-import { parseWikiLink } from "src/utils/frontmatter-value";
+import { parseLinkedPathsFromProperty } from "src/utils/property-utils";
 import { type FileType, SCAN_CONCURRENCY } from "../types/constants";
 import type { Frontmatter, FusionGoalsSettings } from "../types/settings";
 
@@ -89,6 +89,11 @@ export class Indexer {
 			return;
 		}
 
+		console.log(`🚀 Starting indexer with directories:`);
+		console.log(`   Goals: "${this.settings.goalsDirectory}"`);
+		console.log(`   Projects: "${this.settings.projectsDirectory}"`);
+		console.log(`   Tasks: "${this.settings.tasksDirectory}"`);
+
 		await this.buildInitialCache();
 
 		const fileSystemEvents$ = this.buildFileSystemEvents$();
@@ -115,17 +120,6 @@ export class Indexer {
 
 		for (const file of relevantFiles) {
 			await this.buildEvent(file);
-		}
-
-		// Log hierarchical caches
-		console.log("📦 Goal Cache:");
-		for (const [goalPath, hierarchy] of this.goalCache.entries()) {
-			console.log(JSON.stringify({ goalPath, ...hierarchy }));
-		}
-
-		console.log("📦 Project Cache:");
-		for (const [projectPath, hierarchy] of this.projectCache.entries()) {
-			console.log(JSON.stringify({ projectPath, ...hierarchy }));
 		}
 	}
 
@@ -329,17 +323,6 @@ export class Indexer {
 		};
 	}
 
-	private parseLinkedPath(frontmatter: Frontmatter, propName: string): string | null {
-		const value = frontmatter[propName];
-		if (value && typeof value === "string") {
-			const parsed = parseWikiLink(value);
-			if (parsed?.linkPath) {
-				return `${parsed.linkPath}.md`;
-			}
-		}
-		return null;
-	}
-
 	private updateHierarchicalCache(relationships: FileRelationships): void {
 		const { filePath, frontmatter, type } = relationships;
 		const { projectGoalProp, taskGoalProp, taskProjectProp } = this.settings;
@@ -350,8 +333,9 @@ export class Indexer {
 			arrayKey: keyof T,
 			defaultEntry: T
 		) => {
-			const linkedPath = this.parseLinkedPath(frontmatter, propName);
-			if (linkedPath) {
+			const linkedPaths = parseLinkedPathsFromProperty(frontmatter[propName]);
+
+			for (const linkedPath of linkedPaths) {
 				if (!cache.has(linkedPath)) {
 					cache.set(linkedPath, defaultEntry);
 				}
@@ -379,8 +363,8 @@ export class Indexer {
 			propName: string,
 			arrayKey: keyof T
 		) => {
-			const linkedPath = this.parseLinkedPath(frontmatter, propName);
-			if (linkedPath) {
+			const linkedPaths = parseLinkedPathsFromProperty(frontmatter[propName]);
+			for (const linkedPath of linkedPaths) {
 				const entry = cache.get(linkedPath);
 				if (entry) {
 					entry[arrayKey] = entry[arrayKey].filter((p) => p !== filePath) as T[keyof T];
