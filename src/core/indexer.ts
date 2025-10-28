@@ -45,10 +45,12 @@ type FileIntent =
 export interface GoalHierarchy {
 	projects: string[];
 	tasks: string[];
+	[key: string]: string[];
 }
 
 export interface ProjectHierarchy {
 	tasks: string[];
+	[key: string]: string[];
 }
 
 export class Indexer {
@@ -112,15 +114,18 @@ export class Indexer {
 		const relevantFiles = allFiles.filter((file) => this.getFileType(file.path) !== null);
 
 		for (const file of relevantFiles) {
-			const frontmatter = this.metadataCache.getFileCache(file)?.frontmatter;
-			if (frontmatter) {
-				const fileType = this.getFileType(file.path);
-				if (fileType) {
-					const relationships = this.extractRelationships(file, frontmatter, fileType);
-					this.relationshipsCache.set(file.path, relationships);
-					this.updateHierarchicalCache(relationships);
-				}
-			}
+			await this.buildEvent(file);
+		}
+
+		// Log hierarchical caches
+		console.log("📦 Goal Cache:");
+		for (const [goalPath, hierarchy] of this.goalCache.entries()) {
+			console.log(JSON.stringify({ goalPath, ...hierarchy }));
+		}
+
+		console.log("📦 Project Cache:");
+		for (const [projectPath, hierarchy] of this.projectCache.entries()) {
+			console.log(JSON.stringify({ projectPath, ...hierarchy }));
 		}
 	}
 
@@ -274,7 +279,12 @@ export class Indexer {
 		this.removeFromHierarchicalCache(oldRelationships);
 
 		// Update cache for renamed file
-		const newRelationships = this.extractRelationships(newFile, frontmatter, oldRelationships.type);
+		const newRelationships: FileRelationships = {
+			filePath: newFile.path,
+			mtime: newFile.stat.mtime,
+			type: oldRelationships.type,
+			frontmatter,
+		};
 		this.relationshipsCache.delete(oldPath);
 		this.relationshipsCache.set(newFile.path, newRelationships);
 
@@ -294,7 +304,12 @@ export class Indexer {
 		}
 
 		const oldRelationships = this.relationshipsCache.get(file.path);
-		const newRelationships = this.extractRelationships(file, frontmatter, fileType);
+		const newRelationships: FileRelationships = {
+			filePath: file.path,
+			mtime: file.stat.mtime,
+			type: fileType,
+			frontmatter,
+		};
 
 		// Update cache with new relationships
 		this.relationshipsCache.set(file.path, newRelationships);
@@ -314,170 +329,92 @@ export class Indexer {
 		};
 	}
 
-	extractRelationships(file: TFile, frontmatter: Frontmatter, fileType: FileType): FileRelationships {
-		return {
-			filePath: file.path,
-			mtime: file.stat.mtime,
-			type: fileType,
-			frontmatter,
-		};
+	private parseLinkedPath(frontmatter: Frontmatter, propName: string): string | null {
+		const value = frontmatter[propName];
+		if (value && typeof value === "string") {
+			const parsed = parseWikiLink(value);
+			if (parsed?.linkPath) {
+				return `${parsed.linkPath}.md`;
+			}
+		}
+		return null;
 	}
 
-	/**
-	 * Update the hierarchical cache based on file relationships.
-	 * Goals → Projects, Tasks
-	 * Projects → Tasks
-	 */
 	private updateHierarchicalCache(relationships: FileRelationships): void {
 		const { filePath, frontmatter, type } = relationships;
 		const { projectGoalProp, taskGoalProp, taskProjectProp } = this.settings;
 
+		const addToCache = <T extends { [key: string]: string[] }>(
+			cache: Map<string, T>,
+			propName: string,
+			arrayKey: keyof T,
+			defaultEntry: T
+		) => {
+			const linkedPath = this.parseLinkedPath(frontmatter, propName);
+			if (linkedPath) {
+				if (!cache.has(linkedPath)) {
+					cache.set(linkedPath, defaultEntry);
+				}
+				const entry = cache.get(linkedPath)!;
+				if (!entry[arrayKey].includes(filePath)) {
+					entry[arrayKey].push(filePath);
+				}
+			}
+		};
+
 		if (type === "project") {
-			// Extract goal reference from project
-			const goalLink = frontmatter[projectGoalProp];
-			if (goalLink && typeof goalLink === "string") {
-				const parsed = parseWikiLink(goalLink);
-				if (parsed?.linkPath) {
-					const goalPath = `${parsed.linkPath}.md`;
-
-					// Ensure goal entry exists
-					if (!this.goalCache.has(goalPath)) {
-						this.goalCache.set(goalPath, { projects: [], tasks: [] });
-					}
-
-					const goalHierarchy = this.goalCache.get(goalPath)!;
-					if (!goalHierarchy.projects.includes(filePath)) {
-						goalHierarchy.projects.push(filePath);
-					}
-				}
-			}
+			addToCache(this.goalCache, projectGoalProp, "projects", { projects: [], tasks: [] });
 		} else if (type === "task") {
-			// Extract goal reference from task
-			const goalLink = frontmatter[taskGoalProp];
-			if (goalLink && typeof goalLink === "string") {
-				const parsed = parseWikiLink(goalLink);
-				if (parsed?.linkPath) {
-					const goalPath = `${parsed.linkPath}.md`;
-
-					// Ensure goal entry exists
-					if (!this.goalCache.has(goalPath)) {
-						this.goalCache.set(goalPath, { projects: [], tasks: [] });
-					}
-
-					const goalHierarchy = this.goalCache.get(goalPath)!;
-					if (!goalHierarchy.tasks.includes(filePath)) {
-						goalHierarchy.tasks.push(filePath);
-					}
-				}
-			}
-
-			// Extract project reference from task
-			const projectLink = frontmatter[taskProjectProp];
-			if (projectLink && typeof projectLink === "string") {
-				const parsed = parseWikiLink(projectLink);
-				if (parsed?.linkPath) {
-					const projectPath = `${parsed.linkPath}.md`;
-
-					// Ensure project entry exists
-					if (!this.projectCache.has(projectPath)) {
-						this.projectCache.set(projectPath, { tasks: [] });
-					}
-
-					const projectHierarchy = this.projectCache.get(projectPath)!;
-					if (!projectHierarchy.tasks.includes(filePath)) {
-						projectHierarchy.tasks.push(filePath);
-					}
-				}
-			}
+			addToCache(this.goalCache, taskGoalProp, "tasks", { projects: [], tasks: [] });
+			addToCache(this.projectCache, taskProjectProp, "tasks", { tasks: [] });
 		}
 	}
 
-	/**
-	 * Remove file from hierarchical cache.
-	 */
 	private removeFromHierarchicalCache(relationships: FileRelationships): void {
 		const { filePath, frontmatter, type } = relationships;
 		const { projectGoalProp, taskGoalProp, taskProjectProp } = this.settings;
 
+		const removeFromCache = <T extends { [key: string]: string[] }>(
+			cache: Map<string, T>,
+			propName: string,
+			arrayKey: keyof T
+		) => {
+			const linkedPath = this.parseLinkedPath(frontmatter, propName);
+			if (linkedPath) {
+				const entry = cache.get(linkedPath);
+				if (entry) {
+					entry[arrayKey] = entry[arrayKey].filter((p) => p !== filePath) as T[keyof T];
+				}
+			}
+		};
+
 		if (type === "goal") {
-			// Remove the goal entry entirely
 			this.goalCache.delete(filePath);
 		} else if (type === "project") {
-			// Remove project from its goal's projects array
-			const goalLink = frontmatter[projectGoalProp];
-			if (goalLink && typeof goalLink === "string") {
-				const parsed = parseWikiLink(goalLink);
-				if (parsed?.linkPath) {
-					const goalPath = `${parsed.linkPath}.md`;
-					const goalHierarchy = this.goalCache.get(goalPath);
-					if (goalHierarchy) {
-						goalHierarchy.projects = goalHierarchy.projects.filter((p) => p !== filePath);
-					}
-				}
-			}
-
-			// Remove the project entry entirely
+			removeFromCache(this.goalCache, projectGoalProp, "projects");
 			this.projectCache.delete(filePath);
 		} else if (type === "task") {
-			// Remove task from its goal's tasks array
-			const goalLink = frontmatter[taskGoalProp];
-			if (goalLink && typeof goalLink === "string") {
-				const parsed = parseWikiLink(goalLink);
-				if (parsed?.linkPath) {
-					const goalPath = `${parsed.linkPath}.md`;
-					const goalHierarchy = this.goalCache.get(goalPath);
-					if (goalHierarchy) {
-						goalHierarchy.tasks = goalHierarchy.tasks.filter((t) => t !== filePath);
-					}
-				}
-			}
-
-			// Remove task from its project's tasks array
-			const projectLink = frontmatter[taskProjectProp];
-			if (projectLink && typeof projectLink === "string") {
-				const parsed = parseWikiLink(projectLink);
-				if (parsed?.linkPath) {
-					const projectPath = `${parsed.linkPath}.md`;
-					const projectHierarchy = this.projectCache.get(projectPath);
-					if (projectHierarchy) {
-						projectHierarchy.tasks = projectHierarchy.tasks.filter((t) => t !== filePath);
-					}
-				}
-			}
+			removeFromCache(this.goalCache, taskGoalProp, "tasks");
+			removeFromCache(this.projectCache, taskProjectProp, "tasks");
 		}
 	}
 
-	/**
-	 * Get hierarchical data for a goal.
-	 */
 	getGoalHierarchy(goalPath: string): GoalHierarchy | null {
 		return this.goalCache.get(goalPath) ?? null;
 	}
 
-	/**
-	 * Get hierarchical data for a project.
-	 */
 	getProjectHierarchy(projectPath: string): ProjectHierarchy | null {
 		return this.projectCache.get(projectPath) ?? null;
 	}
 
-	/**
-	 * Get all goals (keys of goalCache).
-	 */
 	getAllGoals(): string[] {
 		return Array.from(this.goalCache.keys());
 	}
 
-	/**
-	 * Get all projects (keys of projectCache).
-	 */
 	getAllProjects(): string[] {
 		return Array.from(this.projectCache.keys());
 	}
 
-	/**
-	 * Get current settings (readonly).
-	 */
 	getSettings(): Readonly<FusionGoalsSettings> {
 		return this.settings;
 	}
