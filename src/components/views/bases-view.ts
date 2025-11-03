@@ -9,12 +9,16 @@ export const VIEW_TYPE_BASES = "fusion-bases-view";
  * Bases view component that uses Obsidian's Bases API to render
  * Children, Parent, and Related files using native base code blocks
  */
+type ArchiveViewType = "active" | "archived" | "all";
+
 export class BasesView extends RegisteredEventsComponent {
 	private app: App;
 	private contentEl: HTMLElement;
 	private component: Component;
 	private plugin: FusionGoalsPlugin;
 	private settingsSubscription: Subscription | null = null;
+	private selectedArchiveView: ArchiveViewType = "active";
+	private viewSelectorEl: HTMLElement | null = null;
 
 	constructor(app: App, containerEl: HTMLElement, plugin: FusionGoalsPlugin) {
 		super();
@@ -42,6 +46,9 @@ export class BasesView extends RegisteredEventsComponent {
 			return;
 		}
 
+		// Create view selector for filtering
+		this.createViewSelector();
+
 		// Detect file type based on folder
 		const isTaskFile = activeFile.path.startsWith("Tasks/") && activeFile.name !== "Tasks.md";
 		const isProjectFile = activeFile.path.startsWith("Projects/") && activeFile.name !== "Projects.md";
@@ -67,7 +74,61 @@ export class BasesView extends RegisteredEventsComponent {
 		let basesMarkdown = "";
 
 		if (isTaskFile) {
-			// Task-specific base code block - shows archived tasks
+			// Task-specific base code block
+			const activeView = `
+  - type: table
+    name: Active
+    filters:
+      and:
+        - _Archived != true
+    order:
+${orderArray}
+    sort:
+      - property: formula._status_sort
+        direction: ASC
+      - property: formula._priority_sort
+        direction: ASC
+      - property: file.mtime
+        direction: DESC`;
+
+			const archivedView = `
+  - type: table
+    name: Archived
+    filters:
+      and:
+        - _Archived == true
+    order:
+${orderArray}
+    sort:
+      - property: formula._status_sort
+        direction: ASC
+      - property: formula._priority_sort
+        direction: ASC
+      - property: file.mtime
+        direction: DESC`;
+
+			const allView = `
+  - type: table
+    name: All
+    order:
+${orderArray}
+    sort:
+      - property: formula._status_sort
+        direction: ASC
+      - property: formula._priority_sort
+        direction: ASC
+      - property: file.mtime
+        direction: DESC`;
+
+			let selectedView = "";
+			if (this.selectedArchiveView === "active") {
+				selectedView = activeView;
+			} else if (this.selectedArchiveView === "archived") {
+				selectedView = archivedView;
+			} else {
+				selectedView = allView;
+			}
+
 			basesMarkdown = `
 \`\`\`base
 filters:
@@ -100,7 +161,31 @@ formulas:
       ["Done", 6],
       ["null", 7]
     ].filter(value[0] == Status.toString())[0][1]
-views:
+views:${selectedView}
+\`\`\`
+`;
+		} else if (isProjectFile) {
+			// Project-specific base code block - shows tasks for this project
+			const activeView = `
+  - type: table
+    name: Active
+    filters:
+      and:
+        - _Archived != true
+        - Status != "Done"
+    order:
+${orderArray}
+    sort:
+      - property: formula._status_sort
+        direction: ASC
+      - property: formula._priority_sort
+        direction: ASC
+      - property: file.mtime
+        direction: DESC
+    columnSize:
+      file.name: 401`;
+
+			const archivedView = `
   - type: table
     name: Archived
     filters:
@@ -115,10 +200,33 @@ ${orderArray}
         direction: ASC
       - property: file.mtime
         direction: DESC
-\`\`\`
-`;
-		} else if (isProjectFile) {
-			// Project-specific base code block - shows tasks for this project
+    columnSize:
+      file.name: 401`;
+
+			const allView = `
+  - type: table
+    name: All
+    order:
+${orderArray}
+    sort:
+      - property: formula._status_sort
+        direction: ASC
+      - property: formula._priority_sort
+        direction: ASC
+      - property: file.mtime
+        direction: DESC
+    columnSize:
+      file.name: 401`;
+
+			let selectedView = "";
+			if (this.selectedArchiveView === "active") {
+				selectedView = activeView;
+			} else if (this.selectedArchiveView === "archived") {
+				selectedView = archivedView;
+			} else {
+				selectedView = allView;
+			}
+
 			basesMarkdown = `
 \`\`\`base
 filters:
@@ -152,9 +260,14 @@ formulas:
       ["Done", 6],
       ["null", 7]
     ].filter(value[0] == Status.toString())[0][1]
-views:
+views:${selectedView}
+\`\`\`
+`;
+		} else if (isGoalFile) {
+			// Goal-specific base code block - shows projects for this goal
+			const activeView = `
   - type: table
-    name: Full
+    name: Active
     filters:
       and:
         - _Archived != true
@@ -167,13 +280,46 @@ ${orderArray}
       - property: formula._priority_sort
         direction: ASC
       - property: file.mtime
-        direction: DESC
-    columnSize:
-      file.name: 401
-\`\`\`
-`;
-		} else if (isGoalFile) {
-			// Goal-specific base code block - shows projects for this goal
+        direction: DESC`;
+
+			const archivedView = `
+  - type: table
+    name: Archived
+    filters:
+      and:
+        - _Archived == true
+    order:
+${orderArray}
+    sort:
+      - property: formula._status_sort
+        direction: ASC
+      - property: formula._priority_sort
+        direction: ASC
+      - property: file.mtime
+        direction: DESC`;
+
+			const allView = `
+  - type: table
+    name: All
+    order:
+${orderArray}
+    sort:
+      - property: formula._status_sort
+        direction: ASC
+      - property: formula._priority_sort
+        direction: ASC
+      - property: file.mtime
+        direction: DESC`;
+
+			let selectedView = "";
+			if (this.selectedArchiveView === "active") {
+				selectedView = activeView;
+			} else if (this.selectedArchiveView === "archived") {
+				selectedView = archivedView;
+			} else {
+				selectedView = allView;
+			}
+
 			basesMarkdown = `
 \`\`\`base
 filters:
@@ -206,22 +352,7 @@ formulas:
       ["Done", 6],
       ["null", 7]
     ].filter(value[0] == Status.toString())[0][1]
-views:
-  - type: table
-    name: Full
-    filters:
-      and:
-        - _Archived != true
-        - Status != "Done"
-    order:
-${orderArray}
-    sort:
-      - property: formula._status_sort
-        direction: ASC
-      - property: formula._priority_sort
-        direction: ASC
-      - property: file.mtime
-        direction: DESC
+views:${selectedView}
 \`\`\`
 `;
 		} else {
@@ -248,6 +379,34 @@ views:
 		await MarkdownRenderer.render(this.app, basesMarkdown, markdownContainer, activeFile.path, this.component);
 	}
 
+	private createViewSelector(): void {
+		this.viewSelectorEl = this.contentEl.createDiv({
+			cls: "fusion-bases-view-selector",
+		});
+
+		const viewTypes: { type: ArchiveViewType; label: string }[] = [
+			{ type: "active", label: "Active" },
+			{ type: "archived", label: "Archived" },
+			{ type: "all", label: "All" },
+		];
+
+		for (const { type, label } of viewTypes) {
+			const button = this.viewSelectorEl.createEl("button", {
+				text: label,
+				cls: "fusion-bases-view-button",
+			});
+
+			if (type === this.selectedArchiveView) {
+				button.addClass("is-active");
+			}
+
+			button.addEventListener("click", async () => {
+				this.selectedArchiveView = type;
+				await this.render();
+			});
+		}
+	}
+
 	private renderEmptyState(message: string): void {
 		this.contentEl.createDiv({
 			text: message,
@@ -260,10 +419,16 @@ views:
 	}
 
 	destroy(): void {
+		if (this.settingsSubscription) {
+			this.settingsSubscription.unsubscribe();
+			this.settingsSubscription = null;
+		}
+
 		if (this.component) {
 			this.component.unload();
 		}
 
+		this.viewSelectorEl = null;
 		this.contentEl.empty();
 		this.cleanupEvents();
 	}
