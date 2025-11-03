@@ -186,6 +186,80 @@ export class GraphInteractionHandler {
 		});
 	}
 
+	navigateToParent(currentNodeId: string): string | null {
+		return this.navigateAlongEdge(currentNodeId, "incoming");
+	}
+
+	navigateToChild(currentNodeId: string): string | null {
+		return this.navigateAlongEdge(currentNodeId, "outgoing");
+	}
+
+	private navigateAlongEdge(currentNodeId: string, direction: "incoming" | "outgoing"): string | null {
+		const node = this.cy.getElementById(currentNodeId);
+		if (!node.length) return null;
+
+		const edges = node
+			.connectedEdges()
+			.filter((edge) =>
+				direction === "incoming" ? edge.target().id() === currentNodeId : edge.source().id() === currentNodeId
+			);
+
+		if (!edges.length) return null;
+
+		const dataKey = direction === "incoming" ? "source" : "target";
+		return edges[0].data(dataKey);
+	}
+
+	navigateToLeft(currentNodeId: string): string | null {
+		return this.navigateInDirection(currentNodeId, "left");
+	}
+
+	navigateToRight(currentNodeId: string): string | null {
+		return this.navigateInDirection(currentNodeId, "right");
+	}
+
+	private navigateInDirection(currentNodeId: string, direction: "left" | "right"): string | null {
+		const currentNode = this.cy.getElementById(currentNodeId);
+		if (!currentNode.length) return null;
+
+		const currentPos = currentNode.renderedPosition();
+		if (!currentPos) return null;
+
+		// Get all other nodes
+		const otherNodes = this.cy.nodes().filter((n) => n.id() !== currentNodeId);
+
+		// Vertical tolerance for "same height" (in pixels)
+		// Nodes within this range are considered at the same level
+		const VERTICAL_TOLERANCE = 50;
+
+		let closestNode: any = null;
+		let closestDistance = Number.POSITIVE_INFINITY;
+
+		otherNodes.forEach((node) => {
+			const pos = node.renderedPosition();
+			if (!pos) return;
+
+			// Check if node is at approximately the same vertical level
+			const verticalDist = Math.abs(pos.y - currentPos.y);
+			if (verticalDist > VERTICAL_TOLERANCE) return;
+
+			// Check if node is in the correct horizontal direction
+			const isInDirection = direction === "left" ? pos.x < currentPos.x : pos.x > currentPos.x;
+
+			if (!isInDirection) return;
+
+			// Calculate horizontal distance only (since we've already filtered by vertical level)
+			const horizontalDist = Math.abs(pos.x - currentPos.x);
+
+			if (horizontalDist < closestDistance) {
+				closestDistance = horizontalDist;
+				closestNode = node;
+			}
+		});
+
+		return closestNode ? closestNode.id() : null;
+	}
+
 	cleanup(): void {
 		this.cy.removeAllListeners();
 	}
