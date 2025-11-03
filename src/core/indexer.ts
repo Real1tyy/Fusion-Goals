@@ -224,13 +224,13 @@ export class Indexer {
 			})
 		);
 
-		// Handle renames by updating the cache internally without emitting events
+		// Handle renames by updating the cache and emitting events for affected files
 		// Obsidian automatically updates all wiki links, so we just sync the cache
-		// Debounce by 1.5 seconds to let Obsidian finish updating all links
+		// Debounce by 1 second to let Obsidian finish updating all links
 		renamed$
 			.pipe(
 				filter(([f]) => Indexer.isMarkdownFile(f)),
-				debounceTime(1500)
+				debounceTime(1000)
 			)
 			.subscribe(([newFile, oldPath]) => {
 				this.handleRename(newFile, oldPath);
@@ -284,6 +284,15 @@ export class Indexer {
 
 		// Add new entry to hierarchical cache
 		this.updateHierarchicalCache(newRelationships);
+
+		// Emit event for the renamed file itself
+		this.scanEventsSubject.next({
+			type: "file-changed",
+			fileType: newRelationships.type,
+			filePath: newFile.path,
+			oldRelationships,
+			newRelationships,
+		});
 	}
 
 	private async buildEvent(file: TFile): Promise<IndexerEvent | null> {
