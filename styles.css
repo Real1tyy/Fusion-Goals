@@ -1275,3 +1275,11 @@
 .fusion-bases-file-link:hover {
 	color: var(--interactive-accent);
 }
+
+/* Bases View Settings Styles */
+.fusion-bases-settings-info-box {
+	margin-top: 1em;
+	padding: 1em;
+	background-color: var(--background-secondary);
+	border-radius: 4px;
+}

@@ -2,6 +2,7 @@ import { SettingsUIBuilder } from "@real1ty-obsidian-plugins/utils";
 import { type App, PluginSettingTab } from "obsidian";
 import type FusionGoalsPlugin from "src/main";
 import type { FusionGoalsSettingsSchema } from "../../types/settings";
+import { BasesViewSettingsSection } from "./sections/bases-view";
 import { GraphDisplaySettingsSection } from "./sections/graph-display";
 import { HierarchySection } from "./sections/hierarchy";
 import { PropertyDisplaySettingsSection } from "./sections/property-display";
@@ -83,6 +84,7 @@ export class FusionGoalsSettingsTab extends PluginSettingTab {
 			new HierarchySection(this.uiBuilder),
 			new GraphDisplaySettingsSection(this.uiBuilder),
 			new PropertyDisplaySettingsSection(this.uiBuilder),
+			new BasesViewSettingsSection(this.uiBuilder),
 			new RulesSection(this.plugin, this.uiBuilder),
 		];
 	}

@@ -113,6 +113,20 @@ export const FusionGoalsSettingsSchema = z.object({
 		.optional()
 		.default([...SETTINGS_DEFAULTS.DEFAULT_EXCLUDED_PROPERTIES]),
 	pathExcludedProperties: z.array(PathExcludedPropertiesSchema).optional().default([]),
+
+	// Bases view column configuration
+	basesGoalsProperties: z
+		.array(z.string())
+		.optional()
+		.default([...SETTINGS_DEFAULTS.DEFAULT_BASES_GOALS_PROPERTIES]),
+	basesProjectsProperties: z
+		.array(z.string())
+		.optional()
+		.default([...SETTINGS_DEFAULTS.DEFAULT_BASES_PROJECTS_PROPERTIES]),
+	basesTasksProperties: z
+		.array(z.string())
+		.optional()
+		.default([...SETTINGS_DEFAULTS.DEFAULT_BASES_TASKS_PROPERTIES]),
 });
 
 export type FusionGoalsSettings = z.infer<typeof FusionGoalsSettingsSchema>;

@@ -194,7 +194,7 @@ export class FusionViewSwitcher extends ItemView {
 			});
 
 			// Create and render bases view
-			this.basesView = new BasesView(this.app, this.basesContentEl);
+			this.basesView = new BasesView(this.app, this.basesContentEl, this.plugin);
 			await this.basesView.render();
 		}
 	}

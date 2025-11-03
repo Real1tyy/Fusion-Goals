@@ -40,6 +40,10 @@ export const SETTINGS_DEFAULTS = {
 
 	// Node creation defaults
 	DEFAULT_EXCLUDED_PROPERTIES: ["goal", "project", "tasks"],
+
+	DEFAULT_BASES_GOALS_PROPERTIES: ["Status", "Priority"],
+	DEFAULT_BASES_PROJECTS_PROPERTIES: ["Status", "Priority", "Difficulty"],
+	DEFAULT_BASES_TASKS_PROPERTIES: ["Goal", "Project", "Status", "Priority"],
 } as const;
 
 export const SCAN_CONCURRENCY = 10;

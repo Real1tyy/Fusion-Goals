@@ -1,4 +1,6 @@
 import { type App, Component, MarkdownRenderer } from "obsidian";
+import type { Subscription } from "rxjs";
+import type FusionGoalsPlugin from "../../main";
 import { RegisteredEventsComponent } from "./component";
 
 export const VIEW_TYPE_BASES = "fusion-bases-view";
@@ -11,13 +13,21 @@ export class BasesView extends RegisteredEventsComponent {
 	private app: App;
 	private contentEl: HTMLElement;
 	private component: Component;
+	private plugin: FusionGoalsPlugin;
+	private settingsSubscription: Subscription | null = null;
 
-	constructor(app: App, containerEl: HTMLElement) {
+	constructor(app: App, containerEl: HTMLElement, plugin: FusionGoalsPlugin) {
 		super();
 		this.app = app;
 		this.contentEl = containerEl;
+		this.plugin = plugin;
 		this.component = new Component();
 		this.component.load();
+
+		// Subscribe to settings changes to re-render
+		this.settingsSubscription = this.plugin.settingsStore.settings$.subscribe(() => {
+			this.render();
+		});
 	}
 
 	async render(): Promise<void> {
@@ -36,6 +46,22 @@ export class BasesView extends RegisteredEventsComponent {
 		const isTaskFile = activeFile.path.startsWith("Tasks/") && activeFile.name !== "Tasks.md";
 		const isProjectFile = activeFile.path.startsWith("Projects/") && activeFile.name !== "Projects.md";
 		const isGoalFile = activeFile.path.startsWith("Goals/") && activeFile.name !== "Goals.md";
+
+		// Get settings
+		const settings = this.plugin.settingsStore.settings$.value;
+
+		// Determine which properties to include based on file type
+		let properties: string[] = [];
+		if (isGoalFile) {
+			properties = settings.basesGoalsProperties;
+		} else if (isProjectFile) {
+			properties = settings.basesProjectsProperties;
+		} else if (isTaskFile) {
+			properties = settings.basesTasksProperties;
+		}
+
+		// Build the order array: file.name first, then configured properties
+		const orderArray = ["file.name", ...properties].map((prop) => `      - ${prop}`).join("\n");
 
 		// Create the base code block markdown based on file type
 		let basesMarkdown = "";
@@ -81,15 +107,7 @@ views:
       and:
         - _Archived == true
     order:
-      - file.name
-      - Goal
-      - Project
-      - Child
-      - Related
-      - Status
-      - Priority
-      - Difficulty
-      - formula.Start
+${orderArray}
     sort:
       - property: formula._status_sort
         direction: ASC
@@ -142,11 +160,7 @@ views:
         - _Archived != true
         - Status != "Done"
     order:
-      - file.name
-      - Status
-      - Priority
-      - Difficulty
-      - formula.Start
+${orderArray}
     sort:
       - property: formula._status_sort
         direction: ASC
@@ -200,11 +214,7 @@ views:
         - _Archived != true
         - Status != "Done"
     order:
-      - file.name
-      - Status
-      - Priority
-      - Difficulty
-      - formula.Start
+${orderArray}
     sort:
       - property: formula._status_sort
         direction: ASC
