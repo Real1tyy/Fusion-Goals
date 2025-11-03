@@ -1,6 +1,5 @@
 import { Notice, Plugin } from "obsidian";
-import { FusionGoalsSettingsTab } from "./components";
-import { RelationshipGraphView, VIEW_TYPE_RELATIONSHIP_GRAPH } from "./components/relationship-graph-view";
+import { FusionGoalsSettingsTab, FusionViewSwitcher, VIEW_TYPE_FUSION_SWITCHER } from "./components";
 import { Indexer } from "./core/indexer";
 import { SettingsStore } from "./core/settings-store";
 
@@ -11,8 +10,6 @@ import { SettingsStore } from "./core/settings-store";
  * - Goals (top level)
  * - Projects (linked to goals via "goal" property)
  * - Tasks (linked to projects via "project" property)
- *
- * Note: This plugin focuses on visualization. Property management is manual.
  */
 export default class FusionGoalsPlugin extends Plugin {
 	settingsStore!: SettingsStore;
@@ -33,29 +30,35 @@ export default class FusionGoalsPlugin extends Plugin {
 			callback: () => this.toggleRelationshipGraphView(),
 		});
 
+		this.addCommand({
+			id: "toggle-view-mode",
+			name: "Toggle View Mode (Graph/Bases)",
+			callback: () => this.executeViewSwitcherMethod("toggleView"),
+		});
+
 		// Graph manipulation commands
 		this.addCommand({
 			id: "enlarge-graph",
 			name: "Enlarge Graph",
-			callback: () => this.executeGraphViewMethod("toggleEnlargement"),
+			callback: () => this.executeViewSwitcherMethod("toggleEnlargement"),
 		});
 
 		this.addCommand({
 			id: "toggle-graph-search",
 			name: "Toggle Graph Search",
-			callback: () => this.executeGraphViewMethod("toggleSearch"),
+			callback: () => this.executeViewSwitcherMethod("toggleSearch"),
 		});
 
 		this.addCommand({
 			id: "toggle-graph-filter",
 			name: "Toggle Graph Filter (Expression Input)",
-			callback: () => this.executeGraphViewMethod("toggleFilter"),
+			callback: () => this.executeViewSwitcherMethod("toggleFilter"),
 		});
 
 		this.addCommand({
 			id: "toggle-graph-filter-preset",
 			name: "Toggle Graph Filter (Preset Selector)",
-			callback: () => this.executeGraphViewMethod("toggleFilterPreset"),
+			callback: () => this.executeViewSwitcherMethod("toggleFilterPreset"),
 		});
 
 		// Zoom preview commands
@@ -63,14 +66,17 @@ export default class FusionGoalsPlugin extends Plugin {
 			id: "toggle-focus-content",
 			name: "Toggle Focus Content (Zoom Preview)",
 			callback: () =>
-				this.executeGraphViewMethod("toggleHideContent", "Open the Goals Graph to toggle content visibility"),
+				this.executeViewSwitcherMethod("toggleHideContent", "Open the Goals Graph to toggle content visibility"),
 		});
 
 		this.addCommand({
 			id: "toggle-focus-frontmatter",
 			name: "Toggle Focus Frontmatter (Zoom Preview)",
 			callback: () =>
-				this.executeGraphViewMethod("toggleHideFrontmatter", "Open the Goals Graph to toggle frontmatter visibility"),
+				this.executeViewSwitcherMethod(
+					"toggleHideFrontmatter",
+					"Open the Goals Graph to toggle frontmatter visibility"
+				),
 		});
 
 		this.initializePlugin();
@@ -93,8 +99,7 @@ export default class FusionGoalsPlugin extends Plugin {
 		this.indexer = new Indexer(this.app, this.settingsStore.settings$);
 		await this.indexer.start();
 
-		// Register the graph view
-		this.registerView(VIEW_TYPE_RELATIONSHIP_GRAPH, (leaf) => new RelationshipGraphView(leaf, this.indexer, this));
+		this.registerView(VIEW_TYPE_FUSION_SWITCHER, (leaf) => new FusionViewSwitcher(leaf, this.indexer, this));
 
 		console.log("✅ Fusion Goals plugin loaded successfully");
 	}
@@ -102,13 +107,13 @@ export default class FusionGoalsPlugin extends Plugin {
 	async onunload() {
 		console.log("👋 Unloading Fusion Goals plugin...");
 		this.indexer?.stop();
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE_RELATIONSHIP_GRAPH);
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_FUSION_SWITCHER);
 	}
 
 	private async toggleRelationshipGraphView(): Promise<void> {
 		const { workspace } = this.app;
 
-		const existingLeaves = workspace.getLeavesOfType(VIEW_TYPE_RELATIONSHIP_GRAPH);
+		const existingLeaves = workspace.getLeavesOfType(VIEW_TYPE_FUSION_SWITCHER);
 
 		if (existingLeaves.length > 0) {
 			// View exists, reveal/focus it
@@ -118,22 +123,22 @@ export default class FusionGoalsPlugin extends Plugin {
 			// View doesn't exist, create it in the left sidebar
 			const leaf = workspace.getLeftLeaf(false);
 			if (leaf) {
-				await leaf.setViewState({ type: VIEW_TYPE_RELATIONSHIP_GRAPH, active: true });
+				await leaf.setViewState({ type: VIEW_TYPE_FUSION_SWITCHER, active: true });
 				workspace.revealLeaf(leaf);
 			}
 		}
 	}
 
-	private executeGraphViewMethod(methodName: string, noticeMessage?: string): void {
+	private executeViewSwitcherMethod(methodName: string, noticeMessage?: string): void {
 		const { workspace } = this.app;
-		const existingLeaves = workspace.getLeavesOfType(VIEW_TYPE_RELATIONSHIP_GRAPH);
+		const existingLeaves = workspace.getLeavesOfType(VIEW_TYPE_FUSION_SWITCHER);
 
 		if (existingLeaves.length > 0) {
-			const graphView = existingLeaves[0].view;
-			if (graphView instanceof RelationshipGraphView) {
-				const method = graphView[methodName as keyof RelationshipGraphView];
+			const viewSwitcher = existingLeaves[0].view;
+			if (viewSwitcher instanceof FusionViewSwitcher) {
+				const method = viewSwitcher[methodName as keyof FusionViewSwitcher];
 				if (typeof method === "function") {
-					(method as () => void).call(graphView);
+					(method as () => void).call(viewSwitcher);
 				}
 				return;
 			}

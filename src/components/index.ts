@@ -11,3 +11,4 @@ export { PropertyTooltip } from "./property-tooltip";
 // RelationshipAdder removed - no property management
 export { RelationshipGraphView, VIEW_TYPE_RELATIONSHIP_GRAPH } from "./relationship-graph-view";
 export { FusionGoalsSettingsTab } from "./settings/core";
+export { FusionViewSwitcher, VIEW_TYPE_FUSION_SWITCHER } from "./view-switcher";

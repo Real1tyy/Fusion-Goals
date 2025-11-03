@@ -1,6 +1,6 @@
 import cytoscape, { type Core, type ElementDefinition } from "cytoscape";
 import cytoscapeDagre from "cytoscape-dagre";
-import { ItemView, TFile } from "obsidian";
+import { type App, TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import { GraphBuilder } from "../core/graph-builder";
 import type { Indexer } from "../core/indexer";
@@ -19,7 +19,11 @@ cytoscape.use(cytoscapeDagre);
 
 export const VIEW_TYPE_RELATIONSHIP_GRAPH = "nexus-relationship-graph-view";
 
-export class RelationshipGraphView extends ItemView {
+/**
+ * Graph rendering component (not an ItemView)
+ * Can be embedded in any container
+ */
+export class RelationshipGraphView {
 	private cy: Core | null = null;
 	private graphContainerEl: HTMLElement | null = null;
 	private previewWrapperEl: HTMLElement | null = null;
@@ -29,8 +33,6 @@ export class RelationshipGraphView extends ItemView {
 	// Context menus removed - no property management
 	private resizeObserver: ResizeObserver | null = null;
 	private resizeDebounceTimer: number | null = null;
-	private isEnlarged = false;
-	private originalWidth: number | null = null;
 	private isUpdating = false;
 	private graphBuilder: GraphBuilder;
 	private settingsSubscription: Subscription | null = null;
@@ -43,12 +45,19 @@ export class RelationshipGraphView extends ItemView {
 	private interactionHandler: GraphInteractionHandler;
 	private layoutManager: GraphLayoutManager;
 
+	// Event handlers
+	private fileOpenHandler: ((file: TFile | null) => void) | null = null;
+	private metadataCacheHandler: ((file: TFile) => void) | null = null;
+	private vaultRenameHandler: ((file: any, oldPath: string) => void) | null = null;
+	private windowResizeHandler: (() => void) | null = null;
+	private keydownHandler: ((evt: KeyboardEvent) => void) | null = null;
+
 	constructor(
-		leaf: any,
+		private readonly app: App,
 		private readonly indexer: Indexer,
-		private readonly plugin: FusionGoalsPlugin
+		private readonly plugin: FusionGoalsPlugin,
+		private readonly containerEl: HTMLElement
 	) {
-		super(leaf);
 		// Context menus and relationship adder removed - visualization only
 		this.graphBuilder = new GraphBuilder(this.app, this.indexer, this.plugin.settingsStore);
 
@@ -105,24 +114,11 @@ export class RelationshipGraphView extends ItemView {
 		});
 	}
 
-	getViewType(): string {
-		return VIEW_TYPE_RELATIONSHIP_GRAPH;
-	}
+	async render(): Promise<void> {
+		this.containerEl.empty();
+		this.containerEl.addClass("nexus-graph-view-content");
 
-	getDisplayText(): string {
-		return "Relationship Graph";
-	}
-
-	getIcon(): string {
-		return "git-fork";
-	}
-
-	async onOpen(): Promise<void> {
-		const { contentEl } = this;
-		contentEl.empty();
-		contentEl.addClass("nexus-graph-view-content");
-
-		this.header = new GraphHeader(contentEl, {
+		this.header = new GraphHeader(this.containerEl, {
 			currentFileName: "No file selected",
 			startFromCurrent: this.ignoreTopmostParent,
 			onStartFromCurrentChange: (value) => {
@@ -137,7 +133,7 @@ export class RelationshipGraphView extends ItemView {
 
 		// Create search row wrapper
 		const searchRowClasses = `nexus-graph-search-row${showSearchBar ? "" : " nexus-hidden"}`;
-		this.searchRowEl = contentEl.createEl("div", {
+		this.searchRowEl = this.containerEl.createEl("div", {
 			cls: searchRowClasses,
 		});
 
@@ -157,7 +153,7 @@ export class RelationshipGraphView extends ItemView {
 
 		// Create filter preset selector and filter (in a row)
 		const filterRowClasses = `nexus-graph-filter-row${showFilterBar ? "" : " nexus-hidden"}`;
-		const filterRowEl = contentEl.createEl("div", {
+		const filterRowEl = this.containerEl.createEl("div", {
 			cls: filterRowClasses,
 		});
 
@@ -185,39 +181,34 @@ export class RelationshipGraphView extends ItemView {
 
 		// Create a wrapper for zoom preview (sits between header and graph)
 		// This container will hold the zoom preview when active
-		this.previewWrapperEl = contentEl.createEl("div", {
+		this.previewWrapperEl = this.containerEl.createEl("div", {
 			cls: "nexus-graph-zoom-preview-wrapper",
 		});
 
 		// Create graph container
-		this.graphContainerEl = contentEl.createEl("div", {
+		this.graphContainerEl = this.containerEl.createEl("div", {
 			cls: "nexus-graph-view-container",
 		});
 
-		// Register event listener for active file changes
-		this.registerEvent(
-			this.app.workspace.on("file-open", (file) => {
-				this.onFileOpen(file);
-			})
-		);
+		// Register event listeners
+		this.fileOpenHandler = (file) => this.onFileOpen(file);
+		this.app.workspace.on("file-open", this.fileOpenHandler);
 
-		this.registerEvent(
-			this.app.metadataCache.on("changed", (file) => {
-				// Only re-render if the changed file is the currently displayed file
-				if (this.currentFile && file.path === this.currentFile.path) {
-					this.updateGraph();
-				}
-			})
-		);
+		this.metadataCacheHandler = (file) => {
+			// Only re-render if the changed file is the currently displayed file
+			if (this.currentFile && file.path === this.currentFile.path) {
+				this.updateGraph();
+			}
+		};
+		this.app.metadataCache.on("changed", this.metadataCacheHandler);
 
-		this.registerEvent(
-			this.app.vault.on("rename", (file, oldPath) => {
-				if (this.currentFile && oldPath === this.currentFile.path && file instanceof TFile) {
-					this.currentFile = file;
-					this.updateGraph();
-				}
-			})
-		);
+		this.vaultRenameHandler = (file, oldPath) => {
+			if (this.currentFile && oldPath === this.currentFile.path && file instanceof TFile) {
+				this.currentFile = file;
+				this.updateGraph();
+			}
+		};
+		this.app.vault.on("rename", this.vaultRenameHandler);
 
 		setTimeout(() => {
 			const activeFile = this.app.workspace.getActiveFile();
@@ -230,12 +221,11 @@ export class RelationshipGraphView extends ItemView {
 		this.setupResizeObserver();
 
 		// Also react to global window resizes
-		this.registerDomEvent(window, "resize", () => {
-			this.handleResize();
-		});
+		this.windowResizeHandler = () => this.handleResize();
+		window.addEventListener("resize", this.windowResizeHandler);
 
 		// Register ESC key to exit zoom mode
-		this.registerDomEvent(document, "keydown", (evt: KeyboardEvent) => {
+		this.keydownHandler = (evt: KeyboardEvent) => {
 			if (evt.key === "Escape") {
 				// Only handle ESC if we're in zoom mode
 				// Search/filter inputs handle their own ESC behavior
@@ -244,7 +234,8 @@ export class RelationshipGraphView extends ItemView {
 					this.exitZoomMode();
 				}
 			}
-		});
+		};
+		document.addEventListener("keydown", this.keydownHandler);
 
 		this.settingsSubscription = this.plugin.settingsStore.settings$.subscribe((settings) => {
 			this.graphFilterPresetSelector?.updatePresets(settings.filterPresets);
@@ -282,15 +273,6 @@ export class RelationshipGraphView extends ItemView {
 				this.updateGraph();
 			}
 		});
-
-		// When this view becomes the active leaf, ensure the graph is centered
-		this.registerEvent(
-			this.app.workspace.on("active-leaf-change", (leaf) => {
-				if (leaf === this.leaf && this.cy && !this.isUpdating) {
-					this.ensureCentered();
-				}
-			})
-		);
 	}
 
 	private setupResizeObserver(): void {
@@ -325,7 +307,7 @@ export class RelationshipGraphView extends ItemView {
 		}
 	}
 
-	async onClose(): Promise<void> {
+	destroy(): void {
 		if (this.resizeObserver) {
 			this.resizeObserver.disconnect();
 			this.resizeObserver = null;
@@ -339,6 +321,32 @@ export class RelationshipGraphView extends ItemView {
 		if (this.settingsSubscription) {
 			this.settingsSubscription.unsubscribe();
 			this.settingsSubscription = null;
+		}
+
+		// Remove event listeners
+		if (this.fileOpenHandler) {
+			this.app.workspace.off("file-open", this.fileOpenHandler);
+			this.fileOpenHandler = null;
+		}
+
+		if (this.metadataCacheHandler) {
+			this.app.metadataCache.off("changed", this.metadataCacheHandler);
+			this.metadataCacheHandler = null;
+		}
+
+		if (this.vaultRenameHandler) {
+			this.app.vault.off("rename", this.vaultRenameHandler);
+			this.vaultRenameHandler = null;
+		}
+
+		if (this.windowResizeHandler) {
+			window.removeEventListener("resize", this.windowResizeHandler);
+			this.windowResizeHandler = null;
+		}
+
+		if (this.keydownHandler) {
+			document.removeEventListener("keydown", this.keydownHandler);
+			this.keydownHandler = null;
 		}
 
 		if (this.zoomManager) {
@@ -375,43 +383,6 @@ export class RelationshipGraphView extends ItemView {
 		this.currentFile = null;
 		this.graphContainerEl = null;
 		this.previewWrapperEl = null;
-	}
-
-	toggleEnlargement(): void {
-		// Find the current view's leaf
-		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_RELATIONSHIP_GRAPH);
-		if (leaves.length === 0) return;
-
-		// Access the DOM element through the view's content element
-		const viewContainerEl = this.contentEl.closest(".workspace-leaf");
-		if (!viewContainerEl) return;
-
-		const splitContainer = viewContainerEl.closest(".workspace-split.mod-left-split, .workspace-split.mod-right-split");
-		if (!splitContainer || !(splitContainer instanceof HTMLElement)) return;
-
-		if (this.isEnlarged) {
-			// Restore original width
-			if (this.originalWidth !== null) {
-				splitContainer.style.width = `${this.originalWidth}px`;
-			}
-			this.isEnlarged = false;
-			this.originalWidth = null;
-		} else {
-			// Store original width and enlarge
-			this.originalWidth = splitContainer.clientWidth;
-
-			const settings = this.plugin.settingsStore.settings$.value;
-			const windowWidth = window.innerWidth;
-			const targetWidth = (windowWidth * settings.graphEnlargedWidthPercent) / 100;
-
-			splitContainer.style.width = `${targetWidth}px`;
-			this.isEnlarged = true;
-		}
-
-		// Trigger a resize event to update the graph
-		window.dispatchEvent(new Event("resize"));
-		// Additionally refresh viewport immediately to avoid missed events
-		this.handleResize();
 	}
 
 	toggleSearch(): void {
@@ -832,11 +803,11 @@ export class RelationshipGraphView extends ItemView {
 		});
 	}
 
-	public toggleHideContent(): void {
+	toggleHideContent(): void {
 		this.zoomManager.toggleHideContent();
 	}
 
-	public toggleHideFrontmatter(): void {
+	toggleHideFrontmatter(): void {
 		this.zoomManager.toggleHideFrontmatter();
 	}
 
