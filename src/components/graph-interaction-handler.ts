@@ -1,4 +1,4 @@
-import type { Core } from "cytoscape";
+import type { Core, NodeSingular } from "cytoscape";
 import type { App } from "obsidian";
 import { TFile } from "obsidian";
 import type { PropertyTooltip } from "./property-tooltip";
@@ -26,6 +26,10 @@ export class GraphInteractionHandler {
 	// Track background taps to detect double left-clicks for quick zoom
 	private lastBackgroundTapTime = 0;
 	private lastBackgroundTapRenderedPos: { x: number; y: number } | null = null;
+
+	// Track the child node we came from when navigating to parent
+	// This allows intelligent backtracking: up then down returns to same child
+	private previousChildNodeId: string | null = null;
 
 	private get cy(): Core {
 		return this.config.getCy();
@@ -187,10 +191,23 @@ export class GraphInteractionHandler {
 	}
 
 	navigateToParent(currentNodeId: string): string | null {
-		return this.navigateAlongEdge(currentNodeId, "incoming");
+		const parentId = this.navigateAlongEdge(currentNodeId, "incoming");
+		// Only store as previous child if we actually moved to a different node
+		if (parentId && parentId !== currentNodeId) {
+			this.previousChildNodeId = currentNodeId;
+		}
+		return parentId;
 	}
 
 	navigateToChild(currentNodeId: string): string | null {
+		// If we have a stored previous child, return to it (we just came from there)
+		if (this.previousChildNodeId) {
+			const childToReturn = this.previousChildNodeId;
+			this.previousChildNodeId = null; // Clear after use
+			return childToReturn;
+		}
+
+		// Default behavior: return first child
 		return this.navigateAlongEdge(currentNodeId, "outgoing");
 	}
 
@@ -211,10 +228,14 @@ export class GraphInteractionHandler {
 	}
 
 	navigateToLeft(currentNodeId: string): string | null {
+		// Clear previous child memory when navigating horizontally
+		this.previousChildNodeId = null;
 		return this.navigateInDirection(currentNodeId, "left");
 	}
 
 	navigateToRight(currentNodeId: string): string | null {
+		// Clear previous child memory when navigating horizontally
+		this.previousChildNodeId = null;
 		return this.navigateInDirection(currentNodeId, "right");
 	}
 
@@ -258,6 +279,77 @@ export class GraphInteractionHandler {
 		});
 
 		return closestNode ? closestNode.id() : null;
+	}
+
+	navigateToNextTreeRoot(currentNodeId: string): string | null {
+		// Clear previous child memory when jumping to different tree
+		this.previousChildNodeId = null;
+		return this.navigateToTreeRoot(currentNodeId, "next");
+	}
+
+	navigateToPreviousTreeRoot(currentNodeId: string): string | null {
+		// Clear previous child memory when jumping to different tree
+		this.previousChildNodeId = null;
+		return this.navigateToTreeRoot(currentNodeId, "previous");
+	}
+
+	private navigateToTreeRoot(currentNodeId: string, direction: "next" | "previous"): string | null {
+		const currentNode = this.cy.getElementById(currentNodeId);
+		if (!currentNode.length) return null;
+
+		const currentPos = currentNode.renderedPosition();
+		if (!currentPos) return null;
+
+		// Find all tree roots (nodes with no incoming edges)
+		const allNodes = this.cy.nodes();
+		const treeRoots = allNodes.filter((node) => {
+			const incomingEdges = node.connectedEdges().filter((edge) => edge.target().id() === node.id());
+			return incomingEdges.length === 0;
+		});
+
+		if (treeRoots.length === 0) return null;
+
+		// Convert to array and sort tree roots by horizontal position
+		const rootsArray = treeRoots.toArray();
+		const sortedRoots = rootsArray.sort((a, b) => {
+			const nodeA = a as NodeSingular;
+			const nodeB = b as NodeSingular;
+			const posA = nodeA.renderedPosition();
+			const posB = nodeB.renderedPosition();
+			if (!posA || !posB) return 0;
+			return posA.x - posB.x;
+		}) as NodeSingular[];
+
+		// Find current node's index in sorted roots
+		let currentIndex = -1;
+		for (let i = 0; i < sortedRoots.length; i++) {
+			if (sortedRoots[i].id() === currentNodeId) {
+				currentIndex = i;
+				break;
+			}
+		}
+
+		// If current node is not a root, find the closest root to the left
+		if (currentIndex === -1) {
+			for (let i = sortedRoots.length - 1; i >= 0; i--) {
+				const rootPos = sortedRoots[i].renderedPosition();
+				if (rootPos && rootPos.x <= currentPos.x) {
+					currentIndex = i;
+					break;
+				}
+			}
+			// If no root to the left, use the first root
+			if (currentIndex === -1) currentIndex = 0;
+		}
+
+		// Navigate to next or previous root
+		if (direction === "next") {
+			const nextIndex = (currentIndex + 1) % sortedRoots.length;
+			return sortedRoots[nextIndex].id();
+		}
+
+		const prevIndex = (currentIndex - 1 + sortedRoots.length) % sortedRoots.length;
+		return sortedRoots[prevIndex].id();
 	}
 
 	cleanup(): void {
