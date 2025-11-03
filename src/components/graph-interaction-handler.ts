@@ -1,4 +1,4 @@
-import type { Core, NodeSingular } from "cytoscape";
+import type { Core } from "cytoscape";
 import type { App } from "obsidian";
 import { TFile } from "obsidian";
 import type { PropertyTooltip } from "./property-tooltip";
