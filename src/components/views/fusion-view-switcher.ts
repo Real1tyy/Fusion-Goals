@@ -2,6 +2,7 @@ import { ItemView, type WorkspaceLeaf } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { Indexer } from "../../core/indexer";
 import type FusionGoalsPlugin from "../../main";
+import { BasesView } from "./bases-view";
 import { RelationshipGraphView } from "./relationship-graph-view";
 
 export const VIEW_TYPE_FUSION_SWITCHER = "fusion-view-switcher";
@@ -11,6 +12,7 @@ type ViewMode = "graph" | "bases";
 export class FusionViewSwitcher extends ItemView {
 	private currentMode: ViewMode = "graph";
 	private graphView: RelationshipGraphView | null = null;
+	private basesView: BasesView | null = null;
 	private toggleButton: HTMLButtonElement | null = null;
 	private basesContentEl: HTMLElement | null = null;
 	private graphContainerEl: HTMLElement | null = null;
@@ -47,6 +49,15 @@ export class FusionViewSwitcher extends ItemView {
 			await this.handleSettingsChange(settings.showViewSwitcherHeader);
 		});
 
+		// Track active file changes for bases view
+		this.registerEvent(
+			this.app.workspace.on("active-leaf-change", async () => {
+				if (this.currentMode === "bases" && this.basesView) {
+					await this.basesView.updateActiveFile();
+				}
+			})
+		);
+
 		await this.renderView();
 	}
 
@@ -60,6 +71,12 @@ export class FusionViewSwitcher extends ItemView {
 		if (this.graphView) {
 			this.graphView.destroy();
 			this.graphView = null;
+		}
+
+		// Clean up bases view if it exists
+		if (this.basesView) {
+			this.basesView.destroy();
+			this.basesView = null;
 		}
 
 		// Clean up bases content
@@ -143,6 +160,11 @@ export class FusionViewSwitcher extends ItemView {
 
 		if (this.currentMode === "graph") {
 			// Clean up bases view
+			if (this.basesView) {
+				this.basesView.destroy();
+				this.basesView = null;
+			}
+
 			if (this.basesContentEl) {
 				this.basesContentEl = null;
 			}
@@ -166,15 +188,14 @@ export class FusionViewSwitcher extends ItemView {
 				this.graphContainerEl = null;
 			}
 
-			// Render bases view placeholder
+			// Render bases view
 			this.basesContentEl = contentEl.createEl("div", {
 				cls: "fusion-bases-view-content",
 			});
 
-			this.basesContentEl.createEl("div", {
-				text: "Bases View - Coming Soon",
-				cls: "fusion-bases-placeholder",
-			});
+			// Create and render bases view
+			this.basesView = new BasesView(this.app, this.basesContentEl);
+			await this.basesView.render();
 		}
 	}
 
@@ -190,6 +211,13 @@ export class FusionViewSwitcher extends ItemView {
 	 */
 	getGraphView(): RelationshipGraphView | null {
 		return this.currentMode === "graph" ? this.graphView : null;
+	}
+
+	/**
+	 * Get the active bases view instance (if in bases mode)
+	 */
+	getBasesView(): BasesView | null {
+		return this.currentMode === "bases" ? this.basesView : null;
 	}
 
 	/**

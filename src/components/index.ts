@@ -10,4 +10,5 @@ export { NodePreviewModal } from "./node-preview-modal";
 export { PropertyTooltip } from "./property-tooltip";
 // RelationshipAdder removed - no property management
 export { FusionGoalsSettingsTab } from "./settings/core";
+export { BasesView, VIEW_TYPE_BASES } from "./views/bases-view";
 export { FusionViewSwitcher, VIEW_TYPE_FUSION_SWITCHER } from "./views/fusion-view-switcher";
