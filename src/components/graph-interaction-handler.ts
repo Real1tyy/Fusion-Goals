@@ -27,6 +27,10 @@ export class GraphInteractionHandler {
 	private lastBackgroundTapTime = 0;
 	private lastBackgroundTapRenderedPos: { x: number; y: number } | null = null;
 
+	// Track the child node we came from when navigating to parent
+	// This allows intelligent backtracking: up then down returns to same child
+	private previousChildNodeId: string | null = null;
+
 	private get cy(): Core {
 		return this.config.getCy();
 	}
@@ -187,10 +191,23 @@ export class GraphInteractionHandler {
 	}
 
 	navigateToParent(currentNodeId: string): string | null {
-		return this.navigateAlongEdge(currentNodeId, "incoming");
+		const parentId = this.navigateAlongEdge(currentNodeId, "incoming");
+		// Only store as previous child if we actually moved to a different node
+		if (parentId && parentId !== currentNodeId) {
+			this.previousChildNodeId = currentNodeId;
+		}
+		return parentId;
 	}
 
 	navigateToChild(currentNodeId: string): string | null {
+		// If we have a stored previous child, return to it (we just came from there)
+		if (this.previousChildNodeId) {
+			const childToReturn = this.previousChildNodeId;
+			this.previousChildNodeId = null; // Clear after use
+			return childToReturn;
+		}
+
+		// Default behavior: return first child
 		return this.navigateAlongEdge(currentNodeId, "outgoing");
 	}
 
@@ -211,10 +228,14 @@ export class GraphInteractionHandler {
 	}
 
 	navigateToLeft(currentNodeId: string): string | null {
+		// Clear previous child memory when navigating horizontally
+		this.previousChildNodeId = null;
 		return this.navigateInDirection(currentNodeId, "left");
 	}
 
 	navigateToRight(currentNodeId: string): string | null {
+		// Clear previous child memory when navigating horizontally
+		this.previousChildNodeId = null;
 		return this.navigateInDirection(currentNodeId, "right");
 	}
 
