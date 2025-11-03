@@ -1,5 +1,6 @@
 import { Notice, Plugin } from "obsidian";
-import { FusionGoalsSettingsTab, FusionViewSwitcher, VIEW_TYPE_FUSION_SWITCHER } from "./components";
+import { FusionGoalsSettingsTab } from "./components";
+import { FusionViewSwitcher, VIEW_TYPE_FUSION_SWITCHER } from "./components/views/fusion-view-switcher";
 import { Indexer } from "./core/indexer";
 import { SettingsStore } from "./core/settings-store";
 
