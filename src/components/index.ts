@@ -10,4 +10,4 @@ export { NodePreviewModal } from "./node-preview-modal";
 export { PropertyTooltip } from "./property-tooltip";
 // RelationshipAdder removed - no property management
 export { RelationshipGraphView, VIEW_TYPE_RELATIONSHIP_GRAPH } from "./relationship-graph-view";
-export { FusionGoalsSettingsTab } from "./settings-tab";
+export { FusionGoalsSettingsTab } from "./settings/core";
