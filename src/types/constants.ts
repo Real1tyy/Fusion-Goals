@@ -48,6 +48,10 @@ export const SETTINGS_DEFAULTS = {
 	// Bases archived filtering defaults
 	DEFAULT_EXCLUDE_ARCHIVED: false,
 	DEFAULT_ARCHIVED_PROP: "Archived",
+
+	// Bases custom sorting defaults
+	DEFAULT_BASES_CUSTOM_FORMULAS: "",
+	DEFAULT_BASES_CUSTOM_SORT: "",
 } as const;
 
 export const SCAN_CONCURRENCY = 10;

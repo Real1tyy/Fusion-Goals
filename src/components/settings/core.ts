@@ -84,7 +84,7 @@ export class FusionGoalsSettingsTab extends PluginSettingTab {
 			new HierarchySection(this.uiBuilder),
 			new GraphDisplaySettingsSection(this.uiBuilder),
 			new PropertyDisplaySettingsSection(this.uiBuilder),
-			new BasesViewSettingsSection(this.uiBuilder),
+			new BasesViewSettingsSection(this.plugin, this.uiBuilder),
 			new RulesSection(this.plugin, this.uiBuilder),
 		];
 	}

@@ -33,7 +33,7 @@ export class GoalsBaseHandler extends BaseHandler {
 		const config = this.getConfig();
 		const orderArray = this.generateOrderArray(config.properties);
 		const viewContent = this.generateViewConfig(this.selectedView, orderArray);
-
+		const formulasSection = this.buildFormulasSection();
 		const folder = config.folder;
 
 		return `\`\`\`base
@@ -41,9 +41,7 @@ filters:
   and:
     - Goal.contains(this.file.asLink())
     - file.inFolder("${folder}")
-formulas:
-${this.generateCommonFormulas()}
-views:
+${formulasSection}views:
 ${viewContent}
 \`\`\``;
 	}

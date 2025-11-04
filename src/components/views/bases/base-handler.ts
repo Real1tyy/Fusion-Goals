@@ -97,42 +97,20 @@ export abstract class BaseHandler {
 		return orderProps.map((prop) => `      - ${prop}`).join("\n");
 	}
 
-	protected generateCommonFormulas(): string {
-		return `  Start: |
-    date(
-        note["Start Date"].toString().split(".")[0].replace("T"," ")
-      ).format("YYYY-MM-DD")
-  _priority_sort: |-
-    [
-      ["Very High", 1],
-      ["High", 2],
-      ["Medium-High", 3],
-      ["Medium", 4],
-      ["Medium-Low", 5],
-      ["Low", 6],
-      ["Very Low", 7],
-      ["null", 8]
-    ].filter(value[0] == Priority.toString())[0][1]
-  _status_sort: |-
-    [
-      ["In progress", 1],
-      ["Next Up", 2],
-      ["Planned", 3],
-      ["Inbox", 4],
-      ["Icebox", 5],
-      ["Done", 6],
-      ["null", 7]
-    ].filter(value[0] == Status.toString())[0][1]`;
+	protected buildFormulasSection(): string {
+		const formulas = this.plugin.settingsStore.settings$.value.basesCustomFormulas;
+		if (!formulas || formulas.trim() === "") {
+			return "";
+		}
+		return `formulas:\n${formulas}\n`;
 	}
 
-	protected generateCommonSort(): string {
-		return `    sort:
-      - property: formula._status_sort
-        direction: ASC
-      - property: formula._priority_sort
-        direction: ASC
-      - property: file.mtime
-        direction: DESC`;
+	protected buildSortSection(): string {
+		const sort = this.plugin.settingsStore.settings$.value.basesCustomSort;
+		if (!sort || sort.trim() === "") {
+			return "";
+		}
+		return `\n    sort:\n${sort}`;
 	}
 
 	/**
@@ -219,11 +197,11 @@ export abstract class BaseHandler {
 		};
 
 		const config = statusMap[viewType];
+		const sortSection = this.buildSortSection();
 
 		return `  - type: table
     name: ${config.name}
 ${config.filters || ""}    order:
-${orderArray}
-${this.generateCommonSort()}${extraConfig}`;
+${orderArray}${sortSection}${extraConfig}`;
 	}
 }

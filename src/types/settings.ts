@@ -131,6 +131,10 @@ export const FusionGoalsSettingsSchema = z.object({
 	// Archived filtering for bases view
 	excludeArchived: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_EXCLUDE_ARCHIVED),
 	archivedProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_ARCHIVED_PROP),
+
+	// Custom sorting for bases view
+	basesCustomFormulas: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_CUSTOM_FORMULAS),
+	basesCustomSort: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_CUSTOM_SORT),
 });
 
 export type FusionGoalsSettings = z.infer<typeof FusionGoalsSettingsSchema>;

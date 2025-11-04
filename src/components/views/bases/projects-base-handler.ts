@@ -30,6 +30,7 @@ export class ProjectsBaseHandler extends BaseHandler {
 	generateBasesMarkdown(_file: TFile): string {
 		const config = this.getConfig();
 		const orderArray = this.generateOrderArray(config.properties);
+		const formulasSection = this.buildFormulasSection();
 
 		// Use different column sizes based on view type
 		const columnSize = this.selectedView === "archived" ? 541 : 401;
@@ -46,10 +47,7 @@ filters:
   and:
     - Project.contains(this.file.asLink())
     - file.inFolder("Tasks")
-formulas:
-  _AllChildrenWithCurrent: file.properties._AllChildren.join(this.file.asLink())
-${this.generateCommonFormulas()}
-views:
+${formulasSection}views:
 ${viewContent}
 \`\`\``;
 	}
