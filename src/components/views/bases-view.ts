@@ -1,6 +1,7 @@
 import { type App, Component, MarkdownRenderer } from "obsidian";
 import type { Subscription } from "rxjs";
 import type FusionGoalsPlugin from "../../main";
+import { type BaseHandler, GoalsBaseHandler, ProjectsBaseHandler, TasksBaseHandler } from "./bases";
 import { RegisteredEventsComponent } from "./component";
 
 export const VIEW_TYPE_BASES = "fusion-bases-view";
@@ -9,16 +10,15 @@ export const VIEW_TYPE_BASES = "fusion-bases-view";
  * Bases view component that uses Obsidian's Bases API to render
  * Children, Parent, and Related files using native base code blocks
  */
-type ArchiveViewType = "active" | "archived" | "all";
-
 export class BasesView extends RegisteredEventsComponent {
 	private app: App;
 	private contentEl: HTMLElement;
 	private component: Component;
 	private plugin: FusionGoalsPlugin;
 	private settingsSubscription: Subscription | null = null;
-	private selectedArchiveView: ArchiveViewType = "active";
 	private viewSelectorEl: HTMLElement | null = null;
+	private handlers: BaseHandler[];
+	private currentHandler: BaseHandler | null = null;
 
 	constructor(app: App, containerEl: HTMLElement, plugin: FusionGoalsPlugin) {
 		super();
@@ -27,6 +27,12 @@ export class BasesView extends RegisteredEventsComponent {
 		this.plugin = plugin;
 		this.component = new Component();
 		this.component.load();
+
+		this.handlers = [
+			new TasksBaseHandler(app, plugin),
+			new ProjectsBaseHandler(app, plugin),
+			new GoalsBaseHandler(app, plugin),
+		];
 
 		// Subscribe to settings changes to re-render
 		this.settingsSubscription = this.plugin.settingsStore.settings$.subscribe(() => {
@@ -46,328 +52,21 @@ export class BasesView extends RegisteredEventsComponent {
 			return;
 		}
 
-		// Create view selector for filtering
+		this.currentHandler = this.handlers.find((handler) => handler.canHandle(activeFile)) ?? null;
+
+		if (!this.currentHandler) {
+			this.renderEmptyBase();
+			return;
+		}
+
 		this.createViewSelector();
 
-		// Detect file type based on folder
-		const isTaskFile = activeFile.path.startsWith("Tasks/") && activeFile.name !== "Tasks.md";
-		const isProjectFile = activeFile.path.startsWith("Projects/") && activeFile.name !== "Projects.md";
-		const isGoalFile = activeFile.path.startsWith("Goals/") && activeFile.name !== "Goals.md";
+		const basesMarkdown = this.currentHandler.generateBasesMarkdown(activeFile);
 
-		// Get settings
-		const settings = this.plugin.settingsStore.settings$.value;
-
-		// Determine which properties to include based on file type
-		let properties: string[] = [];
-		if (isGoalFile) {
-			properties = settings.basesGoalsProperties;
-		} else if (isProjectFile) {
-			properties = settings.basesProjectsProperties;
-		} else if (isTaskFile) {
-			properties = settings.basesTasksProperties;
-		}
-
-		// Build the order array: file.name first, then configured properties
-		const orderArray = ["file.name", ...properties].map((prop) => `      - ${prop}`).join("\n");
-
-		// Create the base code block markdown based on file type
-		let basesMarkdown = "";
-
-		if (isTaskFile) {
-			// Task-specific base code block
-			const activeView = `
-  - type: table
-    name: Active
-    filters:
-      and:
-        - _Archived != true
-    order:
-${orderArray}
-    sort:
-      - property: formula._status_sort
-        direction: ASC
-      - property: formula._priority_sort
-        direction: ASC
-      - property: file.mtime
-        direction: DESC`;
-
-			const archivedView = `
-  - type: table
-    name: Archived
-    filters:
-      and:
-        - _Archived == true
-    order:
-${orderArray}
-    sort:
-      - property: formula._status_sort
-        direction: ASC
-      - property: formula._priority_sort
-        direction: ASC
-      - property: file.mtime
-        direction: DESC`;
-
-			const allView = `
-  - type: table
-    name: All
-    order:
-${orderArray}
-    sort:
-      - property: formula._status_sort
-        direction: ASC
-      - property: formula._priority_sort
-        direction: ASC
-      - property: file.mtime
-        direction: DESC`;
-
-			let selectedView = "";
-			if (this.selectedArchiveView === "active") {
-				selectedView = activeView;
-			} else if (this.selectedArchiveView === "archived") {
-				selectedView = archivedView;
-			} else {
-				selectedView = allView;
-			}
-
-			basesMarkdown = `
-\`\`\`base
-filters:
-  and:
-    - file.inFolder("Tasks")
-    - file.name != "Tasks"
-formulas:
-  Start: |
-    date(
-        note["Start Date"].toString().split(".")[0].replace("T"," ")
-      ).format("YYYY-MM-DD")
-  _priority_sort: |-
-    [
-      ["Very High", 1],
-      ["High", 2],
-      ["Medium-High", 3],
-      ["Medium", 4],
-      ["Medium-Low", 5],
-      ["Low", 6],
-      ["Very Low", 7],
-      ["null", 8]
-    ].filter(value[0] == Priority.toString())[0][1]
-  _status_sort: |-
-    [
-      ["In progress", 1],
-      ["Next Up", 2],
-      ["Planned", 3],
-      ["Inbox", 4],
-      ["Icebox", 5],
-      ["Done", 6],
-      ["null", 7]
-    ].filter(value[0] == Status.toString())[0][1]
-views:${selectedView}
-\`\`\`
-`;
-		} else if (isProjectFile) {
-			// Project-specific base code block - shows tasks for this project
-			const activeView = `
-  - type: table
-    name: Active
-    filters:
-      and:
-        - _Archived != true
-        - Status != "Done"
-    order:
-${orderArray}
-    sort:
-      - property: formula._status_sort
-        direction: ASC
-      - property: formula._priority_sort
-        direction: ASC
-      - property: file.mtime
-        direction: DESC
-    columnSize:
-      file.name: 401`;
-
-			const archivedView = `
-  - type: table
-    name: Archived
-    filters:
-      and:
-        - _Archived == true
-    order:
-${orderArray}
-    sort:
-      - property: formula._status_sort
-        direction: ASC
-      - property: formula._priority_sort
-        direction: ASC
-      - property: file.mtime
-        direction: DESC
-    columnSize:
-      file.name: 401`;
-
-			const allView = `
-  - type: table
-    name: All
-    order:
-${orderArray}
-    sort:
-      - property: formula._status_sort
-        direction: ASC
-      - property: formula._priority_sort
-        direction: ASC
-      - property: file.mtime
-        direction: DESC
-    columnSize:
-      file.name: 401`;
-
-			let selectedView = "";
-			if (this.selectedArchiveView === "active") {
-				selectedView = activeView;
-			} else if (this.selectedArchiveView === "archived") {
-				selectedView = archivedView;
-			} else {
-				selectedView = allView;
-			}
-
-			basesMarkdown = `
-\`\`\`base
-filters:
-  and:
-    - Project.contains(this.file.asLink())
-    - file.inFolder("Tasks")
-formulas:
-  _AllChildrenWithCurrent: file.properties._AllChildren.join(this.file.asLink())
-  Start: |
-    date(
-        note["Start Date"].toString().split(".")[0].replace("T"," ")
-      ).format("YYYY-MM-DD")
-  _priority_sort: |-
-    [
-      ["Very High", 1],
-      ["High", 2],
-      ["Medium-High", 3],
-      ["Medium", 4],
-      ["Medium-Low", 5],
-      ["Low", 6],
-      ["Very Low", 7],
-      ["null", 8]
-    ].filter(value[0] == Priority.toString())[0][1]
-  _status_sort: |-
-    [
-      ["In progress", 1],
-      ["Next Up", 2],
-      ["Planned", 3],
-      ["Inbox", 4],
-      ["Icebox", 5],
-      ["Done", 6],
-      ["null", 7]
-    ].filter(value[0] == Status.toString())[0][1]
-views:${selectedView}
-\`\`\`
-`;
-		} else if (isGoalFile) {
-			// Goal-specific base code block - shows projects for this goal
-			const activeView = `
-  - type: table
-    name: Active
-    filters:
-      and:
-        - _Archived != true
-        - Status != "Done"
-    order:
-${orderArray}
-    sort:
-      - property: formula._status_sort
-        direction: ASC
-      - property: formula._priority_sort
-        direction: ASC
-      - property: file.mtime
-        direction: DESC`;
-
-			const archivedView = `
-  - type: table
-    name: Archived
-    filters:
-      and:
-        - _Archived == true
-    order:
-${orderArray}
-    sort:
-      - property: formula._status_sort
-        direction: ASC
-      - property: formula._priority_sort
-        direction: ASC
-      - property: file.mtime
-        direction: DESC`;
-
-			const allView = `
-  - type: table
-    name: All
-    order:
-${orderArray}
-    sort:
-      - property: formula._status_sort
-        direction: ASC
-      - property: formula._priority_sort
-        direction: ASC
-      - property: file.mtime
-        direction: DESC`;
-
-			let selectedView = "";
-			if (this.selectedArchiveView === "active") {
-				selectedView = activeView;
-			} else if (this.selectedArchiveView === "archived") {
-				selectedView = archivedView;
-			} else {
-				selectedView = allView;
-			}
-
-			basesMarkdown = `
-\`\`\`base
-filters:
-  and:
-    - Goal.contains(this.file.asLink())
-    - file.inFolder("Projects")
-formulas:
-  Start: |
-    date(
-        note["Start Date"].toString().split(".")[0].replace("T"," ")
-      ).format("YYYY-MM-DD")
-  _priority_sort: |-
-    [
-      ["Very High", 1],
-      ["High", 2],
-      ["Medium-High", 3],
-      ["Medium", 4],
-      ["Medium-Low", 5],
-      ["Low", 6],
-      ["Very Low", 7],
-      ["null", 8]
-    ].filter(value[0] == Priority.toString())[0][1]
-  _status_sort: |-
-    [
-      ["In progress", 1],
-      ["Next Up", 2],
-      ["Planned", 3],
-      ["Inbox", 4],
-      ["Icebox", 5],
-      ["Done", 6],
-      ["null", 7]
-    ].filter(value[0] == Status.toString())[0][1]
-views:${selectedView}
-\`\`\`
-`;
-		} else {
-			// Empty base code block for all other files
-			basesMarkdown = `
-\`\`\`base
-views:
-  - type: table
-    name: Empty
-    filters:
-      and:
-        - false
-\`\`\`
-`;
-		}
+		// Debug logging: Print the entire generated markdown structure
+		console.log("=== Generated Base Markdown ===");
+		console.log(basesMarkdown);
+		console.log("=== End Base Markdown ===");
 
 		// Create container for the rendered markdown
 		const markdownContainer = this.contentEl.createDiv({
@@ -375,36 +74,40 @@ views:
 		});
 
 		// Render using Obsidian's MarkdownRenderer
-		// This will process the base code block and render the tables
 		await MarkdownRenderer.render(this.app, basesMarkdown, markdownContainer, activeFile.path, this.component);
 	}
 
 	private createViewSelector(): void {
+		if (!this.currentHandler) return;
+
 		this.viewSelectorEl = this.contentEl.createDiv({
 			cls: "fusion-bases-view-selector",
 		});
 
-		const viewTypes: { type: ArchiveViewType; label: string }[] = [
-			{ type: "active", label: "Active" },
-			{ type: "archived", label: "Archived" },
-			{ type: "all", label: "All" },
-		];
+		const viewButtons = this.currentHandler.getViewButtons();
+		const currentView = this.currentHandler.getSelectedView();
 
-		for (const { type, label } of viewTypes) {
+		for (const { type, label } of viewButtons) {
 			const button = this.viewSelectorEl.createEl("button", {
 				text: label,
 				cls: "fusion-bases-view-button",
 			});
 
-			if (type === this.selectedArchiveView) {
+			if (type === currentView) {
 				button.addClass("is-active");
 			}
 
 			button.addEventListener("click", async () => {
-				this.selectedArchiveView = type;
-				await this.render();
+				if (this.currentHandler) {
+					this.currentHandler.setSelectedView(type);
+					await this.render();
+				}
 			});
 		}
+	}
+
+	private renderEmptyBase(): void {
+		this.renderEmptyState("Nothing configured for this note. This view only works with Goals, Projects, and Tasks.");
 	}
 
 	private renderEmptyState(message: string): void {
@@ -428,6 +131,7 @@ views:
 			this.component.unload();
 		}
 
+		this.currentHandler = null;
 		this.viewSelectorEl = null;
 		this.contentEl.empty();
 		this.cleanupEvents();
