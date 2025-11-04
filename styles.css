@@ -1166,6 +1166,7 @@
 	overflow: auto;
 }
 
+/* Bases View Container */
 .fusion-bases-view {
 	display: flex;
 	flex-direction: column;
@@ -1174,59 +1175,211 @@
 	height: 100%;
 }
 
+/* Top Level Selector (Projects/Tasks for Goals) */
 .fusion-bases-top-level-selector {
-	padding: 12px;
+	padding: 8px;
 	border-bottom: 1px solid var(--background-modifier-border);
 	background-color: var(--background-secondary);
 }
 
+/* View Selector (Status Filters) */
 .fusion-bases-view-selector {
-	padding: 12px;
+	padding: 8px;
 	border-bottom: 1px solid var(--background-modifier-border);
 	background-color: var(--background-secondary);
 }
 
+/* Select Dropdown Styling */
 .fusion-bases-select {
 	width: 100%;
-	padding: 8px 12px;
-	background-color: var(--background-primary);
+	padding: 6px 8px;
+	background: var(--background-primary);
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
 	color: var(--text-normal);
-	font-size: 0.9em;
+	font-size: 12px;
+	font-weight: 500;
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition:
+		background-color 0.2s ease,
+		border-color 0.2s ease;
+	pointer-events: auto;
+	position: relative;
 }
 
 .fusion-bases-select:hover {
+	background: var(--background-primary-alt);
 	border-color: var(--interactive-accent);
 }
 
 .fusion-bases-select:focus {
 	outline: none;
+	background: var(--background-primary-alt);
 	border-color: var(--interactive-accent);
 	box-shadow: 0 0 0 2px var(--interactive-accent-hover);
 }
 
+/* Select Options Styling */
+.fusion-bases-select option {
+	background: var(--background-primary);
+	color: var(--text-normal);
+	padding: 4px 8px;
+}
+
+/* Markdown Container */
 .fusion-bases-markdown-container {
-	padding: 1em;
-	overflow-y: auto;
 	flex: 1;
+	overflow: auto;
+	padding: 8px;
+	padding-right: 4px;
+	color: var(--text-normal);
+	font-size: 16px;
+	line-height: 1.5;
 }
 
+/* Scrollbar Styling */
+.fusion-bases-markdown-container::-webkit-scrollbar {
+	width: 6px;
+}
+
+.fusion-bases-markdown-container::-webkit-scrollbar-track {
+	background: var(--background-secondary);
+}
+
+.fusion-bases-markdown-container::-webkit-scrollbar-thumb {
+	background: var(--background-modifier-border);
+	border-radius: 3px;
+}
+
+.fusion-bases-markdown-container::-webkit-scrollbar-thumb:hover {
+	background: var(--text-muted);
+}
+
+/* Empty State */
 .fusion-bases-empty-state {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 2em;
-	font-size: 1em;
-	color: var(--text-muted);
 	text-align: center;
+	color: var(--text-muted);
+	font-style: italic;
+	padding: 20px;
+	border: 2px dashed var(--background-modifier-border);
+	border-radius: 8px;
+	background: var(--background-secondary);
+	margin: 16px;
 }
 
-.fusion-bases-placeholder {
-	font-size: 1.2em;
-	color: var(--text-muted);
+/* Content Styling */
+.fusion-bases-markdown-container h1,
+.fusion-bases-markdown-container h2,
+.fusion-bases-markdown-container h3,
+.fusion-bases-markdown-container h4,
+.fusion-bases-markdown-container h5,
+.fusion-bases-markdown-container h6 {
+	margin-top: 0;
+	margin-bottom: 8px;
+	color: var(--text-normal);
+}
+
+.fusion-bases-markdown-container p {
+	margin-bottom: 8px;
+}
+
+.fusion-bases-markdown-container ul,
+.fusion-bases-markdown-container ol {
+	margin-bottom: 8px;
+	padding-left: 16px;
+}
+
+.fusion-bases-markdown-container li {
+	margin-bottom: 4px;
+}
+
+.fusion-bases-markdown-container pre {
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 8px;
+	margin: 8px 0;
+	overflow-x: auto;
+	font-size: 12px;
+}
+
+.fusion-bases-markdown-container code {
+	background: var(--background-secondary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-size: 0.9em;
+}
+
+.fusion-bases-markdown-container blockquote {
+	border-left: 3px solid var(--text-accent);
+	margin: 8px 0;
+	padding: 6px 10px;
+	background: var(--background-secondary);
+	border-radius: 0 4px 4px 0;
+}
+
+.fusion-bases-markdown-container img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 4px;
+	margin: 8px 0;
+}
+
+.fusion-bases-markdown-container a {
+	color: var(--text-accent);
+	text-decoration: none;
+}
+
+.fusion-bases-markdown-container a:hover {
+	text-decoration: underline;
+}
+
+/* Interactive Elements */
+.fusion-bases-markdown-container button,
+.fusion-bases-markdown-container .clickable-icon,
+.fusion-bases-markdown-container .internal-link,
+.fusion-bases-markdown-container .external-link,
+.fusion-bases-markdown-container input,
+.fusion-bases-markdown-container select,
+.fusion-bases-markdown-container textarea {
+	pointer-events: auto;
+	position: relative;
+}
+
+.fusion-bases-markdown-container button {
+	background: var(--interactive-normal);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 4px 8px;
+	color: var(--text-normal);
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+	font-size: 12px;
+}
+
+.fusion-bases-markdown-container button:hover {
+	background: var(--interactive-hover);
+}
+
+.fusion-bases-markdown-container button:active {
+	background: var(--interactive-active);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 400px) {
+	.fusion-bases-top-level-selector,
+	.fusion-bases-view-selector {
+		padding: 6px;
+	}
+
+	.fusion-bases-markdown-container {
+		font-size: 12px;
+		padding: 6px;
+	}
+
+	.fusion-bases-select {
+		font-size: 11px;
+	}
 }
 
 /* Dataview table styling in bases view */
