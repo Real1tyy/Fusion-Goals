@@ -1,11 +1,16 @@
 import type { TFile } from "obsidian";
-import { BaseHandler, type BaseHandlerConfig } from "./base-handler";
+import { BaseHandler, type BaseHandlerConfig, type TopLevelViewOption } from "./base-handler";
 
 /**
  * Handler for projects-specific base code blocks
  * Shows tasks associated with the project
  */
 export class ProjectsBaseHandler extends BaseHandler {
+	constructor(app: any, plugin: any) {
+		super(app, plugin);
+		this.selectedTopLevelView = "tasks";
+	}
+
 	canHandle(file: TFile): boolean {
 		return file.path.startsWith("Projects/") && file.name !== "Projects.md";
 	}
@@ -16,6 +21,10 @@ export class ProjectsBaseHandler extends BaseHandler {
 			folder: "Tasks",
 			properties: settings.basesProjectsProperties,
 		};
+	}
+
+	getTopLevelOptions(): TopLevelViewOption[] {
+		return [{ id: "tasks", label: "Tasks" }];
 	}
 
 	generateBasesMarkdown(_file: TFile): string {

@@ -16,6 +16,7 @@ export class BasesView extends RegisteredEventsComponent {
 	private component: Component;
 	private plugin: FusionGoalsPlugin;
 	private settingsSubscription: Subscription | null = null;
+	private topLevelSelectorEl: HTMLElement | null = null;
 	private viewSelectorEl: HTMLElement | null = null;
 	private handlers: BaseHandler[];
 	private currentHandler: BaseHandler | null = null;
@@ -55,6 +56,7 @@ export class BasesView extends RegisteredEventsComponent {
 			return;
 		}
 
+		this.createTopLevelSelector();
 		this.createViewSelector();
 
 		const basesMarkdown = this.currentHandler.generateBasesMarkdown(activeFile);
@@ -68,6 +70,42 @@ export class BasesView extends RegisteredEventsComponent {
 		await MarkdownRenderer.render(this.app, basesMarkdown, markdownContainer, activeFile.path, this.component);
 	}
 
+	private createTopLevelSelector(): void {
+		if (!this.currentHandler) return;
+
+		const topLevelOptions = this.currentHandler.getTopLevelOptions();
+
+		// Only show top-level selector if there are multiple options
+		if (topLevelOptions.length <= 1) return;
+
+		this.topLevelSelectorEl = this.contentEl.createDiv({
+			cls: "fusion-bases-top-level-selector",
+		});
+
+		const selectEl = this.topLevelSelectorEl.createEl("select", {
+			cls: "fusion-bases-select",
+		});
+
+		for (const option of topLevelOptions) {
+			selectEl.createEl("option", {
+				value: option.id,
+				text: option.label,
+			});
+		}
+
+		const currentTopLevel = this.currentHandler.getSelectedTopLevelView();
+		if (currentTopLevel) {
+			selectEl.value = currentTopLevel;
+		}
+
+		selectEl.addEventListener("change", async () => {
+			if (this.currentHandler) {
+				this.currentHandler.setSelectedTopLevelView(selectEl.value);
+				await this.render();
+			}
+		});
+	}
+
 	private createViewSelector(): void {
 		if (!this.currentHandler) return;
 
@@ -75,26 +113,28 @@ export class BasesView extends RegisteredEventsComponent {
 			cls: "fusion-bases-view-selector",
 		});
 
-		const viewButtons = this.currentHandler.getViewButtons();
+		const selectEl = this.viewSelectorEl.createEl("select", {
+			cls: "fusion-bases-select",
+		});
+
+		const viewOptions = this.currentHandler.getViewOptions();
 		const currentView = this.currentHandler.getSelectedView();
 
-		for (const { type, label } of viewButtons) {
-			const button = this.viewSelectorEl.createEl("button", {
+		for (const { type, label } of viewOptions) {
+			selectEl.createEl("option", {
+				value: type,
 				text: label,
-				cls: "fusion-bases-view-button",
-			});
-
-			if (type === currentView) {
-				button.addClass("is-active");
-			}
-
-			button.addEventListener("click", async () => {
-				if (this.currentHandler) {
-					this.currentHandler.setSelectedView(type);
-					await this.render();
-				}
 			});
 		}
+
+		selectEl.value = currentView;
+
+		selectEl.addEventListener("change", async () => {
+			if (this.currentHandler) {
+				this.currentHandler.setSelectedView(selectEl.value as any);
+				await this.render();
+			}
+		});
 	}
 
 	private renderEmptyBase(file: TFile): void {
@@ -129,6 +169,7 @@ export class BasesView extends RegisteredEventsComponent {
 		}
 
 		this.currentHandler = null;
+		this.topLevelSelectorEl = null;
 		this.viewSelectorEl = null;
 		this.contentEl.empty();
 		this.cleanupEvents();

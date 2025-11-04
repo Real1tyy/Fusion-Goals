@@ -3,8 +3,13 @@ import type FusionGoalsPlugin from "../../../main";
 
 export type ViewType = "full" | "in-progress" | "inbox" | "planned" | "next-up" | "done" | "icebox" | "archived";
 
-export interface ViewButton {
+export interface ViewOption {
 	type: ViewType;
+	label: string;
+}
+
+export interface TopLevelViewOption {
+	id: string;
 	label: string;
 }
 
@@ -21,6 +26,7 @@ export abstract class BaseHandler {
 	protected app: App;
 	protected plugin: FusionGoalsPlugin;
 	protected selectedView: ViewType = "full";
+	protected selectedTopLevelView: string | null = null;
 
 	constructor(app: App, plugin: FusionGoalsPlugin) {
 		this.app = app;
@@ -33,7 +39,9 @@ export abstract class BaseHandler {
 
 	abstract generateBasesMarkdown(file: TFile): string;
 
-	getViewButtons(): ViewButton[] {
+	abstract getTopLevelOptions(): TopLevelViewOption[];
+
+	getViewOptions(): ViewOption[] {
 		return [
 			{ type: "full", label: "Full" },
 			{ type: "in-progress", label: "In Progress" },
@@ -52,6 +60,14 @@ export abstract class BaseHandler {
 
 	getSelectedView(): ViewType {
 		return this.selectedView;
+	}
+
+	setSelectedTopLevelView(viewId: string): void {
+		this.selectedTopLevelView = viewId;
+	}
+
+	getSelectedTopLevelView(): string | null {
+		return this.selectedTopLevelView;
 	}
 
 	protected generateOrderArray(properties: string[]): string {

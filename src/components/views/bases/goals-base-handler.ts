@@ -1,11 +1,15 @@
 import type { TFile } from "obsidian";
-import { BaseHandler, type BaseHandlerConfig } from "./base-handler";
+import { BaseHandler, type BaseHandlerConfig, type TopLevelViewOption } from "./base-handler";
 
 /**
  * Handler for goals-specific base code blocks
- * Shows projects associated with the goal
  */
 export class GoalsBaseHandler extends BaseHandler {
+	constructor(app: any, plugin: any) {
+		super(app, plugin);
+		this.selectedTopLevelView = "projects";
+	}
+
 	canHandle(file: TFile): boolean {
 		return file.path.startsWith("Goals/") && file.name !== "Goals.md";
 	}
@@ -13,9 +17,16 @@ export class GoalsBaseHandler extends BaseHandler {
 	protected getConfig(): BaseHandlerConfig {
 		const settings = this.plugin.settingsStore.settings$.value;
 		return {
-			folder: "Projects",
+			folder: this.selectedTopLevelView === "projects" ? "Projects" : "Tasks",
 			properties: settings.basesGoalsProperties,
 		};
+	}
+
+	getTopLevelOptions(): TopLevelViewOption[] {
+		return [
+			{ id: "projects", label: "Projects" },
+			{ id: "tasks", label: "Tasks" },
+		];
 	}
 
 	generateBasesMarkdown(_file: TFile): string {
@@ -23,11 +34,13 @@ export class GoalsBaseHandler extends BaseHandler {
 		const orderArray = this.generateOrderArray(config.properties);
 		const viewContent = this.generateViewConfig(this.selectedView, orderArray);
 
+		const folder = config.folder;
+
 		return `\`\`\`base
 filters:
   and:
     - Goal.contains(this.file.asLink())
-    - file.inFolder("Projects")
+    - file.inFolder("${folder}")
 formulas:
 ${this.generateCommonFormulas()}
 views:
