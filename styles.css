@@ -1175,6 +1175,100 @@
 	height: 100%;
 }
 
+/* Additional Views Settings */
+.fusion-additional-views-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-top: 8px;
+}
+
+.fusion-rule-item {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 12px;
+	background-color: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+}
+
+.fusion-rule-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+}
+
+.fusion-rule-header strong {
+	flex: 1;
+	font-size: 0.95em;
+	color: var(--text-normal);
+}
+
+.fusion-rule-controls {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+}
+
+.fusion-rule-content {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.fusion-view-name-input,
+.fusion-view-filter-input {
+	width: 100%;
+	padding: 8px 12px;
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	color: var(--text-normal);
+	font-size: 0.9em;
+	font-family: var(--font-monospace);
+	transition: border-color 0.2s ease;
+}
+
+.fusion-view-name-input:focus,
+.fusion-view-filter-input:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+}
+
+.fusion-view-name-input::placeholder,
+.fusion-view-filter-input::placeholder {
+	color: var(--text-muted);
+	opacity: 0.6;
+}
+
+.color-rule-btn {
+	padding: 4px 8px;
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	color: var(--text-normal);
+	cursor: pointer;
+	font-size: 0.9em;
+	transition: all 0.2s ease;
+	min-width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.color-rule-btn:hover {
+	background-color: var(--interactive-hover);
+	border-color: var(--interactive-accent);
+}
+
+.color-rule-btn:active {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
 /* Top Level Selector (Projects/Tasks for Goals) */
 .fusion-bases-top-level-selector {
 	padding: 8px;

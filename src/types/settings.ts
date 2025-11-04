@@ -135,6 +135,31 @@ export const FusionGoalsSettingsSchema = z.object({
 	// Custom sorting for bases view
 	basesCustomFormulas: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_CUSTOM_FORMULAS),
 	basesCustomSort: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_CUSTOM_SORT),
+
+	// Status property configuration for bases view
+	basesStatusProperty: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_STATUS_PROPERTY),
+	basesStatusValues: z
+		.array(z.string())
+		.optional()
+		.default([...SETTINGS_DEFAULTS.DEFAULT_BASES_STATUS_VALUES]),
+
+	// Additional custom views for bases view (rendered first, before status views)
+	basesAdditionalViews: z
+		.array(
+			z.object({
+				id: z.string(),
+				name: z.string(),
+				filter: z.string(),
+			})
+		)
+		.optional()
+		.default([]),
 });
 
 export type FusionGoalsSettings = z.infer<typeof FusionGoalsSettingsSchema>;
+
+export interface BasesAdditionalView {
+	id: string;
+	name: string;
+	filter: string;
+}

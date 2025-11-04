@@ -47,7 +47,7 @@ export class BasesView extends RegisteredEventsComponent {
 		for (const handler of this.handlers) {
 			const currentView = handler.getSelectedView();
 			if ((currentView === "archived" || currentView === "all-archived") && !settings.excludeArchived) {
-				handler.setSelectedView("full");
+				handler.setSelectedView("status-in-progress");
 			}
 		}
 	}
@@ -94,7 +94,8 @@ export class BasesView extends RegisteredEventsComponent {
 		const isViewStillValid = viewOptions.some((opt) => opt.type === currentView);
 
 		if (!isViewStillValid) {
-			this.currentHandler.setSelectedView("full");
+			const defaultView = viewOptions.length > 0 ? viewOptions[0].type : "status-in-progress";
+			this.currentHandler.setSelectedView(defaultView);
 		}
 	}
 
@@ -191,8 +192,8 @@ export class BasesView extends RegisteredEventsComponent {
 		const goalsHandler = this.handlers.find((h) => h instanceof GoalsBaseHandler);
 
 		return {
-			projectsView: projectsHandler?.getSelectedView() ?? "full",
-			goalsView: goalsHandler?.getSelectedView() ?? "full",
+			projectsView: projectsHandler?.getSelectedView() ?? "status-in-progress",
+			goalsView: goalsHandler?.getSelectedView() ?? "status-in-progress",
 			goalsTopLevel: goalsHandler?.getSelectedTopLevelView() ?? "projects",
 		};
 	}

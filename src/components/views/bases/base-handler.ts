@@ -1,17 +1,7 @@
 import type { App, TFile } from "obsidian";
 import type FusionGoalsPlugin from "../../../main";
 
-export type ViewType =
-	| "all"
-	| "all-archived"
-	| "full"
-	| "in-progress"
-	| "inbox"
-	| "planned"
-	| "next-up"
-	| "done"
-	| "icebox"
-	| "archived";
+export type ViewType = string;
 
 export interface ViewOption {
 	type: ViewType;
@@ -35,7 +25,7 @@ export interface BaseHandlerConfig {
 export abstract class BaseHandler {
 	protected app: App;
 	protected plugin: FusionGoalsPlugin;
-	protected selectedView: ViewType = "full";
+	protected selectedView: ViewType = "status-in-progress";
 	protected selectedTopLevelView: string | null = null;
 
 	constructor(app: App, plugin: FusionGoalsPlugin) {
@@ -51,29 +41,42 @@ export abstract class BaseHandler {
 
 	abstract getTopLevelOptions(): TopLevelViewOption[];
 
+	/**
+	 * Get available view options in the following order:
+	 * 1. Additional custom views (user-defined, in order)
+	 * 2. Status-based views (from settings)
+	 * 3. Archived view (if enabled)
+	 * 4. All view
+	 * 5. All Archived view (if enabled)
+	 */
 	getViewOptions(): ViewOption[] {
 		const settings = this.plugin.settingsStore.settings$.value;
-		const baseOptions: ViewOption[] = [
-			{ type: "full", label: "Full" },
-			{ type: "in-progress", label: "In Progress" },
-			{ type: "inbox", label: "Inbox" },
-			{ type: "planned", label: "Planned" },
-			{ type: "next-up", label: "Next Up" },
-			{ type: "done", label: "Done" },
-			{ type: "icebox", label: "Icebox" },
-		];
+		const options: ViewOption[] = [];
 
-		if (settings.excludeArchived) {
-			baseOptions.push({ type: "archived", label: "Archived" });
+		// 1. Add additional custom views FIRST (in order)
+		for (const view of settings.basesAdditionalViews) {
+			options.push({ type: `custom-${view.id}`, label: view.name });
 		}
 
-		baseOptions.push({ type: "all", label: "All" });
-
-		if (settings.excludeArchived) {
-			baseOptions.push({ type: "all-archived", label: "All Archived" });
+		// 2. Add status-based views from settings
+		for (const statusValue of settings.basesStatusValues) {
+			const id = statusValue.toLowerCase().replace(/\s+/g, "-");
+			options.push({ type: `status-${id}`, label: statusValue });
 		}
 
-		return baseOptions;
+		// 3. Add "Archived" view if enabled
+		if (settings.excludeArchived) {
+			options.push({ type: "archived", label: "Archived" });
+		}
+
+		// 4. Add "All" and "All Archived" at the end
+		options.push({ type: "all", label: "All" });
+
+		if (settings.excludeArchived) {
+			options.push({ type: "all-archived", label: "All Archived" });
+		}
+
+		return options;
 	}
 
 	setSelectedView(view: ViewType): void {
@@ -113,95 +116,70 @@ export abstract class BaseHandler {
 		return `\n    sort:\n${sort}`;
 	}
 
-	/**
-	 * Generate view configuration with reactive archived filtering.
-	 * Uses current settings for archivedProp and excludeArchived.
-	 */
-	protected generateViewConfig(viewType: ViewType, orderArray: string, extraConfig = ""): string {
-		const { archivedProp, excludeArchived } = this.plugin.settingsStore.settings$.value;
-		const getArchivedFilter = (isArchivedView: boolean): string => {
-			if (!excludeArchived) {
+	private buildFilterSection(filterExpression: string, applyArchivedFilter: boolean, settings: any): string {
+		const getArchivedFilter = (): string => {
+			if (!settings.excludeArchived || !applyArchivedFilter) {
 				return "";
 			}
-			return `\n        - ${archivedProp} ${isArchivedView ? "==" : "!="} true`;
+			return `\n        - ${settings.archivedProp} != true`;
 		};
 
-		const statusMap: Record<ViewType, { name: string; filters?: string }> = {
-			all: {
-				name: "All",
-				filters: excludeArchived
-					? `    filters:
-      and:${getArchivedFilter(false)}
+		if (!filterExpression && !getArchivedFilter()) {
+			return "";
+		}
+
+		const filterLine = filterExpression ? `\n        - ${filterExpression}` : "";
+		return `    filters:
+      and:${filterLine}${getArchivedFilter()}
+`;
+	}
+
+	/**
+	 * Generate view configuration with reactive archived filtering.
+	 * Uses current settings for status property, archived filtering, and custom views.
+	 */
+	protected generateViewConfig(viewType: ViewType, orderArray: string, extraConfig = ""): string {
+		const settings = this.plugin.settingsStore.settings$.value;
+		const { basesStatusProperty, basesStatusValues, basesAdditionalViews, archivedProp, excludeArchived } = settings;
+
+		let viewName = "";
+		let filtersSection = "";
+
+		// Determine view name and filters based on view type
+		if (viewType.startsWith("custom-")) {
+			const viewId = viewType.replace("custom-", "");
+			const customView = basesAdditionalViews.find((v) => v.id === viewId);
+			if (customView) {
+				viewName = customView.name;
+				filtersSection = this.buildFilterSection(customView.filter, true, settings);
+			}
+		} else if (viewType.startsWith("status-")) {
+			const statusId = viewType.replace("status-", "");
+			const statusValue = basesStatusValues.find((v) => v.toLowerCase().replace(/\s+/g, "-") === statusId) || "";
+			viewName = statusValue;
+			const filterExpr = `${basesStatusProperty} == "${statusValue}"`;
+			filtersSection = this.buildFilterSection(filterExpr, true, settings);
+		} else if (viewType === "archived") {
+			viewName = "Archived";
+			filtersSection = excludeArchived
+				? `    filters:
+      and:
+        - ${archivedProp} == true
 `
-					: undefined,
-			},
-			"all-archived": {
-				name: "All Archived",
-				filters: undefined,
-			},
-			full: {
-				name: "Full",
-				filters: `    filters:
-      and:
-        - Status != "Done"${getArchivedFilter(false)}
-`,
-			},
-			"in-progress": {
-				name: "In Progress",
-				filters: `    filters:
-      and:
-        - Status == "In progress"${getArchivedFilter(false)}
-`,
-			},
-			inbox: {
-				name: "Inbox",
-				filters: `    filters:
-      and:
-        - Status == "Inbox"${getArchivedFilter(false)}
-`,
-			},
-			planned: {
-				name: "Planned",
-				filters: `    filters:
-      and:
-        - Status == "Planned"${getArchivedFilter(false)}
-`,
-			},
-			"next-up": {
-				name: "Next Up",
-				filters: `    filters:
-      and:
-        - Status == "Next Up"${getArchivedFilter(false)}
-`,
-			},
-			done: {
-				name: "Done",
-				filters: `    filters:
-      and:
-        - Status == "Done"${getArchivedFilter(false)}
-`,
-			},
-			icebox: {
-				name: "Icebox",
-				filters: `    filters:
-      and:
-        - Status == "Icebox"${getArchivedFilter(false)}
-`,
-			},
-			archived: {
-				name: "Archived",
-				filters: `    filters:
-      and:${getArchivedFilter(true)}
-`,
-			},
-		};
+				: "";
+		} else if (viewType === "all") {
+			viewName = "All";
+			filtersSection = this.buildFilterSection("", true, settings);
+		} else if (viewType === "all-archived") {
+			viewName = "All Archived";
+			filtersSection = "";
+		}
 
-		const config = statusMap[viewType];
 		const sortSection = this.buildSortSection();
 
 		return `  - type: table
-    name: ${config.name}
-${config.filters || ""}    order:
+    name: ${viewName}
+${filtersSection}    order:
 ${orderArray}${sortSection}${extraConfig}`;
 	}
 }

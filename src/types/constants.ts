@@ -52,6 +52,10 @@ export const SETTINGS_DEFAULTS = {
 	// Bases custom sorting defaults
 	DEFAULT_BASES_CUSTOM_FORMULAS: "",
 	DEFAULT_BASES_CUSTOM_SORT: "",
+
+	// Bases status configuration defaults
+	DEFAULT_BASES_STATUS_PROPERTY: "Status",
+	DEFAULT_BASES_STATUS_VALUES: ["In progress", "Inbox", "Planned", "Next Up", "Done", "Icebox"],
 } as const;
 
 export const SCAN_CONCURRENCY = 10;
