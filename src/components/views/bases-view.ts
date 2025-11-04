@@ -26,6 +26,8 @@ export class BasesView extends RegisteredEventsComponent {
 	private viewSelectorEl: HTMLElement | null = null;
 	private handlers: BaseHandler[];
 	private currentHandler: BaseHandler | null = null;
+	private lastFilePath: string | null = null;
+	private isUpdating = false;
 
 	constructor(app: App, containerEl: HTMLElement, plugin: FusionGoalsPlugin) {
 		super();
@@ -39,6 +41,8 @@ export class BasesView extends RegisteredEventsComponent {
 
 		this.settingsSubscription = this.plugin.settingsStore.settings$.subscribe(async (settings) => {
 			this.validateAllHandlers(settings);
+			// Force re-render when settings change
+			this.lastFilePath = null;
 			await this.render();
 		});
 	}
@@ -53,37 +57,59 @@ export class BasesView extends RegisteredEventsComponent {
 	}
 
 	async render(): Promise<void> {
-		this.contentEl.empty();
-		this.contentEl.addClass("fusion-bases-view");
-
-		// Get the active file
-		const activeFile = this.app.workspace.getActiveFile();
-
-		if (!activeFile) {
-			this.renderEmptyState("No active file. Open a note to see its bases view.");
+		// Prevent concurrent updates
+		if (this.isUpdating) {
 			return;
 		}
 
-		this.currentHandler = this.handlers.find((handler) => handler.canHandle(activeFile)) ?? null;
+		this.isUpdating = true;
 
-		if (!this.currentHandler) {
-			this.renderEmptyBase(activeFile);
-			return;
+		try {
+			// Get the active file
+			const activeFile = this.app.workspace.getActiveFile();
+			const currentFilePath = activeFile?.path || "";
+
+			// Early return: Has the file actually changed?
+			// This prevents unnecessary re-renders that break focus
+			if (currentFilePath === this.lastFilePath && currentFilePath !== "") {
+				return;
+			}
+
+			// Update tracking
+			this.lastFilePath = currentFilePath;
+
+			// Clear and render
+			this.contentEl.empty();
+			this.contentEl.addClass("fusion-bases-view");
+
+			if (!activeFile) {
+				this.renderEmptyState("No active file. Open a note to see its bases view.");
+				return;
+			}
+
+			this.currentHandler = this.handlers.find((handler) => handler.canHandle(activeFile)) ?? null;
+
+			if (!this.currentHandler) {
+				this.renderEmptyBase(activeFile);
+				return;
+			}
+
+			this.validateSelectedView();
+			this.createTopLevelSelector();
+			this.createViewSelector();
+
+			const basesMarkdown = this.currentHandler.generateBasesMarkdown(activeFile);
+
+			// Create container for the rendered markdown
+			const markdownContainer = this.contentEl.createDiv({
+				cls: "fusion-bases-markdown-container",
+			});
+
+			// Render using Obsidian's MarkdownRenderer
+			await MarkdownRenderer.render(this.app, basesMarkdown, markdownContainer, activeFile.path, this.component);
+		} finally {
+			this.isUpdating = false;
 		}
-
-		this.validateSelectedView();
-		this.createTopLevelSelector();
-		this.createViewSelector();
-
-		const basesMarkdown = this.currentHandler.generateBasesMarkdown(activeFile);
-
-		// Create container for the rendered markdown
-		const markdownContainer = this.contentEl.createDiv({
-			cls: "fusion-bases-markdown-container",
-		});
-
-		// Render using Obsidian's MarkdownRenderer
-		await MarkdownRenderer.render(this.app, basesMarkdown, markdownContainer, activeFile.path, this.component);
 	}
 
 	private validateSelectedView(): void {
@@ -130,6 +156,8 @@ export class BasesView extends RegisteredEventsComponent {
 		selectEl.addEventListener("change", async () => {
 			if (this.currentHandler) {
 				this.currentHandler.setSelectedTopLevelView(selectEl.value);
+				// Force re-render by clearing last path since view changed
+				this.lastFilePath = null;
 				await this.render();
 			}
 		});
@@ -161,6 +189,8 @@ export class BasesView extends RegisteredEventsComponent {
 		selectEl.addEventListener("change", async () => {
 			if (this.currentHandler) {
 				this.currentHandler.setSelectedView(selectEl.value as any);
+				// Force re-render by clearing last path since view changed
+				this.lastFilePath = null;
 				await this.render();
 			}
 		});
@@ -229,6 +259,8 @@ export class BasesView extends RegisteredEventsComponent {
 		this.currentHandler = null;
 		this.topLevelSelectorEl = null;
 		this.viewSelectorEl = null;
+		this.lastFilePath = null;
+		this.isUpdating = false;
 		this.contentEl.empty();
 		this.cleanupEvents();
 	}
