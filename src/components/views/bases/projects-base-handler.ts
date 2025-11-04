@@ -21,7 +21,16 @@ export class ProjectsBaseHandler extends BaseHandler {
 	generateBasesMarkdown(_file: TFile): string {
 		const config = this.getConfig();
 		const orderArray = this.generateOrderArray(config.properties);
-		const viewContent = this.generateViewConfig(this.selectedView, orderArray, this.getColumnSize());
+
+		// Use different column sizes based on view type
+		const columnSize = this.selectedView === "archived" ? 541 : 401;
+		const viewContent = this.generateViewConfig(
+			this.selectedView,
+			orderArray,
+			`
+    columnSize:
+      file.name: ${columnSize}`
+		);
 
 		return `\`\`\`base
 filters:
@@ -34,11 +43,5 @@ ${this.generateCommonFormulas()}
 views:
 ${viewContent}
 \`\`\``;
-	}
-
-	private getColumnSize(): string {
-		return `
-    columnSize:
-      file.name: 401`;
 	}
 }

@@ -1176,6 +1176,7 @@
 
 .fusion-bases-view-selector {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 8px;
 	padding: 12px;
 	border-bottom: 1px solid var(--background-modifier-border);
@@ -1183,7 +1184,8 @@
 }
 
 .fusion-bases-view-button {
-	flex: 1;
+	flex: 1 1 auto;
+	min-width: 80px;
 	padding: 8px 16px;
 	background-color: var(--background-primary);
 	border: 1px solid var(--background-modifier-border);
@@ -1193,6 +1195,7 @@
 	font-size: 0.9em;
 	font-weight: 500;
 	transition: all 0.2s ease;
+	white-space: nowrap;
 }
 
 .fusion-bases-view-button:hover {

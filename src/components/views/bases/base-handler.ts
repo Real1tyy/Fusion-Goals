@@ -1,10 +1,10 @@
 import type { App, TFile } from "obsidian";
 import type FusionGoalsPlugin from "../../../main";
 
-export type ArchiveViewType = "active" | "archived" | "all";
+export type ViewType = "full" | "in-progress" | "inbox" | "planned" | "next-up" | "done" | "icebox" | "archived";
 
 export interface ViewButton {
-	type: ArchiveViewType;
+	type: ViewType;
 	label: string;
 }
 
@@ -20,7 +20,7 @@ export interface BaseHandlerConfig {
 export abstract class BaseHandler {
 	protected app: App;
 	protected plugin: FusionGoalsPlugin;
-	protected selectedView: ArchiveViewType = "active";
+	protected selectedView: ViewType = "full";
 
 	constructor(app: App, plugin: FusionGoalsPlugin) {
 		this.app = app;
@@ -35,17 +35,22 @@ export abstract class BaseHandler {
 
 	getViewButtons(): ViewButton[] {
 		return [
-			{ type: "active", label: "Active" },
+			{ type: "full", label: "Full" },
+			{ type: "in-progress", label: "In Progress" },
+			{ type: "inbox", label: "Inbox" },
+			{ type: "planned", label: "Planned" },
+			{ type: "next-up", label: "Next Up" },
+			{ type: "done", label: "Done" },
+			{ type: "icebox", label: "Icebox" },
 			{ type: "archived", label: "Archived" },
-			{ type: "all", label: "All" },
 		];
 	}
 
-	setSelectedView(view: ArchiveViewType): void {
+	setSelectedView(view: ViewType): void {
 		this.selectedView = view;
 	}
 
-	getSelectedView(): ArchiveViewType {
+	getSelectedView(): ViewType {
 		return this.selectedView;
 	}
 
@@ -92,26 +97,78 @@ export abstract class BaseHandler {
         direction: DESC`;
 	}
 
-	protected generateViewConfig(viewType: ArchiveViewType, orderArray: string, extraConfig = ""): string {
-		const viewName = viewType.charAt(0).toUpperCase() + viewType.slice(1);
-
-		let filters = "";
-		if (viewType === "active") {
-			filters = `    filters:
+	protected generateViewConfig(viewType: ViewType, orderArray: string, extraConfig = ""): string {
+		const statusMap: Record<ViewType, { name: string; filters?: string }> = {
+			full: {
+				name: "Full",
+				filters: `    filters:
       and:
-        - _Archived != true
         - Status != "Done"
-`;
-		} else if (viewType === "archived") {
-			filters = `    filters:
+        - _Archived != true
+`,
+			},
+			"in-progress": {
+				name: "In Progress",
+				filters: `    filters:
+      and:
+        - Status == "In progress"
+        - _Archived != true
+`,
+			},
+			inbox: {
+				name: "Inbox",
+				filters: `    filters:
+      and:
+        - Status == "Inbox"
+        - _Archived != true
+`,
+			},
+			planned: {
+				name: "Planned",
+				filters: `    filters:
+      and:
+        - Status == "Planned"
+        - _Archived != true
+`,
+			},
+			"next-up": {
+				name: "Next Up",
+				filters: `    filters:
+      and:
+        - Status == "Next Up"
+        - _Archived != true
+`,
+			},
+			done: {
+				name: "Done",
+				filters: `    filters:
+      and:
+        - Status == "Done"
+        - _Archived != true
+`,
+			},
+			icebox: {
+				name: "Icebox",
+				filters: `    filters:
+      and:
+        - Status == "Icebox"
+        - _Archived != true
+`,
+			},
+			archived: {
+				name: "Archived",
+				filters: `    filters:
       and:
         - _Archived == true
-`;
-		}
+`,
+			},
+		};
+
+		const config = statusMap[viewType];
 
 		return `  - type: table
-    name: ${viewName}
-${filters}    order:
+    name: ${config.name}
+${config.filters || ""}    order:
 ${orderArray}
 ${this.generateCommonSort()}${extraConfig}`;
 	}

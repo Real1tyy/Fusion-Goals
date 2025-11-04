@@ -1,7 +1,7 @@
-import { type App, Component, MarkdownRenderer } from "obsidian";
+import { type App, Component, MarkdownRenderer, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type FusionGoalsPlugin from "../../main";
-import { type BaseHandler, GoalsBaseHandler, ProjectsBaseHandler, TasksBaseHandler } from "./bases";
+import { type BaseHandler, GoalsBaseHandler, ProjectsBaseHandler } from "./bases";
 import { RegisteredEventsComponent } from "./component";
 
 export const VIEW_TYPE_BASES = "fusion-bases-view";
@@ -28,11 +28,7 @@ export class BasesView extends RegisteredEventsComponent {
 		this.component = new Component();
 		this.component.load();
 
-		this.handlers = [
-			new TasksBaseHandler(app, plugin),
-			new ProjectsBaseHandler(app, plugin),
-			new GoalsBaseHandler(app, plugin),
-		];
+		this.handlers = [new ProjectsBaseHandler(app, plugin), new GoalsBaseHandler(app, plugin)];
 
 		// Subscribe to settings changes to re-render
 		this.settingsSubscription = this.plugin.settingsStore.settings$.subscribe(() => {
@@ -55,18 +51,13 @@ export class BasesView extends RegisteredEventsComponent {
 		this.currentHandler = this.handlers.find((handler) => handler.canHandle(activeFile)) ?? null;
 
 		if (!this.currentHandler) {
-			this.renderEmptyBase();
+			this.renderEmptyBase(activeFile);
 			return;
 		}
 
 		this.createViewSelector();
 
 		const basesMarkdown = this.currentHandler.generateBasesMarkdown(activeFile);
-
-		// Debug logging: Print the entire generated markdown structure
-		console.log("=== Generated Base Markdown ===");
-		console.log(basesMarkdown);
-		console.log("=== End Base Markdown ===");
 
 		// Create container for the rendered markdown
 		const markdownContainer = this.contentEl.createDiv({
@@ -106,8 +97,14 @@ export class BasesView extends RegisteredEventsComponent {
 		}
 	}
 
-	private renderEmptyBase(): void {
-		this.renderEmptyState("Nothing configured for this note. This view only works with Goals, Projects, and Tasks.");
+	private renderEmptyBase(file: TFile): void {
+		const isTaskFile = file.path.startsWith("Tasks/") && file.name !== "Tasks.md";
+
+		if (isTaskFile) {
+			this.renderEmptyState("This view only works with Projects and Goals. Tasks don't have a bases view.");
+		} else {
+			this.renderEmptyState("Bases are not configured for this directory.");
+		}
 	}
 
 	private renderEmptyState(message: string): void {
