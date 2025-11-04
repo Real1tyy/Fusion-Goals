@@ -2,12 +2,17 @@ import { ItemView, type WorkspaceLeaf } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { Indexer } from "../../core/indexer";
 import type FusionGoalsPlugin from "../../main";
-import { BasesView } from "./bases-view";
+import { BasesView, type BasesViewState } from "./bases-view";
 import { RelationshipGraphView } from "./relationship-graph-view";
 
 export const VIEW_TYPE_FUSION_SWITCHER = "fusion-view-switcher";
 
 type ViewMode = "graph" | "bases";
+
+interface ViewState extends Record<string, unknown> {
+	mode: ViewMode;
+	basesState?: BasesViewState;
+}
 
 export class FusionViewSwitcher extends ItemView {
 	private currentMode: ViewMode = "graph";
@@ -19,6 +24,7 @@ export class FusionViewSwitcher extends ItemView {
 	private isEnlarged = false;
 	private originalWidth: number | null = null;
 	private settingsSubscription: Subscription | null = null;
+	private savedBasesState: ViewState["basesState"] | null = null;
 
 	constructor(
 		leaf: WorkspaceLeaf,
@@ -38,6 +44,22 @@ export class FusionViewSwitcher extends ItemView {
 
 	getIcon(): string {
 		return this.currentMode === "graph" ? "git-fork" : "layout-grid";
+	}
+
+	getState(): ViewState {
+		return {
+			mode: this.currentMode,
+			basesState: this.basesView?.getState() ?? this.savedBasesState ?? undefined,
+		};
+	}
+
+	async setState(state: ViewState, _result: unknown): Promise<void> {
+		if (state?.mode) {
+			this.currentMode = state.mode;
+		}
+		if (state?.basesState) {
+			this.savedBasesState = state.basesState;
+		}
 	}
 
 	async onOpen(): Promise<void> {
@@ -195,6 +217,11 @@ export class FusionViewSwitcher extends ItemView {
 
 			// Create and render bases view
 			this.basesView = new BasesView(this.app, this.basesContentEl, this.plugin);
+
+			if (this.savedBasesState) {
+				this.basesView.restoreState(this.savedBasesState);
+			}
+
 			await this.basesView.render();
 		}
 	}

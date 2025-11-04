@@ -1,10 +1,16 @@
 import { type App, Component, MarkdownRenderer, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type FusionGoalsPlugin from "../../main";
-import { type BaseHandler, GoalsBaseHandler, ProjectsBaseHandler } from "./bases";
+import { type BaseHandler, GoalsBaseHandler, ProjectsBaseHandler, type ViewType } from "./bases";
 import { RegisteredEventsComponent } from "./component";
 
 export const VIEW_TYPE_BASES = "fusion-bases-view";
+
+export interface BasesViewState {
+	projectsView: ViewType;
+	goalsView: ViewType;
+	goalsTopLevel: string;
+}
 
 /**
  * Bases view component that uses Obsidian's Bases API to render
@@ -156,6 +162,35 @@ export class BasesView extends RegisteredEventsComponent {
 
 	async updateActiveFile(): Promise<void> {
 		await this.render();
+	}
+
+	getState(): BasesViewState {
+		const projectsHandler = this.handlers.find((h) => h instanceof ProjectsBaseHandler);
+		const goalsHandler = this.handlers.find((h) => h instanceof GoalsBaseHandler);
+
+		return {
+			projectsView: projectsHandler?.getSelectedView() ?? "full",
+			goalsView: goalsHandler?.getSelectedView() ?? "full",
+			goalsTopLevel: goalsHandler?.getSelectedTopLevelView() ?? "projects",
+		};
+	}
+
+	restoreState(state: BasesViewState): void {
+		const projectsHandler = this.handlers.find((h) => h instanceof ProjectsBaseHandler);
+		const goalsHandler = this.handlers.find((h) => h instanceof GoalsBaseHandler);
+
+		if (projectsHandler && state.projectsView) {
+			projectsHandler.setSelectedView(state.projectsView);
+		}
+
+		if (goalsHandler) {
+			if (state.goalsView) {
+				goalsHandler.setSelectedView(state.goalsView);
+			}
+			if (state.goalsTopLevel) {
+				goalsHandler.setSelectedTopLevelView(state.goalsTopLevel);
+			}
+		}
 	}
 
 	destroy(): void {
