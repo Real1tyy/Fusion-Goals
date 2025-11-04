@@ -19,6 +19,19 @@ export class BasesViewSettingsSection implements SettingsSection {
 					"'file.name' is always included first, followed by the properties you specify below."
 			);
 
+		this.uiBuilder.addToggle(container, {
+			key: "excludeArchived",
+			name: "Enable archived filtering",
+			desc: "When enabled, shows the archived view option and filters non-archived items in other views. When disabled, shows all items without archived filtering.",
+		});
+
+		this.uiBuilder.addText(container, {
+			key: "archivedProp",
+			name: "Archived property name",
+			desc: "Name of the frontmatter property used to mark files as archived (e.g., 'Archived', '_Archived').",
+			placeholder: "Archived",
+		});
+
 		this.uiBuilder.addTextArray(container, {
 			key: "basesGoalsProperties",
 			name: "Goals properties",

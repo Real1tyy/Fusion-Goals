@@ -44,6 +44,10 @@ export const SETTINGS_DEFAULTS = {
 	DEFAULT_BASES_GOALS_PROPERTIES: ["Status", "Priority"],
 	DEFAULT_BASES_PROJECTS_PROPERTIES: ["Status", "Priority", "Difficulty"],
 	DEFAULT_BASES_TASKS_PROPERTIES: ["Goal", "Project", "Status", "Priority"],
+
+	// Bases archived filtering defaults
+	DEFAULT_EXCLUDE_ARCHIVED: false,
+	DEFAULT_ARCHIVED_PROP: "Archived",
 } as const;
 
 export const SCAN_CONCURRENCY = 10;

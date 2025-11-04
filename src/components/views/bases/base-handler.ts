@@ -42,7 +42,8 @@ export abstract class BaseHandler {
 	abstract getTopLevelOptions(): TopLevelViewOption[];
 
 	getViewOptions(): ViewOption[] {
-		return [
+		const settings = this.plugin.settingsStore.settings$.value;
+		const baseOptions: ViewOption[] = [
 			{ type: "full", label: "Full" },
 			{ type: "in-progress", label: "In Progress" },
 			{ type: "inbox", label: "Inbox" },
@@ -50,8 +51,13 @@ export abstract class BaseHandler {
 			{ type: "next-up", label: "Next Up" },
 			{ type: "done", label: "Done" },
 			{ type: "icebox", label: "Icebox" },
-			{ type: "archived", label: "Archived" },
 		];
+
+		if (settings.excludeArchived) {
+			baseOptions.push({ type: "archived", label: "Archived" });
+		}
+
+		return baseOptions;
 	}
 
 	setSelectedView(view: ViewType): void {
@@ -113,69 +119,73 @@ export abstract class BaseHandler {
         direction: DESC`;
 	}
 
+	/**
+	 * Generate view configuration with reactive archived filtering.
+	 * Uses current settings for archivedProp and excludeArchived.
+	 */
 	protected generateViewConfig(viewType: ViewType, orderArray: string, extraConfig = ""): string {
+		const { archivedProp, excludeArchived } = this.plugin.settingsStore.settings$.value;
+		const getArchivedFilter = (isArchivedView: boolean): string => {
+			if (!excludeArchived) {
+				return "";
+			}
+			return `\n        - ${archivedProp} ${isArchivedView ? "==" : "!="} true`;
+		};
+
 		const statusMap: Record<ViewType, { name: string; filters?: string }> = {
 			full: {
 				name: "Full",
 				filters: `    filters:
       and:
-        - Status != "Done"
-        - _Archived != true
+        - Status != "Done"${getArchivedFilter(false)}
 `,
 			},
 			"in-progress": {
 				name: "In Progress",
 				filters: `    filters:
       and:
-        - Status == "In progress"
-        - _Archived != true
+        - Status == "In progress"${getArchivedFilter(false)}
 `,
 			},
 			inbox: {
 				name: "Inbox",
 				filters: `    filters:
       and:
-        - Status == "Inbox"
-        - _Archived != true
+        - Status == "Inbox"${getArchivedFilter(false)}
 `,
 			},
 			planned: {
 				name: "Planned",
 				filters: `    filters:
       and:
-        - Status == "Planned"
-        - _Archived != true
+        - Status == "Planned"${getArchivedFilter(false)}
 `,
 			},
 			"next-up": {
 				name: "Next Up",
 				filters: `    filters:
       and:
-        - Status == "Next Up"
-        - _Archived != true
+        - Status == "Next Up"${getArchivedFilter(false)}
 `,
 			},
 			done: {
 				name: "Done",
 				filters: `    filters:
       and:
-        - Status == "Done"
-        - _Archived != true
+        - Status == "Done"${getArchivedFilter(false)}
 `,
 			},
 			icebox: {
 				name: "Icebox",
 				filters: `    filters:
       and:
-        - Status == "Icebox"
-        - _Archived != true
+        - Status == "Icebox"${getArchivedFilter(false)}
 `,
 			},
 			archived: {
 				name: "Archived",
 				filters: `    filters:
-      and:
-        - _Archived == true
+      and:${getArchivedFilter(true)}
 `,
 			},
 		};

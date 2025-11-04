@@ -37,10 +37,19 @@ export class BasesView extends RegisteredEventsComponent {
 
 		this.handlers = [new ProjectsBaseHandler(app, plugin), new GoalsBaseHandler(app, plugin)];
 
-		// Subscribe to settings changes to re-render
-		this.settingsSubscription = this.plugin.settingsStore.settings$.subscribe(() => {
-			this.render();
+		this.settingsSubscription = this.plugin.settingsStore.settings$.subscribe(async (settings) => {
+			this.validateAllHandlers(settings);
+			await this.render();
 		});
+	}
+
+	private validateAllHandlers(settings: typeof this.plugin.settingsStore.settings$.value): void {
+		for (const handler of this.handlers) {
+			const currentView = handler.getSelectedView();
+			if (currentView === "archived" && !settings.excludeArchived) {
+				handler.setSelectedView("full");
+			}
+		}
 	}
 
 	async render(): Promise<void> {
@@ -62,6 +71,7 @@ export class BasesView extends RegisteredEventsComponent {
 			return;
 		}
 
+		this.validateSelectedView();
 		this.createTopLevelSelector();
 		this.createViewSelector();
 
@@ -74,6 +84,18 @@ export class BasesView extends RegisteredEventsComponent {
 
 		// Render using Obsidian's MarkdownRenderer
 		await MarkdownRenderer.render(this.app, basesMarkdown, markdownContainer, activeFile.path, this.component);
+	}
+
+	private validateSelectedView(): void {
+		if (!this.currentHandler) return;
+
+		const currentView = this.currentHandler.getSelectedView();
+		const viewOptions = this.currentHandler.getViewOptions();
+		const isViewStillValid = viewOptions.some((opt) => opt.type === currentView);
+
+		if (!isViewStillValid) {
+			this.currentHandler.setSelectedView("full");
+		}
 	}
 
 	private createTopLevelSelector(): void {
