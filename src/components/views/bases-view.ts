@@ -46,7 +46,7 @@ export class BasesView extends RegisteredEventsComponent {
 	private validateAllHandlers(settings: typeof this.plugin.settingsStore.settings$.value): void {
 		for (const handler of this.handlers) {
 			const currentView = handler.getSelectedView();
-			if (currentView === "archived" && !settings.excludeArchived) {
+			if ((currentView === "archived" || currentView === "all-archived") && !settings.excludeArchived) {
 				handler.setSelectedView("full");
 			}
 		}

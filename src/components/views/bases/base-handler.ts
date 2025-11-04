@@ -1,7 +1,17 @@
 import type { App, TFile } from "obsidian";
 import type FusionGoalsPlugin from "../../../main";
 
-export type ViewType = "full" | "in-progress" | "inbox" | "planned" | "next-up" | "done" | "icebox" | "archived";
+export type ViewType =
+	| "all"
+	| "all-archived"
+	| "full"
+	| "in-progress"
+	| "inbox"
+	| "planned"
+	| "next-up"
+	| "done"
+	| "icebox"
+	| "archived";
 
 export interface ViewOption {
 	type: ViewType;
@@ -55,6 +65,12 @@ export abstract class BaseHandler {
 
 		if (settings.excludeArchived) {
 			baseOptions.push({ type: "archived", label: "Archived" });
+		}
+
+		baseOptions.push({ type: "all", label: "All" });
+
+		if (settings.excludeArchived) {
+			baseOptions.push({ type: "all-archived", label: "All Archived" });
 		}
 
 		return baseOptions;
@@ -133,6 +149,18 @@ export abstract class BaseHandler {
 		};
 
 		const statusMap: Record<ViewType, { name: string; filters?: string }> = {
+			all: {
+				name: "All",
+				filters: excludeArchived
+					? `    filters:
+      and:${getArchivedFilter(false)}
+`
+					: undefined,
+			},
+			"all-archived": {
+				name: "All Archived",
+				filters: undefined,
+			},
 			full: {
 				name: "Full",
 				filters: `    filters:
