@@ -98,6 +98,7 @@ export const FusionGoalsSettingsSchema = z.object({
 	// Graph filtering settings
 	filterExpressions: z.array(z.string()).optional().default([]),
 	filterPresets: z.array(FilterPresetSchema).optional().default([]),
+	preFillFilterPreset: z.string().optional().default(""),
 	displayNodeProperties: z
 		.array(z.string())
 		.optional()

@@ -12,6 +12,7 @@ export class RulesSection implements SettingsSection {
 
 	private colorRulesListContainer: HTMLElement | null = null;
 	private filterPresetsContainer: HTMLElement | null = null;
+	private preFillPresetContainer: HTMLElement | null = null;
 
 	constructor(
 		private readonly plugin: FusionGoalsPlugin,
@@ -163,6 +164,8 @@ export class RulesSection implements SettingsSection {
 			multiline: true,
 		});
 
+		this.addPreFillPresetSelector(container);
+
 		new Setting(container).setName("Filter presets").setHeading();
 
 		const presetDescription = container.createDiv();
@@ -187,6 +190,53 @@ export class RulesSection implements SettingsSection {
 					}));
 
 					this.renderFilterPresetsList();
+					this.renderPreFillPresetDropdown();
+				});
+			});
+	}
+
+	private addPreFillPresetSelector(container: HTMLElement): void {
+		const infoContainer = container.createDiv("settings-info-box");
+		infoContainer.createEl("strong", { text: "Pre-fill vs Default Filters:" });
+		const infoList = infoContainer.createEl("ul");
+		infoList.createEl("li", {
+			text: "Filter expressions above are default filters - always applied and cannot be toggled off",
+		});
+		infoList.createEl("li", {
+			text: "Pre-fill preset below is optional - fills the filter input on startup but can be cleared by the user",
+		});
+
+		this.preFillPresetContainer = container.createDiv();
+		this.renderPreFillPresetDropdown();
+	}
+
+	private renderPreFillPresetDropdown(): void {
+		if (!this.preFillPresetContainer) return;
+
+		this.preFillPresetContainer.empty();
+		const settings = this.plugin.settingsStore.currentSettings;
+
+		new Setting(this.preFillPresetContainer)
+			.setName("Pre-fill filter preset")
+			.setDesc(
+				"Automatically fill the filter input with this preset when the graph opens. Users can clear or modify it."
+			)
+			.addDropdown((dropdown) => {
+				dropdown.addOption("", "None");
+
+				settings.filterPresets.forEach((preset) => {
+					if (preset.name) {
+						dropdown.addOption(preset.name, preset.name);
+					}
+				});
+
+				dropdown.setValue(settings.preFillFilterPreset);
+
+				dropdown.onChange(async (value) => {
+					await this.plugin.settingsStore.updateSettings((current) => ({
+						...current,
+						preFillFilterPreset: value,
+					}));
 				});
 			});
 	}
@@ -318,6 +368,7 @@ export class RulesSection implements SettingsSection {
 						presetIndex === index ? { ...existing, name: nameInput.value } : existing
 					),
 				}));
+				this.renderPreFillPresetDropdown();
 			};
 
 			nameInput.addEventListener("blur", () => {
@@ -364,6 +415,7 @@ export class RulesSection implements SettingsSection {
 						filterPresets: current.filterPresets.filter((_, presetIndex) => presetIndex !== index),
 					}));
 					this.renderFilterPresetsList();
+					this.renderPreFillPresetDropdown();
 				},
 				{ buttonClass: "filter-preset-btn-delete" }
 			);
