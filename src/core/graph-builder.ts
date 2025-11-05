@@ -102,18 +102,23 @@ export class GraphBuilder {
 	}
 
 	private buildProjectView(projectPath: string): GraphData {
-		const nodes: ElementDefinition[] = [];
-		const edges: ElementDefinition[] = [];
-		const processedPaths = new Set<string>();
-
 		const goalPath = this.getParentPath(projectPath);
 		if (!goalPath) {
 			return this.buildHierarchyGraphData(projectPath, false);
 		}
 
-		const goalNode = this.createNodeElement(goalPath, 0, false);
-		nodes.push(goalNode);
-		processedPaths.add(goalPath);
+		const nodes: ElementDefinition[] = [];
+		const edges: ElementDefinition[] = [];
+		const processedPaths = new Set<string>();
+
+		const buildNode = (pathOrWikiLink: string, level: number, isSource: boolean): string => {
+			const node = this.createNodeElement(pathOrWikiLink, level, isSource);
+			nodes.push(node);
+			processedPaths.add(node.data.id as string);
+			return node.data.id as string;
+		};
+
+		const goalId = buildNode(goalPath, 0, false);
 
 		const goalHierarchy = this.indexer.getGoalHierarchy(goalPath);
 		if (goalHierarchy) {
@@ -122,25 +127,17 @@ export class GraphBuilder {
 
 			for (const ctx of validProjects) {
 				const isSource = ctx.path === projectPath;
-				const projectNode = this.createNodeElement(ctx.wikiLink, 1, isSource);
-				nodes.push(projectNode);
-				processedPaths.add(ctx.path);
+				const projectId = buildNode(ctx.wikiLink, 1, isSource);
 
-				// Add edge from goal to project
-				edges.push({ data: { source: goalPath, target: ctx.path } });
+				edges.push({ data: { source: goalId, target: projectId } });
 
-				// Only add tasks for the source project
 				if (isSource && this.hierarchyMaxDepth > 2) {
 					const taskPaths = this.getChildrenPaths(ctx.path);
 					const validTasks = this.resolveValidContexts(taskPaths, processedPaths);
 
 					for (const taskCtx of validTasks) {
-						const taskNode = this.createNodeElement(taskCtx.wikiLink, 2, false);
-						nodes.push(taskNode);
-						processedPaths.add(taskCtx.path);
-
-						// Add edge from project to task
-						edges.push({ data: { source: ctx.path, target: taskCtx.path } });
+						const taskId = buildNode(taskCtx.wikiLink, 2, false);
+						edges.push({ data: { source: projectId, target: taskId } });
 					}
 				}
 			}
@@ -154,44 +151,36 @@ export class GraphBuilder {
 		const edges: ElementDefinition[] = [];
 		const processedPaths = new Set<string>();
 
-		// Find parent project
+		const buildNode = (pathOrWikiLink: string, level: number, isSource: boolean): string => {
+			const node = this.createNodeElement(pathOrWikiLink, level, isSource);
+			nodes.push(node);
+			processedPaths.add(node.data.id as string);
+			return node.data.id as string;
+		};
+
 		const projectPath = this.getParentPath(taskPath);
 		if (!projectPath) {
 			return this.buildHierarchyGraphData(taskPath, false);
 		}
 
-		// Find grandparent goal
 		const goalPath = this.getParentPath(projectPath);
 		if (!goalPath) {
 			return this.buildHierarchyGraphData(taskPath, false);
 		}
 
-		// Add goal as root node (level 0)
-		const goalNode = this.createNodeElement(goalPath, 0, false);
-		nodes.push(goalNode);
-		processedPaths.add(goalPath);
+		const goalId = buildNode(goalPath, 0, false);
+		const projectId = buildNode(projectPath, 1, false);
 
-		// Add only the parent project (level 1)
-		const projectNode = this.createNodeElement(projectPath, 1, false);
-		nodes.push(projectNode);
-		processedPaths.add(projectPath);
+		edges.push({ data: { source: goalId, target: projectId } });
 
-		// Add edge from goal to project
-		edges.push({ data: { source: goalPath, target: projectPath } });
-
-		// Add all sibling tasks for this project (level 2)
 		if (this.hierarchyMaxDepth > 2) {
 			const taskPaths = this.getChildrenPaths(projectPath);
 			const validTasks = this.resolveValidContexts(taskPaths, processedPaths);
 
 			for (const taskCtx of validTasks) {
 				const isSourceTask = taskCtx.path === taskPath;
-				const taskNode = this.createNodeElement(taskCtx.wikiLink, 2, isSourceTask);
-				nodes.push(taskNode);
-				processedPaths.add(taskCtx.path);
-
-				// Add edge from project to task
-				edges.push({ data: { source: projectPath, target: taskCtx.path } });
+				const taskId = buildNode(taskCtx.wikiLink, 2, isSourceTask);
+				edges.push({ data: { source: projectId, target: taskId } });
 			}
 		}
 
