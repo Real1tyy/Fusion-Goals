@@ -3,6 +3,7 @@ import type { App } from "obsidian";
 import { ColorEvaluator } from "../utils/colors";
 import { extractDisplayName, extractFilePath, type FileContext, getFileContext } from "../utils/file";
 import { FilterEvaluator } from "../utils/filters";
+import { parseLinkedPathsFromProperty } from "../utils/property-utils";
 import type { Indexer } from "./indexer";
 import type { SettingsStore } from "./settings-store";
 
@@ -83,8 +84,118 @@ export class GraphBuilder {
 	}
 
 	buildGraph(options: GraphBuilderOptions): GraphData {
-		const graphData = this.buildHierarchyGraphData(options.sourcePath, options.startFromCurrent);
+		const fileType = this.indexer.getFileType(options.sourcePath);
+		let graphData: GraphData;
+
+		if (options.startFromCurrent) {
+			// When "Start from current" is enabled, just build from current file
+			graphData = this.buildHierarchyGraphData(options.sourcePath, true);
+		} else if (fileType === "project") {
+			graphData = this.buildProjectView(options.sourcePath);
+		} else if (fileType === "task") {
+			graphData = this.buildTaskView(options.sourcePath);
+		} else {
+			graphData = this.buildHierarchyGraphData(options.sourcePath, false);
+		}
+
 		return this.applyGraphFilters(graphData, options.searchQuery, options.filterEvaluator);
+	}
+
+	private buildProjectView(projectPath: string): GraphData {
+		const nodes: ElementDefinition[] = [];
+		const edges: ElementDefinition[] = [];
+		const processedPaths = new Set<string>();
+
+		const goalPath = this.getParentPath(projectPath);
+		if (!goalPath) {
+			return this.buildHierarchyGraphData(projectPath, false);
+		}
+
+		const goalNode = this.createNodeElement(goalPath, 0, false);
+		nodes.push(goalNode);
+		processedPaths.add(goalPath);
+
+		const goalHierarchy = this.indexer.getGoalHierarchy(goalPath);
+		if (goalHierarchy) {
+			const projectPaths = goalHierarchy.projects;
+			const validProjects = this.resolveValidContexts(projectPaths, processedPaths);
+
+			for (const ctx of validProjects) {
+				const isSource = ctx.path === projectPath;
+				const projectNode = this.createNodeElement(ctx.wikiLink, 1, isSource);
+				nodes.push(projectNode);
+				processedPaths.add(ctx.path);
+
+				// Add edge from goal to project
+				edges.push({ data: { source: goalPath, target: ctx.path } });
+
+				// Only add tasks for the source project
+				if (isSource && this.hierarchyMaxDepth > 2) {
+					const taskPaths = this.getChildrenPaths(ctx.path);
+					const validTasks = this.resolveValidContexts(taskPaths, processedPaths);
+
+					for (const taskCtx of validTasks) {
+						const taskNode = this.createNodeElement(taskCtx.wikiLink, 2, false);
+						nodes.push(taskNode);
+						processedPaths.add(taskCtx.path);
+
+						// Add edge from project to task
+						edges.push({ data: { source: ctx.path, target: taskCtx.path } });
+					}
+				}
+			}
+		}
+
+		return { nodes, edges };
+	}
+
+	private buildTaskView(taskPath: string): GraphData {
+		const nodes: ElementDefinition[] = [];
+		const edges: ElementDefinition[] = [];
+		const processedPaths = new Set<string>();
+
+		// Find parent project
+		const projectPath = this.getParentPath(taskPath);
+		if (!projectPath) {
+			return this.buildHierarchyGraphData(taskPath, false);
+		}
+
+		// Find grandparent goal
+		const goalPath = this.getParentPath(projectPath);
+		if (!goalPath) {
+			return this.buildHierarchyGraphData(taskPath, false);
+		}
+
+		// Add goal as root node (level 0)
+		const goalNode = this.createNodeElement(goalPath, 0, false);
+		nodes.push(goalNode);
+		processedPaths.add(goalPath);
+
+		// Add only the parent project (level 1)
+		const projectNode = this.createNodeElement(projectPath, 1, false);
+		nodes.push(projectNode);
+		processedPaths.add(projectPath);
+
+		// Add edge from goal to project
+		edges.push({ data: { source: goalPath, target: projectPath } });
+
+		// Add all sibling tasks for this project (level 2)
+		if (this.hierarchyMaxDepth > 2) {
+			const taskPaths = this.getChildrenPaths(projectPath);
+			const validTasks = this.resolveValidContexts(taskPaths, processedPaths);
+
+			for (const taskCtx of validTasks) {
+				const isSourceTask = taskCtx.path === taskPath;
+				const taskNode = this.createNodeElement(taskCtx.wikiLink, 2, isSourceTask);
+				nodes.push(taskNode);
+				processedPaths.add(taskCtx.path);
+
+				// Add edge from project to task
+				edges.push({ data: { source: projectPath, target: taskCtx.path } });
+			}
+		}
+
+		return { nodes, edges };
 	}
 
 	private buildHierarchyGraphData(
@@ -104,29 +215,47 @@ export class GraphBuilder {
 
 		const queue: Array<{ path: string; level: number }> = [{ path: rootPath, level: 0 }];
 
-		while (queue.length > 0) {
-			const { path: currentPath, level: currentLevel } = queue.shift()!;
+		const processChildrenAtLevel = (children: ValidFileContext[], parentPath: string, targetLevel: number): void => {
+			if (targetLevel >= this.hierarchyMaxDepth) return;
 
-			// Check if we can add children (next level must be within depth limit)
-			if (currentLevel + 1 >= this.hierarchyMaxDepth) continue;
-
-			// Get children based on file type
-			const childPaths = this.getChildrenPaths(currentPath);
-			const validChildren = this.resolveValidContexts(childPaths, processedPaths);
-
-			const childNodes = validChildren.map((ctx) =>
-				this.createNodeElement(ctx.wikiLink, currentLevel + 1, allowSourceHighlight && ctx.path === sourcePath)
+			const childNodes = children.map((ctx) =>
+				this.createNodeElement(ctx.wikiLink, targetLevel, allowSourceHighlight && ctx.path === sourcePath)
 			);
-
-			const childEdges = validChildren.map((ctx) => ({ data: { source: currentPath, target: ctx.path } }));
+			const childEdges = children.map((ctx) => ({ data: { source: parentPath, target: ctx.path } }));
 
 			nodes.push(...childNodes);
 			edges.push(...childEdges);
 
-			validChildren.forEach((ctx) => {
+			children.forEach((ctx) => {
 				processedPaths.add(ctx.path);
-				queue.push({ path: ctx.path, level: currentLevel + 1 });
+				queue.push({ path: ctx.path, level: targetLevel });
 			});
+		};
+
+		while (queue.length > 0) {
+			const { path: currentPath, level: currentLevel } = queue.shift()!;
+
+			if (currentLevel + 1 >= this.hierarchyMaxDepth) continue;
+
+			const childPaths = this.getChildrenPaths(currentPath);
+			const validChildren = this.resolveValidContexts(childPaths, processedPaths);
+			const fileType = this.indexer.getFileType(currentPath);
+
+			if (fileType === "goal") {
+				const projects = validChildren.filter((child) => this.indexer.getFileType(child.path) === "project");
+				const tasks = validChildren.filter((child) => this.indexer.getFileType(child.path) === "task");
+
+				const settings = this.indexer.getSettings();
+				const orphanTasks = tasks.filter((taskCtx) => {
+					const projectLinks = parseLinkedPathsFromProperty(taskCtx.frontmatter?.[settings.taskProjectProp]);
+					return projectLinks.length === 0;
+				});
+
+				processChildrenAtLevel(projects, currentPath, currentLevel + 1);
+				processChildrenAtLevel(orphanTasks, currentPath, currentLevel + 2);
+			} else {
+				processChildrenAtLevel(validChildren, currentPath, currentLevel + 1);
+			}
 		}
 
 		return { nodes, edges };
@@ -169,26 +298,16 @@ export class GraphBuilder {
 		const settings = this.indexer.getSettings();
 
 		if (fileType === "project") {
-			// Projects have goals as parents
-			const goalLink = frontmatter[settings.projectGoalProp];
-			if (goalLink && typeof goalLink === "string") {
-				const parsed = goalLink.match(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/);
-				if (parsed) {
-					return `${parsed[1]}.md`;
-				}
-			}
-		} else if (fileType === "task") {
-			// Tasks have projects as parents
-			const projectLink = frontmatter[settings.taskProjectProp];
-			if (projectLink && typeof projectLink === "string") {
-				const parsed = projectLink.match(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/);
-				if (parsed) {
-					return `${parsed[1]}.md`;
-				}
-			}
+			const paths = parseLinkedPathsFromProperty(frontmatter[settings.projectGoalProp]);
+			return paths.length > 0 ? paths[0] : null;
 		}
-		// Goals have no parents
 
+		if (fileType === "task") {
+			const paths = parseLinkedPathsFromProperty(frontmatter[settings.taskProjectProp]);
+			return paths.length > 0 ? paths[0] : null;
+		}
+
+		// Goals have no parents
 		return null;
 	}
 
