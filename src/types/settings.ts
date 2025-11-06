@@ -155,6 +155,12 @@ export const FusionGoalsSettingsSchema = z.object({
 		)
 		.optional()
 		.default([]),
+
+	// Date formula configuration for bases view
+	basesDaysRemainingEnabled: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_DAYS_REMAINING_ENABLED),
+	basesDaysRemainingProperty: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_DAYS_REMAINING_PROPERTY),
+	basesDaysSinceStartEnabled: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_DAYS_SINCE_START_ENABLED),
+	basesDaysSinceStartProperty: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_DAYS_SINCE_START_PROPERTY),
 });
 
 export type FusionGoalsSettings = z.infer<typeof FusionGoalsSettingsSchema>;

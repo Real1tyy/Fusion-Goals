@@ -96,16 +96,62 @@ export abstract class BaseHandler {
 	}
 
 	protected generateOrderArray(properties: string[]): string {
+		const settings = this.plugin.settingsStore.settings$.value;
 		const orderProps = ["file.name", ...properties];
+
+		if (settings.basesDaysRemainingEnabled && settings.basesDaysRemainingProperty?.trim()) {
+			orderProps.push("formula.Days Remaining");
+		}
+
+		if (settings.basesDaysSinceStartEnabled && settings.basesDaysSinceStartProperty?.trim()) {
+			orderProps.push("formula.Days Since");
+		}
+
 		return orderProps.map((prop) => `      - ${prop}`).join("\n");
 	}
 
 	protected buildFormulasSection(): string {
-		const formulas = this.plugin.settingsStore.settings$.value.basesCustomFormulas;
-		if (!formulas || formulas.trim() === "") {
+		const settings = this.plugin.settingsStore.settings$.value;
+		const customFormulas = settings.basesCustomFormulas;
+		const daysRemainingEnabled = settings.basesDaysRemainingEnabled;
+		const daysRemainingProperty = settings.basesDaysRemainingProperty;
+		const daysSinceStartEnabled = settings.basesDaysSinceStartEnabled;
+		const daysSinceStartProperty = settings.basesDaysSinceStartProperty;
+
+		const hasCustomFormulas = customFormulas && customFormulas.trim() !== "";
+		const hasDaysRemaining = daysRemainingEnabled && daysRemainingProperty && daysRemainingProperty.trim() !== "";
+		const hasDaysSinceStart = daysSinceStartEnabled && daysSinceStartProperty && daysSinceStartProperty.trim() !== "";
+
+		if (!hasCustomFormulas && !hasDaysRemaining && !hasDaysSinceStart) {
 			return "";
 		}
-		return `formulas:\n${formulas}\n`;
+
+		let formulasContent = "";
+
+		// Helper to generate date formula with proper property reference
+		const generateDateFormula = (propertyName: string): string => {
+			const propRef =
+				propertyName.includes(" ") || /[^a-zA-Z0-9_]/.test(propertyName) ? `note["${propertyName}"]` : propertyName;
+			return `date(if(${propRef}.toString().contains("T"),${propRef}.slice(0, 19).replace("T", " "),${propRef})).relative()`;
+		};
+
+		if (hasDaysRemaining) {
+			formulasContent += `  Days Remaining: |-\n    ${generateDateFormula(daysRemainingProperty)}\n`;
+		}
+
+		if (hasDaysSinceStart) {
+			formulasContent += `  Days Since: |-\n    ${generateDateFormula(daysSinceStartProperty)}\n`;
+		}
+
+		// Add custom formulas after
+		if (hasCustomFormulas) {
+			formulasContent += customFormulas;
+			if (!customFormulas.endsWith("\n")) {
+				formulasContent += "\n";
+			}
+		}
+
+		return `formulas:\n${formulasContent}`;
 	}
 
 	protected buildSortSection(): string {

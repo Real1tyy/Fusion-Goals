@@ -39,6 +39,41 @@ export class BasesViewSettingsSection implements SettingsSection {
 			placeholder: "Archived",
 		});
 
+		new Setting(container).setName("Date Formulas").setHeading();
+
+		container
+			.createDiv("setting-item-description")
+			.setText(
+				"Automatically calculate and display relative date information. " +
+					"These formulas will add dynamic columns to all Bases view tables showing time relationships."
+			);
+
+		this.uiBuilder.addToggle(container, {
+			key: "basesDaysRemainingEnabled",
+			name: "Enable Days Remaining formula",
+			desc: "When enabled, adds a 'Days Remaining' column showing relative time until the end date (e.g., 'in 5 days', '2 days ago').",
+		});
+
+		this.uiBuilder.addText(container, {
+			key: "basesDaysRemainingProperty",
+			name: "End date property",
+			desc: "Name of the frontmatter property containing the end/due date (e.g., 'End Date', 'Due Date', 'Deadline').",
+			placeholder: "End Date",
+		});
+
+		this.uiBuilder.addToggle(container, {
+			key: "basesDaysSinceStartEnabled",
+			name: "Enable Days Since Start formula",
+			desc: "When enabled, adds a 'Days Since Start' column showing relative time from the start date (e.g., '5 days ago', 'in 2 days').",
+		});
+
+		this.uiBuilder.addText(container, {
+			key: "basesDaysSinceStartProperty",
+			name: "Start date property",
+			desc: "Name of the frontmatter property containing the start date (e.g., 'Start Date', 'Started', 'Begin Date').",
+			placeholder: "Start Date",
+		});
+
 		new Setting(container).setName("Custom sorting").setHeading();
 
 		container

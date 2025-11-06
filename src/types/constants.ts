@@ -56,6 +56,12 @@ export const SETTINGS_DEFAULTS = {
 	// Bases status configuration defaults
 	DEFAULT_BASES_STATUS_PROPERTY: "Status",
 	DEFAULT_BASES_STATUS_VALUES: ["In progress", "Inbox", "Planned", "Next Up", "Done", "Icebox"],
+
+	// Bases date formula defaults
+	DEFAULT_BASES_DAYS_REMAINING_ENABLED: true,
+	DEFAULT_BASES_DAYS_REMAINING_PROPERTY: "End Date",
+	DEFAULT_BASES_DAYS_SINCE_START_ENABLED: false,
+	DEFAULT_BASES_DAYS_SINCE_START_PROPERTY: "Start Date",
 } as const;
 
 export const SCAN_CONCURRENCY = 10;
