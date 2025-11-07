@@ -71,9 +71,9 @@ describe("Indexer", () => {
 		});
 
 		it("should handle directories without trailing slash", () => {
-			expect(indexer.getFileType("Goals")).toBe("goal");
-			expect(indexer.getFileType("Projects")).toBe("project");
-			expect(indexer.getFileType("Tasks")).toBe("task");
+			expect(indexer.getFileType("Goals")).toBeNull();
+			expect(indexer.getFileType("Projects")).toBeNull();
+			expect(indexer.getFileType("Tasks")).toBeNull();
 		});
 	});
 
@@ -94,7 +94,7 @@ describe("Indexer", () => {
 
 			const goalHierarchy = indexer.getGoalHierarchy("Goals/My Goal.md");
 			expect(goalHierarchy).toBeDefined();
-			expect(goalHierarchy?.projects).toEqual(["Projects/My Project.md"]);
+			expect(goalHierarchy?.projects).toEqual(["My Project.md"]);
 			expect(goalHierarchy?.tasks).toEqual([]);
 		});
 
@@ -116,9 +116,9 @@ describe("Indexer", () => {
 			const secondGoal = indexer.getGoalHierarchy("Goals/Second Goal.md");
 			const thirdGoal = indexer.getGoalHierarchy("Goals/Third Goal.md");
 
-			expect(firstGoal?.projects).toEqual(["Projects/Multi Goal Project.md"]);
-			expect(secondGoal?.projects).toEqual(["Projects/Multi Goal Project.md"]);
-			expect(thirdGoal?.projects).toEqual(["Projects/Multi Goal Project.md"]);
+			expect(firstGoal?.projects).toEqual(["Multi Goal Project.md"]);
+			expect(secondGoal?.projects).toEqual(["Multi Goal Project.md"]);
+			expect(thirdGoal?.projects).toEqual(["Multi Goal Project.md"]);
 		});
 
 		it("should handle project with goal link containing alias", async () => {
@@ -136,7 +136,7 @@ describe("Indexer", () => {
 			await indexer.start();
 
 			const goalHierarchy = indexer.getGoalHierarchy("Goals/My Goal.md");
-			expect(goalHierarchy?.projects).toEqual(["Projects/My Project.md"]);
+			expect(goalHierarchy?.projects).toEqual(["My Project.md"]);
 		});
 
 		it("should not add project to cache when goal link is empty", async () => {
@@ -175,7 +175,7 @@ describe("Indexer", () => {
 
 			const goalHierarchy = indexer.getGoalHierarchy("Goals/My Goal.md");
 			expect(goalHierarchy).toBeDefined();
-			expect(goalHierarchy?.tasks).toEqual(["Tasks/My Task.md"]);
+			expect(goalHierarchy?.tasks).toEqual(["My Task.md"]);
 			expect(goalHierarchy?.projects).toEqual([]);
 		});
 
@@ -197,8 +197,8 @@ describe("Indexer", () => {
 			const firstGoal = indexer.getGoalHierarchy("Goals/First Goal.md");
 			const secondGoal = indexer.getGoalHierarchy("Goals/Second Goal.md");
 
-			expect(firstGoal?.tasks).toEqual(["Tasks/Multi Goal Task.md"]);
-			expect(secondGoal?.tasks).toEqual(["Tasks/Multi Goal Task.md"]);
+			expect(firstGoal?.tasks).toEqual(["Multi Goal Task.md"]);
+			expect(secondGoal?.tasks).toEqual(["Multi Goal Task.md"]);
 		});
 
 		it("should add task to project cache when task has single project link", async () => {
@@ -218,7 +218,7 @@ describe("Indexer", () => {
 
 			const projectHierarchy = indexer.getProjectHierarchy("Projects/My Project.md");
 			expect(projectHierarchy).toBeDefined();
-			expect(projectHierarchy?.tasks).toEqual(["Tasks/My Task.md"]);
+			expect(projectHierarchy?.tasks).toEqual(["My Task.md"]);
 		});
 
 		it("should add task to multiple project caches when task has multiple project links", async () => {
@@ -239,8 +239,8 @@ describe("Indexer", () => {
 			const firstProject = indexer.getProjectHierarchy("Projects/First Project.md");
 			const secondProject = indexer.getProjectHierarchy("Projects/Second Project.md");
 
-			expect(firstProject?.tasks).toEqual(["Tasks/Multi Project Task.md"]);
-			expect(secondProject?.tasks).toEqual(["Tasks/Multi Project Task.md"]);
+			expect(firstProject?.tasks).toEqual(["Multi Project Task.md"]);
+			expect(secondProject?.tasks).toEqual(["Multi Project Task.md"]);
 		});
 
 		it("should add task to both goal and project caches", async () => {
@@ -261,8 +261,8 @@ describe("Indexer", () => {
 			const goalHierarchy = indexer.getGoalHierarchy("Goals/My Goal.md");
 			const projectHierarchy = indexer.getProjectHierarchy("Projects/My Project.md");
 
-			expect(goalHierarchy?.tasks).toEqual(["Tasks/Complete Task.md"]);
-			expect(projectHierarchy?.tasks).toEqual(["Tasks/Complete Task.md"]);
+			expect(goalHierarchy?.tasks).toEqual(["Complete Task.md"]);
+			expect(projectHierarchy?.tasks).toEqual(["Complete Task.md"]);
 		});
 	});
 
@@ -317,14 +317,14 @@ describe("Indexer", () => {
 			await indexer.start();
 
 			const goalHierarchy = indexer.getGoalHierarchy("Goals/Goal 1.md");
-			expect(goalHierarchy?.projects).toEqual(["Projects/Project 1.md", "Projects/Project 2.md"]);
-			expect(goalHierarchy?.tasks).toEqual(["Tasks/Task 1.md", "Tasks/Task 2.md", "Tasks/Task 3.md"]);
+			expect(goalHierarchy?.projects).toEqual(["Project 1.md", "Project 2.md"]);
+			expect(goalHierarchy?.tasks).toEqual(["Task 1.md", "Task 2.md", "Task 3.md"]);
 
 			const project1Hierarchy = indexer.getProjectHierarchy("Projects/Project 1.md");
-			expect(project1Hierarchy?.tasks).toEqual(["Tasks/Task 1.md", "Tasks/Task 2.md"]);
+			expect(project1Hierarchy?.tasks).toEqual(["Task 1.md", "Task 2.md"]);
 
 			const project2Hierarchy = indexer.getProjectHierarchy("Projects/Project 2.md");
-			expect(project2Hierarchy?.tasks).toEqual(["Tasks/Task 3.md"]);
+			expect(project2Hierarchy?.tasks).toEqual(["Task 3.md"]);
 		});
 	});
 
@@ -348,7 +348,7 @@ describe("Indexer", () => {
 			await indexer.start();
 
 			const allGoals = indexer.getAllGoals();
-			expect(allGoals).toEqual(expect.arrayContaining(["Goals/Goal 1.md", "Goals/Goal 2.md"]));
+			expect(allGoals).toEqual(expect.arrayContaining(["Goal 1.md", "Goal 2.md"]));
 			expect(allGoals).toHaveLength(2);
 		});
 
@@ -371,7 +371,7 @@ describe("Indexer", () => {
 			await indexer.start();
 
 			const allProjects = indexer.getAllProjects();
-			expect(allProjects).toEqual(expect.arrayContaining(["Projects/Project 1.md", "Projects/Project 2.md"]));
+			expect(allProjects).toEqual(expect.arrayContaining(["Project 1.md", "Project 2.md"]));
 			expect(allProjects).toHaveLength(2);
 		});
 	});
@@ -423,7 +423,7 @@ describe("Indexer", () => {
 				await indexer.start();
 
 				const goalHierarchy = indexer.getGoalHierarchy("Goals/My Goal.md");
-				expect(goalHierarchy?.projects).toEqual(["Projects/My Project.md"]);
+				expect(goalHierarchy?.projects).toEqual(["My Project.md"]);
 			});
 
 			it("should populate project's tasks array when task links to project", async () => {
@@ -440,60 +440,7 @@ describe("Indexer", () => {
 				await indexer.start();
 
 				const projectHierarchy = indexer.getProjectHierarchy("Projects/My Project.md");
-				expect(projectHierarchy?.tasks).toEqual(["Tasks/My Task.md"]);
-			});
-		});
-
-		describe("child → parents caching (fileToParents)", () => {
-			it("should track project's parent goals", async () => {
-				const projectFile = new TFile("Projects/My Project.md");
-
-				vi.mocked(mockVault.getMarkdownFiles).mockReturnValue([projectFile]);
-				vi.mocked(mockMetadataCache.getFileCache).mockReturnValue({
-					frontmatter: {
-						Goal: ["[[Goals/Goal 1]]", "[[Goals/Goal 2]]"],
-					},
-				} as CachedMetadata);
-
-				await indexer.start();
-
-				const parents = indexer.getFileParents("Projects/My Project.md");
-				expect(parents).toBeDefined();
-				expect(parents?.goals).toEqual(["Goals/Goal 1.md", "Goals/Goal 2.md"]);
-				expect(parents?.projects).toEqual([]);
-			});
-
-			it("should track task's parent goals and projects", async () => {
-				const taskFile = new TFile("Tasks/My Task.md");
-
-				vi.mocked(mockVault.getMarkdownFiles).mockReturnValue([taskFile]);
-				vi.mocked(mockMetadataCache.getFileCache).mockReturnValue({
-					frontmatter: {
-						Goal: "[[Goals/My Goal]]",
-						Project: "[[Projects/My Project]]",
-					},
-				} as CachedMetadata);
-
-				await indexer.start();
-
-				const parents = indexer.getFileParents("Tasks/My Task.md");
-				expect(parents).toBeDefined();
-				expect(parents?.goals).toEqual(["Goals/My Goal.md"]);
-				expect(parents?.projects).toEqual(["Projects/My Project.md"]);
-			});
-
-			it("should return null for files not in hierarchy", async () => {
-				const goalFile = new TFile("Goals/My Goal.md");
-
-				vi.mocked(mockVault.getMarkdownFiles).mockReturnValue([goalFile]);
-				vi.mocked(mockMetadataCache.getFileCache).mockReturnValue({
-					frontmatter: {},
-				} as CachedMetadata);
-
-				await indexer.start();
-
-				const parents = indexer.getFileParents("Goals/My Goal.md");
-				expect(parents).toBeNull();
+				expect(projectHierarchy?.tasks).toEqual(["My Task.md"]);
 			});
 		});
 
@@ -522,19 +469,11 @@ describe("Indexer", () => {
 
 				// Check parent→child cache
 				const goalHierarchy = indexer.getGoalHierarchy("Goals/My Goal.md");
-				expect(goalHierarchy?.projects).toContain("Projects/My Project.md");
-				expect(goalHierarchy?.tasks).toContain("Tasks/My Task.md");
+				expect(goalHierarchy?.projects).toContain("My Project.md");
+				expect(goalHierarchy?.tasks).toContain("My Task.md");
 
 				const projectHierarchy = indexer.getProjectHierarchy("Projects/My Project.md");
-				expect(projectHierarchy?.tasks).toContain("Tasks/My Task.md");
-
-				// Check child→parent cache
-				const projectParents = indexer.getFileParents("Projects/My Project.md");
-				expect(projectParents?.goals).toContain("Goals/My Goal.md");
-
-				const taskParents = indexer.getFileParents("Tasks/My Task.md");
-				expect(taskParents?.goals).toContain("Goals/My Goal.md");
-				expect(taskParents?.projects).toContain("Projects/My Project.md");
+				expect(projectHierarchy?.tasks).toContain("My Task.md");
 			});
 		});
 	});

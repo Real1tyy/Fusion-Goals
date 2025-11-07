@@ -48,14 +48,6 @@ export interface GoalChildrenCache extends ProjectChildrenCache {
 	projects: string[];
 }
 
-export interface ProjectParentsCache {
-	goals: string[];
-}
-
-export interface TaskParentsCache extends ProjectParentsCache {
-	projects: string[];
-}
-
 export class Indexer {
 	private settings: FusionGoalsSettings;
 	private fileSub: Subscription | null = null;
@@ -68,8 +60,6 @@ export class Indexer {
 
 	private goalToChildren = new Map<string, GoalChildrenCache>();
 	private projectToChildren = new Map<string, ProjectChildrenCache>();
-	private projectToParents = new Map<string, ProjectParentsCache>();
-	private taskToParents = new Map<string, TaskParentsCache>();
 
 	private isInitialCacheBuilt = false;
 
@@ -119,8 +109,6 @@ export class Indexer {
 		this.relationshipsCache.clear();
 		this.goalToChildren.clear();
 		this.projectToChildren.clear();
-		this.projectToParents.clear();
-		this.taskToParents.clear();
 		this.isInitialCacheBuilt = false;
 	}
 
@@ -284,7 +272,7 @@ export class Indexer {
 			return;
 		}
 
-		this.removeFromHierarchicalCache(oldRelationships);
+		this.deleteFromHierarchicalCache(oldRelationships);
 
 		const newRelationships: FileRelationships = {
 			filePath: newFile.path,
@@ -328,9 +316,6 @@ export class Indexer {
 		};
 
 		this.relationshipsCache.set(file.path, newRelationships);
-		if (oldRelationships) {
-			this.removeFromHierarchicalCache(oldRelationships);
-		}
 		this.updateHierarchicalCache(newRelationships);
 
 		if (this.isInitialCacheBuilt && (fileType === "goal" || fileType === "project")) {
@@ -382,12 +367,7 @@ export class Indexer {
 			}
 
 			const goalPaths = parseLinkedPathsFromProperty(frontmatter[projectGoalProp]);
-			// Store normalized filename in children arrays
 			linkToParents(this.goalToChildren, goalPaths, normalizedKey, "projects", { projects: [], tasks: [] });
-
-			// Normalize goal paths for parent cache
-			const normalizedGoalPaths = goalPaths.map(normalizePathToFilename);
-			this.projectToParents.set(normalizedKey, { goals: normalizedGoalPaths });
 		} else if (type === "task") {
 			const goalPaths = parseLinkedPathsFromProperty(frontmatter[taskGoalProp]);
 			const projectPaths = parseLinkedPathsFromProperty(frontmatter[taskProjectProp]);
@@ -395,58 +375,6 @@ export class Indexer {
 			// Store normalized filename in children arrays
 			linkToParents(this.goalToChildren, goalPaths, normalizedKey, "tasks", { projects: [], tasks: [] });
 			linkToParents(this.projectToChildren, projectPaths, normalizedKey, "tasks", { tasks: [] });
-
-			// Normalize paths for parent cache
-			const normalizedGoalPaths = goalPaths.map(normalizePathToFilename);
-			const normalizedProjectPaths = projectPaths.map(normalizePathToFilename);
-			this.taskToParents.set(normalizedKey, { goals: normalizedGoalPaths, projects: normalizedProjectPaths });
-		}
-	}
-
-	private removeFromHierarchicalCache(relationships: FileRelationships): void {
-		const { filePath, frontmatter, type } = relationships;
-		const { projectGoalProp, taskGoalProp, taskProjectProp } = this.settings;
-
-		const normalizedKey = normalizePathToFilename(filePath);
-
-		const unlinkFromParents = <T extends ProjectChildrenCache>(
-			parentCache: Map<string, T>,
-			parentPaths: string[],
-			childKey: string,
-			arrayKey: keyof T
-		) => {
-			for (const parentPath of parentPaths) {
-				const normalizedParentKey = normalizePathToFilename(parentPath);
-				const children = parentCache.get(normalizedParentKey);
-				if (children) {
-					const childArray = children[arrayKey] as string[];
-					children[arrayKey] = childArray.filter((p) => p !== childKey) as T[keyof T];
-				}
-			}
-		};
-
-		if (type === "goal") {
-			// ❌ DON'T delete goal's children - they're populated by other files!
-			// Goals' children are added when projects/tasks link to them
-			// Only delete if the file is actually being deleted (not modified)
-			// We'll handle this in the deletion flow, not here
-		} else if (type === "project") {
-			const goalPaths = parseLinkedPathsFromProperty(frontmatter[projectGoalProp]);
-			// Use normalized key to remove from children arrays
-			unlinkFromParents(this.goalToChildren, goalPaths, normalizedKey, "projects");
-
-			// ❌ DON'T delete project's children - they're populated by tasks!
-			// this.projectToChildren.delete(normalizedKey);
-			this.projectToParents.delete(normalizedKey);
-		} else if (type === "task") {
-			const goalPaths = parseLinkedPathsFromProperty(frontmatter[taskGoalProp]);
-			const projectPaths = parseLinkedPathsFromProperty(frontmatter[taskProjectProp]);
-
-			// Use normalized key to remove from children arrays
-			unlinkFromParents(this.goalToChildren, goalPaths, normalizedKey, "tasks");
-			unlinkFromParents(this.projectToChildren, projectPaths, normalizedKey, "tasks");
-
-			this.taskToParents.delete(normalizedKey);
 		}
 	}
 
@@ -479,15 +407,12 @@ export class Indexer {
 			unlinkFromParents(this.goalToChildren, goalPaths, normalizedKey, "projects");
 
 			this.projectToChildren.delete(normalizedKey);
-			this.projectToParents.delete(normalizedKey);
 		} else if (type === "task") {
 			const goalPaths = parseLinkedPathsFromProperty(frontmatter[taskGoalProp]);
 			const projectPaths = parseLinkedPathsFromProperty(frontmatter[taskProjectProp]);
 
 			unlinkFromParents(this.goalToChildren, goalPaths, normalizedKey, "tasks");
 			unlinkFromParents(this.projectToChildren, projectPaths, normalizedKey, "tasks");
-
-			this.taskToParents.delete(normalizedKey);
 		}
 	}
 
@@ -499,16 +424,6 @@ export class Indexer {
 	getProjectHierarchy(projectPath: string): ProjectChildrenCache | null {
 		const normalized = normalizePathToFilename(projectPath);
 		return this.projectToChildren.get(normalized) ?? null;
-	}
-
-	getProjectParents(projectPath: string): ProjectParentsCache | null {
-		const normalized = normalizePathToFilename(projectPath);
-		return this.projectToParents.get(normalized) ?? null;
-	}
-
-	getTaskParents(taskPath: string): TaskParentsCache | null {
-		const normalized = normalizePathToFilename(taskPath);
-		return this.taskToParents.get(normalized) ?? null;
 	}
 
 	getAllGoals(): string[] {
