@@ -69,6 +69,7 @@ export class GraphBuilder {
 
 		const { frontmatter } = getFileContext(this.app, filePath);
 		const nodeColor = this.colorEvaluator.evaluateColor(frontmatter ?? {});
+		const fileType = this.indexer.getFileType(filePath);
 
 		return {
 			data: {
@@ -79,6 +80,7 @@ export class GraphBuilder {
 				width: estimatedWidth,
 				height: estimatedHeight,
 				nodeColor: nodeColor,
+				fileType: fileType,
 			},
 		};
 	}

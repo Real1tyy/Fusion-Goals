@@ -104,8 +104,9 @@ export const FusionGoalsSettingsSchema = z.object({
 		.optional()
 		.default([...SETTINGS_DEFAULTS.DEFAULT_DISPLAY_NODE_PROPERTIES]),
 
-	// Node color rules
+	// Node appearance settings
 	defaultNodeColor: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_NODE_COLOR),
+	differentiateNodesByType: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_DIFFERENTIATE_NODES_BY_TYPE),
 	colorRules: z.array(ColorRuleSchema).optional().default([]),
 
 	// Excluded properties for node creation
