@@ -25,12 +25,16 @@ export interface BaseHandlerConfig {
 export abstract class BaseHandler {
 	protected app: App;
 	protected plugin: FusionGoalsPlugin;
-	protected selectedView: ViewType = "status-in-progress";
+	protected selectedView: ViewType;
 	protected selectedTopLevelView: string | null = null;
 
 	constructor(app: App, plugin: FusionGoalsPlugin) {
 		this.app = app;
 		this.plugin = plugin;
+
+		// Initialize with first available view option
+		const viewOptions = this.getViewOptions();
+		this.selectedView = viewOptions.length > 0 ? viewOptions[0].type : "status-in-progress";
 	}
 
 	abstract canHandle(file: TFile): boolean;
