@@ -1,5 +1,6 @@
 import type { SettingsUIBuilder } from "@real1ty-obsidian-plugins/utils";
 import { Notice, Setting } from "obsidian";
+import type FusionGoalsPlugin from "src/main";
 import type { FusionGoalsSettingsSchema } from "src/types/settings";
 import type { SettingsSection } from "../types";
 
@@ -7,7 +8,10 @@ export class HierarchySection implements SettingsSection {
 	id = "hierarchy";
 	label = "Hierarchy";
 
-	constructor(private uiBuilder: SettingsUIBuilder<typeof FusionGoalsSettingsSchema>) {}
+	constructor(
+		private plugin: FusionGoalsPlugin,
+		private uiBuilder: SettingsUIBuilder<typeof FusionGoalsSettingsSchema>
+	) {}
 
 	render(containerEl: HTMLElement): void {
 		new Setting(containerEl).setName("Hierarchical Structure").setHeading();
@@ -123,7 +127,9 @@ export class HierarchySection implements SettingsSection {
 						button.setButtonText("Rescanning...");
 
 						try {
-							new Notice("Property management has been removed from this plugin");
+							new Notice("Starting full rescan...");
+							await this.plugin.indexer.scanAllFiles();
+							new Notice("Rescan complete!");
 							button.setButtonText("✓ Complete!");
 							setTimeout(() => {
 								button.setButtonText("Rescan Everything");
@@ -131,6 +137,7 @@ export class HierarchySection implements SettingsSection {
 							}, 2000);
 						} catch (error) {
 							console.error("Error during rescan:", error);
+							new Notice("Error during rescan - check console");
 							button.setButtonText("✗ Error");
 							setTimeout(() => {
 								button.setButtonText("Rescan Everything");

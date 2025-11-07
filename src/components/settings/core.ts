@@ -81,7 +81,7 @@ export class FusionGoalsSettingsTab extends PluginSettingTab {
 	private createSections(): SettingsSection[] {
 		return [
 			new UserInterfaceSettingsSection(this.uiBuilder),
-			new HierarchySection(this.uiBuilder),
+			new HierarchySection(this.plugin, this.uiBuilder),
 			new GraphDisplaySettingsSection(this.uiBuilder),
 			new PropertyDisplaySettingsSection(this.uiBuilder),
 			new BasesViewSettingsSection(this.plugin, this.uiBuilder),
