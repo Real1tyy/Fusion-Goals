@@ -11,9 +11,12 @@ import {
 	type Subscription,
 } from "rxjs";
 import { debounceTime, filter, groupBy, map, mergeMap, switchMap, toArray } from "rxjs/operators";
-import { parseLinkedPathsFromProperty } from "src/utils/property-utils";
+import { applyInheritanceUpdates, getInheritableProperties } from "src/utils/inheritance";
+import { normalizePathToFilename } from "src/utils/path";
+import { parseLinkedPathsFromProperty } from "src/utils/property";
 import { type FileType, SCAN_CONCURRENCY } from "../types/constants";
 import type { Frontmatter, FusionGoalsSettings } from "../types/settings";
+import type { InheritanceUpdate } from "../utils/inheritance";
 
 export interface FileRelationships {
 	filePath: string;
@@ -37,38 +40,43 @@ type FileIntent =
 	| { kind: "changed"; file: TFile; path: string; fileType: FileType }
 	| { kind: "deleted"; path: string; fileType: FileType };
 
-/**
- * Hierarchical cache structure:
- * - Goals have arrays of projects and tasks
- * - Projects have arrays of tasks
- */
-export interface GoalHierarchy {
-	projects: string[];
+export interface ProjectChildrenCache {
 	tasks: string[];
-	[key: string]: string[];
 }
 
-export interface ProjectHierarchy {
-	tasks: string[];
-	[key: string]: string[];
+export interface GoalChildrenCache extends ProjectChildrenCache {
+	projects: string[];
+}
+
+export interface ProjectParentsCache {
+	goals: string[];
+}
+
+export interface TaskParentsCache extends ProjectParentsCache {
+	projects: string[];
 }
 
 export class Indexer {
 	private settings: FusionGoalsSettings;
 	private fileSub: Subscription | null = null;
 	private settingsSubscription: Subscription | null = null;
+	private app: App;
 	private vault: Vault;
 	private metadataCache: MetadataCache;
 	private scanEventsSubject = new Subject<IndexerEvent>();
 	private relationshipsCache = new Map<string, FileRelationships>();
 
-	// Hierarchical caches
-	private goalCache = new Map<string, GoalHierarchy>();
-	private projectCache = new Map<string, ProjectHierarchy>();
+	private goalToChildren = new Map<string, GoalChildrenCache>();
+	private projectToChildren = new Map<string, ProjectChildrenCache>();
+	private projectToParents = new Map<string, ProjectParentsCache>();
+	private taskToParents = new Map<string, TaskParentsCache>();
+
+	private isInitialCacheBuilt = false;
 
 	public readonly events$: Observable<IndexerEvent>;
 
 	constructor(app: App, settingsStore: BehaviorSubject<FusionGoalsSettings>) {
+		this.app = app;
 		this.vault = app.vault;
 		this.metadataCache = app.metadataCache;
 		this.settings = settingsStore.value;
@@ -89,10 +97,9 @@ export class Indexer {
 			return;
 		}
 
-		console.log(`🚀 Starting indexer with directories:`);
-		console.log(`   Goals: "${this.settings.goalsDirectory}"`);
-		console.log(`   Projects: "${this.settings.projectsDirectory}"`);
-		console.log(`   Tasks: "${this.settings.tasksDirectory}"`);
+		console.log(
+			`🚀 Starting indexer with directories: Goals: "${this.settings.goalsDirectory}" Projects: "${this.settings.projectsDirectory}" Tasks: "${this.settings.tasksDirectory}"`
+		);
 
 		await this.buildInitialCache();
 
@@ -110,8 +117,11 @@ export class Indexer {
 		this.settingsSubscription = null;
 
 		this.relationshipsCache.clear();
-		this.goalCache.clear();
-		this.projectCache.clear();
+		this.goalToChildren.clear();
+		this.projectToChildren.clear();
+		this.projectToParents.clear();
+		this.taskToParents.clear();
+		this.isInitialCacheBuilt = false;
 	}
 
 	private async buildInitialCache(): Promise<void> {
@@ -121,6 +131,8 @@ export class Indexer {
 		for (const file of relevantFiles) {
 			await this.buildEvent(file);
 		}
+
+		this.isInitialCacheBuilt = true;
 	}
 
 	async scanAllFiles(): Promise<void> {
@@ -146,6 +158,10 @@ export class Indexer {
 			for (const event of allEvents) {
 				this.scanEventsSubject.next(event);
 			}
+
+			this.isInitialCacheBuilt = true;
+
+			await this.propagateAllInheritance();
 		} catch (error) {
 			console.error("❌ Error during file scanning:", error);
 		}
@@ -163,13 +179,13 @@ export class Indexer {
 		const projectsDir = normalizeDir(projectsDirectory);
 		const tasksDir = normalizeDir(tasksDirectory);
 
-		if (filePath.startsWith(goalsDir) || filePath === goalsDirectory) {
+		if (filePath.startsWith(goalsDir)) {
 			return "goal";
 		}
-		if (filePath.startsWith(projectsDir) || filePath === projectsDirectory) {
+		if (filePath.startsWith(projectsDir)) {
 			return "project";
 		}
-		if (filePath.startsWith(tasksDir) || filePath === tasksDirectory) {
+		if (filePath.startsWith(tasksDir)) {
 			return "task";
 		}
 
@@ -244,9 +260,8 @@ export class Indexer {
 					const oldRelationships = this.relationshipsCache.get(intent.path);
 					this.relationshipsCache.delete(intent.path);
 
-					// Remove from hierarchical cache
 					if (oldRelationships) {
-						this.removeFromHierarchicalCache(oldRelationships);
+						this.deleteFromHierarchicalCache(oldRelationships);
 					}
 
 					return of<IndexerEvent>({
@@ -269,10 +284,8 @@ export class Indexer {
 			return;
 		}
 
-		// Remove old entry from hierarchical cache
 		this.removeFromHierarchicalCache(oldRelationships);
 
-		// Update cache for renamed file
 		const newRelationships: FileRelationships = {
 			filePath: newFile.path,
 			mtime: newFile.stat.mtime,
@@ -314,14 +327,15 @@ export class Indexer {
 			frontmatter,
 		};
 
-		// Update cache with new relationships
 		this.relationshipsCache.set(file.path, newRelationships);
-
-		// Update hierarchical cache
 		if (oldRelationships) {
 			this.removeFromHierarchicalCache(oldRelationships);
 		}
 		this.updateHierarchicalCache(newRelationships);
+
+		if (this.isInitialCacheBuilt && (fileType === "goal" || fileType === "project")) {
+			await this.propagateInheritance(newRelationships);
+		}
 
 		return {
 			type: "file-changed",
@@ -336,30 +350,56 @@ export class Indexer {
 		const { filePath, frontmatter, type } = relationships;
 		const { projectGoalProp, taskGoalProp, taskProjectProp } = this.settings;
 
-		const addToCache = <T extends { [key: string]: string[] }>(
-			cache: Map<string, T>,
-			propName: string,
+		const normalizedKey = normalizePathToFilename(filePath);
+
+		const linkToParents = <T extends ProjectChildrenCache>(
+			parentCache: Map<string, T>,
+			parentPaths: string[],
+			childKey: string,
 			arrayKey: keyof T,
 			defaultEntry: T
 		) => {
-			const linkedPaths = parseLinkedPathsFromProperty(frontmatter[propName]);
-
-			for (const linkedPath of linkedPaths) {
-				if (!cache.has(linkedPath)) {
-					cache.set(linkedPath, defaultEntry);
+			for (const parentPath of parentPaths) {
+				const normalizedParentKey = normalizePathToFilename(parentPath);
+				if (!parentCache.has(normalizedParentKey)) {
+					parentCache.set(normalizedParentKey, defaultEntry);
 				}
-				const entry = cache.get(linkedPath)!;
-				if (!entry[arrayKey].includes(filePath)) {
-					entry[arrayKey].push(filePath);
+				const children = parentCache.get(normalizedParentKey)!;
+				const childArray = children[arrayKey] as string[];
+				if (!childArray.includes(childKey)) {
+					childArray.push(childKey);
 				}
 			}
 		};
 
-		if (type === "project") {
-			addToCache(this.goalCache, projectGoalProp, "projects", { projects: [], tasks: [] });
+		if (type === "goal") {
+			if (!this.goalToChildren.has(normalizedKey)) {
+				this.goalToChildren.set(normalizedKey, { projects: [], tasks: [] });
+			}
+		} else if (type === "project") {
+			if (!this.projectToChildren.has(normalizedKey)) {
+				this.projectToChildren.set(normalizedKey, { tasks: [] });
+			}
+
+			const goalPaths = parseLinkedPathsFromProperty(frontmatter[projectGoalProp]);
+			// Store normalized filename in children arrays
+			linkToParents(this.goalToChildren, goalPaths, normalizedKey, "projects", { projects: [], tasks: [] });
+
+			// Normalize goal paths for parent cache
+			const normalizedGoalPaths = goalPaths.map(normalizePathToFilename);
+			this.projectToParents.set(normalizedKey, { goals: normalizedGoalPaths });
 		} else if (type === "task") {
-			addToCache(this.goalCache, taskGoalProp, "tasks", { projects: [], tasks: [] });
-			addToCache(this.projectCache, taskProjectProp, "tasks", { tasks: [] });
+			const goalPaths = parseLinkedPathsFromProperty(frontmatter[taskGoalProp]);
+			const projectPaths = parseLinkedPathsFromProperty(frontmatter[taskProjectProp]);
+
+			// Store normalized filename in children arrays
+			linkToParents(this.goalToChildren, goalPaths, normalizedKey, "tasks", { projects: [], tasks: [] });
+			linkToParents(this.projectToChildren, projectPaths, normalizedKey, "tasks", { tasks: [] });
+
+			// Normalize paths for parent cache
+			const normalizedGoalPaths = goalPaths.map(normalizePathToFilename);
+			const normalizedProjectPaths = projectPaths.map(normalizePathToFilename);
+			this.taskToParents.set(normalizedKey, { goals: normalizedGoalPaths, projects: normalizedProjectPaths });
 		}
 	}
 
@@ -367,48 +407,189 @@ export class Indexer {
 		const { filePath, frontmatter, type } = relationships;
 		const { projectGoalProp, taskGoalProp, taskProjectProp } = this.settings;
 
-		const removeFromCache = <T extends { [key: string]: string[] }>(
-			cache: Map<string, T>,
-			propName: string,
+		const normalizedKey = normalizePathToFilename(filePath);
+
+		const unlinkFromParents = <T extends ProjectChildrenCache>(
+			parentCache: Map<string, T>,
+			parentPaths: string[],
+			childKey: string,
 			arrayKey: keyof T
 		) => {
-			const linkedPaths = parseLinkedPathsFromProperty(frontmatter[propName]);
-			for (const linkedPath of linkedPaths) {
-				const entry = cache.get(linkedPath);
-				if (entry) {
-					entry[arrayKey] = entry[arrayKey].filter((p) => p !== filePath) as T[keyof T];
+			for (const parentPath of parentPaths) {
+				const normalizedParentKey = normalizePathToFilename(parentPath);
+				const children = parentCache.get(normalizedParentKey);
+				if (children) {
+					const childArray = children[arrayKey] as string[];
+					children[arrayKey] = childArray.filter((p) => p !== childKey) as T[keyof T];
 				}
 			}
 		};
 
 		if (type === "goal") {
-			this.goalCache.delete(filePath);
+			// ❌ DON'T delete goal's children - they're populated by other files!
+			// Goals' children are added when projects/tasks link to them
+			// Only delete if the file is actually being deleted (not modified)
+			// We'll handle this in the deletion flow, not here
 		} else if (type === "project") {
-			removeFromCache(this.goalCache, projectGoalProp, "projects");
-			this.projectCache.delete(filePath);
+			const goalPaths = parseLinkedPathsFromProperty(frontmatter[projectGoalProp]);
+			// Use normalized key to remove from children arrays
+			unlinkFromParents(this.goalToChildren, goalPaths, normalizedKey, "projects");
+
+			// ❌ DON'T delete project's children - they're populated by tasks!
+			// this.projectToChildren.delete(normalizedKey);
+			this.projectToParents.delete(normalizedKey);
 		} else if (type === "task") {
-			removeFromCache(this.goalCache, taskGoalProp, "tasks");
-			removeFromCache(this.projectCache, taskProjectProp, "tasks");
+			const goalPaths = parseLinkedPathsFromProperty(frontmatter[taskGoalProp]);
+			const projectPaths = parseLinkedPathsFromProperty(frontmatter[taskProjectProp]);
+
+			// Use normalized key to remove from children arrays
+			unlinkFromParents(this.goalToChildren, goalPaths, normalizedKey, "tasks");
+			unlinkFromParents(this.projectToChildren, projectPaths, normalizedKey, "tasks");
+
+			this.taskToParents.delete(normalizedKey);
 		}
 	}
 
-	getGoalHierarchy(goalPath: string): GoalHierarchy | null {
-		return this.goalCache.get(goalPath) ?? null;
+	private deleteFromHierarchicalCache(relationships: FileRelationships): void {
+		const { filePath, frontmatter, type } = relationships;
+		const { projectGoalProp, taskGoalProp, taskProjectProp } = this.settings;
+
+		const normalizedKey = normalizePathToFilename(filePath);
+
+		const unlinkFromParents = <T extends ProjectChildrenCache>(
+			parentCache: Map<string, T>,
+			parentPaths: string[],
+			childKey: string,
+			arrayKey: keyof T
+		) => {
+			for (const parentPath of parentPaths) {
+				const normalizedParentKey = normalizePathToFilename(parentPath);
+				const children = parentCache.get(normalizedParentKey);
+				if (children) {
+					const childArray = children[arrayKey] as string[];
+					children[arrayKey] = childArray.filter((p) => p !== childKey) as T[keyof T];
+				}
+			}
+		};
+
+		if (type === "goal") {
+			this.goalToChildren.delete(normalizedKey);
+		} else if (type === "project") {
+			const goalPaths = parseLinkedPathsFromProperty(frontmatter[projectGoalProp]);
+			unlinkFromParents(this.goalToChildren, goalPaths, normalizedKey, "projects");
+
+			this.projectToChildren.delete(normalizedKey);
+			this.projectToParents.delete(normalizedKey);
+		} else if (type === "task") {
+			const goalPaths = parseLinkedPathsFromProperty(frontmatter[taskGoalProp]);
+			const projectPaths = parseLinkedPathsFromProperty(frontmatter[taskProjectProp]);
+
+			unlinkFromParents(this.goalToChildren, goalPaths, normalizedKey, "tasks");
+			unlinkFromParents(this.projectToChildren, projectPaths, normalizedKey, "tasks");
+
+			this.taskToParents.delete(normalizedKey);
+		}
 	}
 
-	getProjectHierarchy(projectPath: string): ProjectHierarchy | null {
-		return this.projectCache.get(projectPath) ?? null;
+	getGoalHierarchy(goalPath: string): GoalChildrenCache | null {
+		const normalized = normalizePathToFilename(goalPath);
+		return this.goalToChildren.get(normalized) ?? null;
+	}
+
+	getProjectHierarchy(projectPath: string): ProjectChildrenCache | null {
+		const normalized = normalizePathToFilename(projectPath);
+		return this.projectToChildren.get(normalized) ?? null;
+	}
+
+	getProjectParents(projectPath: string): ProjectParentsCache | null {
+		const normalized = normalizePathToFilename(projectPath);
+		return this.projectToParents.get(normalized) ?? null;
+	}
+
+	getTaskParents(taskPath: string): TaskParentsCache | null {
+		const normalized = normalizePathToFilename(taskPath);
+		return this.taskToParents.get(normalized) ?? null;
 	}
 
 	getAllGoals(): string[] {
-		return Array.from(this.goalCache.keys());
+		return Array.from(this.goalToChildren.keys());
 	}
 
 	getAllProjects(): string[] {
-		return Array.from(this.projectCache.keys());
+		return Array.from(this.projectToChildren.keys());
 	}
 
 	getSettings(): Readonly<FusionGoalsSettings> {
 		return this.settings;
+	}
+
+	private async propagateAllInheritance(): Promise<void> {
+		if (!this.settings.enableFrontmatterInheritance) {
+			return;
+		}
+		for (const [_goalPath, goalData] of this.relationshipsCache.entries()) {
+			if (goalData.type === "goal") {
+				await this.propagateInheritance(goalData);
+			}
+		}
+		for (const [_projectPath, projectData] of this.relationshipsCache.entries()) {
+			if (projectData.type === "project") {
+				await this.propagateInheritance(projectData);
+			}
+		}
+	}
+
+	private async propagateInheritance(parentFile: FileRelationships): Promise<void> {
+		if (!this.settings.enableFrontmatterInheritance) {
+			return;
+		}
+
+		const { type, frontmatter, filePath } = parentFile;
+		const normalizedKey = normalizePathToFilename(filePath);
+		const inheritableProps = getInheritableProperties(frontmatter, this.settings);
+		let updates: InheritanceUpdate[] = [];
+
+		// Helper to reconstruct full path from normalized filename
+		const reconstructPath = (normalizedFilename: string): string | null => {
+			for (const [fullPath] of this.relationshipsCache.entries()) {
+				if (normalizePathToFilename(fullPath) === normalizedFilename) {
+					return fullPath;
+				}
+			}
+			return null;
+		};
+
+		if (type === "goal") {
+			const hierarchy = this.goalToChildren.get(normalizedKey);
+			if (hierarchy) {
+				const projectUpdates = hierarchy.projects
+					.map((projectFilename) => {
+						const fullPath = reconstructPath(projectFilename);
+						return fullPath ? { filePath: fullPath, properties: inheritableProps } : null;
+					})
+					.filter((u): u is InheritanceUpdate => u !== null);
+
+				const taskUpdates = hierarchy.tasks
+					.map((taskFilename) => {
+						const fullPath = reconstructPath(taskFilename);
+						return fullPath ? { filePath: fullPath, properties: inheritableProps } : null;
+					})
+					.filter((u): u is InheritanceUpdate => u !== null);
+
+				updates = [...projectUpdates, ...taskUpdates];
+			}
+		} else if (type === "project") {
+			const hierarchy = this.projectToChildren.get(normalizedKey);
+			if (hierarchy) {
+				updates = hierarchy.tasks
+					.map((taskFilename) => {
+						const fullPath = reconstructPath(taskFilename);
+						return fullPath ? { filePath: fullPath, properties: inheritableProps } : null;
+					})
+					.filter((u): u is InheritanceUpdate => u !== null);
+			}
+		}
+
+		await applyInheritanceUpdates(this.app, updates);
 	}
 }

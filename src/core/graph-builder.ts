@@ -250,33 +250,24 @@ export class GraphBuilder {
 		return { nodes, edges };
 	}
 
-	/**
-	 * Get children paths for a file using hierarchical cache.
-	 */
 	private getChildrenPaths(filePath: string): string[] {
 		const fileType = this.indexer.getFileType(filePath);
 
 		if (fileType === "goal") {
-			// Goals have both projects and tasks as direct children
 			const goalHierarchy = this.indexer.getGoalHierarchy(filePath);
 			if (goalHierarchy) {
 				return [...goalHierarchy.projects, ...goalHierarchy.tasks];
 			}
 		} else if (fileType === "project") {
-			// Projects have tasks as children
 			const projectHierarchy = this.indexer.getProjectHierarchy(filePath);
 			if (projectHierarchy) {
 				return projectHierarchy.tasks;
 			}
 		}
 		// Tasks have no children
-
 		return [];
 	}
 
-	/**
-	 * Get parent path for a file based on frontmatter links.
-	 */
 	private getParentPath(filePath: string): string | null {
 		const { file, frontmatter } = getFileContext(this.app, filePath);
 		if (!file || !frontmatter) return null;
