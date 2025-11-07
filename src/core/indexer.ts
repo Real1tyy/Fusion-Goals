@@ -423,20 +423,44 @@ export class Indexer {
 
 	getGoalHierarchy(goalPath: string): GoalChildrenCache | null {
 		const normalized = normalizePathToFilename(goalPath);
-		return this.goalToChildren.get(normalized) ?? null;
+		const cache = this.goalToChildren.get(normalized);
+		if (!cache) return null;
+
+		return {
+			projects: this.resolveFullPaths(cache.projects),
+			tasks: this.resolveFullPaths(cache.tasks),
+		};
 	}
 
 	getProjectHierarchy(projectPath: string): ProjectChildrenCache | null {
 		const normalized = normalizePathToFilename(projectPath);
-		return this.projectToChildren.get(normalized) ?? null;
+		const cache = this.projectToChildren.get(normalized);
+		if (!cache) return null;
+
+		return {
+			tasks: this.resolveFullPaths(cache.tasks),
+		};
 	}
 
 	getAllGoals(): string[] {
-		return Array.from(this.goalToChildren.keys());
+		return this.resolveFullPaths(Array.from(this.goalToChildren.keys()));
 	}
 
 	getAllProjects(): string[] {
-		return Array.from(this.projectToChildren.keys());
+		return this.resolveFullPaths(Array.from(this.projectToChildren.keys()));
+	}
+
+	private resolveFullPaths(normalizedFilenames: string[]): string[] {
+		return normalizedFilenames
+			.map((filename) => {
+				for (const fullPath of this.relationshipsCache.keys()) {
+					if (normalizePathToFilename(fullPath) === filename) {
+						return fullPath;
+					}
+				}
+				return filename;
+			})
+			.filter((path) => path !== undefined);
 	}
 
 	getSettings(): Readonly<FusionGoalsSettings> {
@@ -471,17 +495,6 @@ export class Indexer {
 			? detectPropertyRemovals(oldParentFile.frontmatter, frontmatter, this.settings)
 			: {};
 
-		const normalizedToFullPath = new Map<string, string>();
-		for (const [fullPath] of this.relationshipsCache.entries()) {
-			normalizedToFullPath.set(normalizePathToFilename(fullPath), fullPath);
-		}
-
-		const resolveFullPaths = (normalizedFilenames: string[]): string[] => {
-			return normalizedFilenames
-				.map((filename) => normalizedToFullPath.get(filename))
-				.filter((fullPath): fullPath is string => fullPath !== undefined);
-		};
-
 		const createInheritanceChanges = (
 			affectedPaths: string[],
 			customProperties?: Record<string, unknown>
@@ -509,8 +522,8 @@ export class Indexer {
 		if (type === "goal") {
 			const hierarchy = this.goalToChildren.get(normalizedKey);
 			if (hierarchy) {
-				const projectPaths = resolveFullPaths(hierarchy.projects);
-				const directTaskPaths = resolveFullPaths(hierarchy.tasks);
+				const projectPaths = this.resolveFullPaths(hierarchy.projects);
+				const directTaskPaths = this.resolveFullPaths(hierarchy.tasks);
 
 				// Performance optimization: Only propagate to tasks that are NOT linked to any project.
 				// Tasks linked to projects will receive updates when their project's modified event fires,
@@ -520,7 +533,7 @@ export class Indexer {
 				for (const projectFilename of hierarchy.projects) {
 					const projectHierarchy = this.projectToChildren.get(projectFilename);
 					if (projectHierarchy) {
-						const resolvedTasks = resolveFullPaths(projectHierarchy.tasks);
+						const resolvedTasks = this.resolveFullPaths(projectHierarchy.tasks);
 						for (const taskPath of resolvedTasks) {
 							tasksThatHaveProjects.add(taskPath);
 						}
@@ -545,7 +558,7 @@ export class Indexer {
 					projectInheritableProps[this.settings.projectGoalProp] = frontmatter[this.settings.projectGoalProp];
 				}
 
-				const taskPaths = resolveFullPaths(hierarchy.tasks);
+				const taskPaths = this.resolveFullPaths(hierarchy.tasks);
 				({ updates: allUpdates, removals: allRemovals } = createInheritanceChanges(taskPaths, projectInheritableProps));
 			}
 		}

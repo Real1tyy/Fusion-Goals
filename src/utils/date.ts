@@ -78,4 +78,3 @@ export function calculateDaysRemainingFromFrontmatter(dateValue: unknown): strin
 	const days = calculateDaysDifference(date);
 	return formatDaysRelative(days);
 }
-
