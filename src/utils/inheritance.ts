@@ -30,9 +30,34 @@ export function getInheritableProperties(
 	);
 }
 
+function mergeValues(existing: unknown, newValue: unknown): unknown {
+	if (Array.isArray(existing) && Array.isArray(newValue)) {
+		return [...new Set([...existing, ...newValue])];
+	}
+	return newValue;
+}
+
+/**
+ * Merge multiple property objects into one.
+ * Arrays are merged using union (with deduplication via Set).
+ * For non-array values, last value wins.
+ */
+export function mergeProperties(propsList: Record<string, unknown>[]): Record<string, unknown> {
+	const merged: Record<string, unknown> = {};
+
+	for (const props of propsList) {
+		for (const [key, value] of Object.entries(props)) {
+			merged[key] = key in merged ? mergeValues(merged[key], value) : value;
+		}
+	}
+
+	return merged;
+}
+
 /**
  * Apply inheritance updates to child files.
  * Updates frontmatter for each file with inherited properties.
+ * Arrays are merged (union with automatic deduplication via Set).
  */
 export async function applyInheritanceUpdates(app: App, updates: InheritanceUpdate[]): Promise<void> {
 	for (const update of updates) {
@@ -44,7 +69,7 @@ export async function applyInheritanceUpdates(app: App, updates: InheritanceUpda
 		try {
 			await app.fileManager.processFrontMatter(file, (fm: Frontmatter) => {
 				for (const [key, value] of Object.entries(update.properties)) {
-					fm[key] = value;
+					fm[key] = key in fm ? mergeValues(fm[key], value) : value;
 				}
 			});
 		} catch (error) {

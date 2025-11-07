@@ -897,6 +897,156 @@ describe("Indexer", () => {
 			);
 			expect(callsForProject.length).toBe(0);
 		});
+
+		it("should propagate to indirect tasks (goal -> project -> task, where task only links to project)", async () => {
+			const goalFile = new TFile("Goals/My Goal.md");
+			const projectFile = new TFile("Projects/My Project.md");
+			const taskFile = new TFile("Tasks/My Task.md");
+
+			const goalFrontmatter: Frontmatter = {
+				Priority: "High",
+				Category: "Work",
+			};
+
+			const projectFrontmatter: Frontmatter = {
+				Goal: "[[Goals/My Goal]]",
+			};
+
+			// Task only links to project, NOT to goal
+			const taskFrontmatter: Frontmatter = {
+				Project: "[[Projects/My Project]]",
+			};
+
+			vi.mocked(mockVault.getMarkdownFiles).mockReturnValue([goalFile, projectFile, taskFile]);
+			vi.mocked(mockMetadataCache.getFileCache).mockImplementation((file) => {
+				if (file.path === "Goals/My Goal.md") {
+					return { frontmatter: goalFrontmatter } as CachedMetadata;
+				}
+				if (file.path === "Projects/My Project.md") {
+					return { frontmatter: projectFrontmatter } as CachedMetadata;
+				}
+				if (file.path === "Tasks/My Task.md") {
+					return { frontmatter: taskFrontmatter } as CachedMetadata;
+				}
+				return null;
+			});
+
+			await indexer.start();
+			processFrontMatterSpy.mockClear();
+
+			// Update the goal
+			vi.mocked(mockMetadataCache.getFileCache).mockImplementation((file) => {
+				if (file.path === "Goals/My Goal.md") {
+					return {
+						frontmatter: {
+							...goalFrontmatter,
+							Priority: "Critical", // Changed
+						},
+					} as CachedMetadata;
+				}
+				if (file.path === "Projects/My Project.md") {
+					return { frontmatter: projectFrontmatter } as CachedMetadata;
+				}
+				if (file.path === "Tasks/My Task.md") {
+					return { frontmatter: taskFrontmatter } as CachedMetadata;
+				}
+				return null;
+			});
+
+			const buildEvent = (indexer as any).buildEvent.bind(indexer);
+			await buildEvent(goalFile);
+
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
+			// Verify task received updates even though it doesn't directly link to goal
+			const callsForTask = processFrontMatterSpy.mock.calls.filter((call) => call[0].path === "Tasks/My Task.md");
+			expect(callsForTask.length).toBeGreaterThan(0);
+
+			if (callsForTask.length > 0) {
+				const taskCall = callsForTask[0];
+				const updaterFn = taskCall[1];
+				const testFm: any = {};
+				updaterFn(testFm);
+
+				// Task should inherit properties from goal through project
+				expect(testFm).toHaveProperty("Priority", "Critical");
+				expect(testFm).toHaveProperty("Category", "Work");
+			}
+		});
+
+		it("should merge array properties instead of replacing them", async () => {
+			const goalFile = new TFile("Goals/My Goal.md");
+			const projectFile = new TFile("Projects/My Project.md");
+
+			const goalFrontmatter: Frontmatter = {
+				Tags: ["tag-a", "tag-b", "tag-c"],
+				SimpleValue: "from-goal",
+			};
+
+			const projectFrontmatter: Frontmatter = {
+				Goal: "[[Goals/My Goal]]",
+				Tags: ["tag-d", "tag-e"],
+				SimpleValue: "from-project",
+			};
+
+			vi.mocked(mockVault.getMarkdownFiles).mockReturnValue([goalFile, projectFile]);
+			vi.mocked(mockMetadataCache.getFileCache).mockImplementation((file) => {
+				if (file.path === "Goals/My Goal.md") {
+					return { frontmatter: goalFrontmatter } as CachedMetadata;
+				}
+				if (file.path === "Projects/My Project.md") {
+					return { frontmatter: projectFrontmatter } as CachedMetadata;
+				}
+				return null;
+			});
+
+			await indexer.start();
+			processFrontMatterSpy.mockClear();
+
+			// Update the goal
+			vi.mocked(mockMetadataCache.getFileCache).mockImplementation((file) => {
+				if (file.path === "Goals/My Goal.md") {
+					return {
+						frontmatter: {
+							...goalFrontmatter,
+							Tags: ["tag-a", "tag-b", "tag-f"], // Changed: removed tag-c, added tag-f
+						},
+					} as CachedMetadata;
+				}
+				if (file.path === "Projects/My Project.md") {
+					return { frontmatter: projectFrontmatter } as CachedMetadata;
+				}
+				return null;
+			});
+
+			const buildEvent = (indexer as any).buildEvent.bind(indexer);
+			await buildEvent(goalFile);
+
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
+			// Verify array properties were merged, not replaced
+			const callsForProject = processFrontMatterSpy.mock.calls.filter(
+				(call) => call[0].path === "Projects/My Project.md"
+			);
+			expect(callsForProject.length).toBeGreaterThan(0);
+
+			if (callsForProject.length > 0) {
+				const projectCall = callsForProject[0];
+				const updaterFn = projectCall[1];
+				const testFm: any = {
+					Tags: ["tag-d", "tag-e"], // Existing tags in project
+					SimpleValue: "from-project", // Existing simple value
+				};
+				updaterFn(testFm);
+
+				// Tags should be merged (union)
+				expect(testFm.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-d", "tag-e", "tag-f"]));
+				expect(testFm.Tags).toHaveLength(5);
+
+				// Simple value should be replaced
+				expect(testFm.SimpleValue).toBe("from-goal");
+			}
+		});
 	});
 
 	describe("stop", () => {

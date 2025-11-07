@@ -1,7 +1,7 @@
 import { type App, TFile as TFileType } from "obsidian";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Frontmatter, FusionGoalsSettings } from "../src/types/settings";
-import { applyInheritanceUpdates, getInheritableProperties } from "../src/utils/inheritance";
+import { applyInheritanceUpdates, getInheritableProperties, mergeProperties } from "../src/utils/inheritance";
 
 // Mock Obsidian imports
 vi.mock("obsidian", async () => {
@@ -176,6 +176,104 @@ describe("getInheritableProperties", () => {
 	});
 });
 
+describe("mergeProperties", () => {
+	it("should merge properties from single source", () => {
+		const result = mergeProperties([{ Priority: "High", Status: "Active" }]);
+
+		expect(result).toEqual({
+			Priority: "High",
+			Status: "Active",
+		});
+	});
+
+	it("should merge properties from multiple sources", () => {
+		const result = mergeProperties([
+			{ Priority: "High", Category: "Work" },
+			{ Status: "Active", Owner: "John" },
+			{ Difficulty: "Medium" },
+		]);
+
+		expect(result).toEqual({
+			Priority: "High",
+			Category: "Work",
+			Status: "Active",
+			Owner: "John",
+			Difficulty: "Medium",
+		});
+	});
+
+	it("should merge array properties using union", () => {
+		const result = mergeProperties([{ Tags: ["tag-a", "tag-b"] }, { Tags: ["tag-c", "tag-d"] }]);
+
+		expect(result.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
+		expect((result.Tags as string[]).length).toBe(4);
+	});
+
+	it("should deduplicate array properties during merge", () => {
+		const result = mergeProperties([{ Tags: ["tag-a", "tag-b", "tag-c"] }, { Tags: ["tag-b", "tag-d", "tag-a"] }]);
+
+		expect(result.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
+		expect((result.Tags as string[]).length).toBe(4);
+	});
+
+	it("should override non-array properties (last value wins)", () => {
+		const result = mergeProperties([
+			{ Priority: "Low", Status: "Inactive" },
+			{ Priority: "Medium" },
+			{ Priority: "High" },
+		]);
+
+		expect(result).toEqual({
+			Priority: "High", // Last value wins
+			Status: "Inactive",
+		});
+	});
+
+	it("should handle mixed array and non-array merging", () => {
+		const result = mergeProperties([
+			{ Tags: ["tag-a"], Priority: "Low" },
+			{ Tags: ["tag-b"], Priority: "High" },
+			{ Category: "Work" },
+		]);
+
+		expect(result).toEqual({
+			Tags: expect.arrayContaining(["tag-a", "tag-b"]),
+			Priority: "High", // Last value wins
+			Category: "Work",
+		});
+	});
+
+	it("should handle empty property lists", () => {
+		const result = mergeProperties([]);
+		expect(result).toEqual({});
+	});
+
+	it("should handle empty objects in the list", () => {
+		const result = mergeProperties([{ Priority: "High" }, {}, { Status: "Active" }]);
+
+		expect(result).toEqual({
+			Priority: "High",
+			Status: "Active",
+		});
+	});
+
+	it("should merge complex nested scenarios", () => {
+		const result = mergeProperties([
+			{ Tags: ["a", "b"], Priority: "Low", Category: "Work" },
+			{ Tags: ["c"], Priority: "Medium", Owner: "Alice" },
+			{ Tags: ["b", "d"], Priority: "High" },
+		]);
+
+		expect(result).toEqual({
+			Tags: expect.arrayContaining(["a", "b", "c", "d"]),
+			Priority: "High", // Last wins
+			Category: "Work",
+			Owner: "Alice",
+		});
+		expect((result.Tags as string[]).length).toBe(4); // Deduplicated
+	});
+});
+
 describe("applyInheritanceUpdates", () => {
 	let mockApp: App;
 	let processFrontMatterSpy: ReturnType<typeof vi.fn>;
@@ -344,5 +442,87 @@ describe("applyInheritanceUpdates", () => {
 		const testFm: Frontmatter = { ExistingProp: "Value" };
 		processFrontMatterSpy.mock.calls[0][1](testFm);
 		expect(testFm).toEqual({ ExistingProp: "Value" });
+	});
+
+	it("should merge array properties without duplicates", async () => {
+		const updates = [
+			{
+				filePath: "Tasks/Task 1.md",
+				properties: {
+					Tags: ["tag-a", "tag-b", "tag-c"],
+					SimpleValue: "new-value",
+				},
+			},
+		];
+
+		await applyInheritanceUpdates(mockApp, updates);
+
+		expect(processFrontMatterSpy).toHaveBeenCalledTimes(1);
+
+		const testFm: Frontmatter = {
+			Tags: ["tag-b", "tag-c", "tag-d"], // Existing tags with overlap
+			SimpleValue: "old-value",
+		};
+		processFrontMatterSpy.mock.calls[0][1](testFm);
+
+		// Tags should be merged with deduplication
+		expect(testFm.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
+		expect(testFm.Tags).toHaveLength(4); // No duplicates
+
+		// Simple value should be replaced
+		expect(testFm.SimpleValue).toBe("new-value");
+	});
+
+	it("should handle incoming array properties with duplicates", async () => {
+		const updates = [
+			{
+				filePath: "Tasks/Task 1.md",
+				properties: {
+					Tags: ["tag-a", "tag-b", "tag-a", "tag-c", "tag-b"], // Contains duplicates
+				},
+			},
+		];
+
+		await applyInheritanceUpdates(mockApp, updates);
+
+		expect(processFrontMatterSpy).toHaveBeenCalledTimes(1);
+
+		const testFm: Frontmatter = {
+			Tags: ["tag-d"], // Existing tag
+		};
+		processFrontMatterSpy.mock.calls[0][1](testFm);
+
+		// Union operation with Set automatically deduplicates
+		expect(testFm.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
+		expect(testFm.Tags).toHaveLength(4);
+	});
+
+	it("should merge multiple inherited array properties", async () => {
+		const updates = [
+			{
+				filePath: "Tasks/Task 1.md",
+				properties: {
+					Tags: ["tag-a", "tag-b"],
+					Categories: ["cat-1", "cat-2"],
+				},
+			},
+		];
+
+		await applyInheritanceUpdates(mockApp, updates);
+
+		expect(processFrontMatterSpy).toHaveBeenCalledTimes(1);
+
+		const testFm: Frontmatter = {
+			Tags: ["tag-c", "tag-d"],
+			Categories: ["cat-2", "cat-3"], // Overlap with inherited
+		};
+		processFrontMatterSpy.mock.calls[0][1](testFm);
+
+		// Both arrays should be merged with deduplication
+		expect(testFm.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
+		expect(testFm.Tags).toHaveLength(4);
+
+		expect(testFm.Categories).toEqual(expect.arrayContaining(["cat-1", "cat-2", "cat-3"]));
+		expect(testFm.Categories).toHaveLength(3);
 	});
 });

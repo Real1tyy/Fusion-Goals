@@ -464,44 +464,48 @@ export class Indexer {
 		const inheritableProps = getInheritableProperties(frontmatter, this.settings);
 		let updates: InheritanceUpdate[] = [];
 
-		// Helper to reconstruct full path from normalized filename
-		const reconstructPath = (normalizedFilename: string): string | null => {
-			for (const [fullPath] of this.relationshipsCache.entries()) {
-				if (normalizePathToFilename(fullPath) === normalizedFilename) {
-					return fullPath;
-				}
-			}
-			return null;
-		};
+		const normalizedToFullPath = new Map<string, string>();
+		for (const [fullPath] of this.relationshipsCache.entries()) {
+			normalizedToFullPath.set(normalizePathToFilename(fullPath), fullPath);
+		}
 
 		if (type === "goal") {
 			const hierarchy = this.goalToChildren.get(normalizedKey);
 			if (hierarchy) {
 				const projectUpdates = hierarchy.projects
-					.map((projectFilename) => {
-						const fullPath = reconstructPath(projectFilename);
-						return fullPath ? { filePath: fullPath, properties: inheritableProps } : null;
-					})
-					.filter((u): u is InheritanceUpdate => u !== null);
+					.map((projectFilename) => normalizedToFullPath.get(projectFilename))
+					.filter((fullPath): fullPath is string => fullPath !== undefined)
+					.map((fullPath) => ({ filePath: fullPath, properties: inheritableProps }));
 
-				const taskUpdates = hierarchy.tasks
-					.map((taskFilename) => {
-						const fullPath = reconstructPath(taskFilename);
-						return fullPath ? { filePath: fullPath, properties: inheritableProps } : null;
-					})
-					.filter((u): u is InheritanceUpdate => u !== null);
+				const directTaskUpdates = hierarchy.tasks
+					.map((taskFilename) => normalizedToFullPath.get(taskFilename))
+					.filter((fullPath): fullPath is string => fullPath !== undefined)
+					.map((fullPath) => ({ filePath: fullPath, properties: inheritableProps }));
 
-				updates = [...projectUpdates, ...taskUpdates];
+				const directTaskPaths = new Set(directTaskUpdates.map((u) => u.filePath));
+				const indirectTaskUpdates: InheritanceUpdate[] = [];
+
+				for (const projectFilename of hierarchy.projects) {
+					const projectHierarchy = this.projectToChildren.get(projectFilename);
+					if (projectHierarchy) {
+						for (const taskFilename of projectHierarchy.tasks) {
+							const fullPath = normalizedToFullPath.get(taskFilename);
+							if (fullPath && !directTaskPaths.has(fullPath)) {
+								indirectTaskUpdates.push({ filePath: fullPath, properties: inheritableProps });
+							}
+						}
+					}
+				}
+
+				updates = [...projectUpdates, ...directTaskUpdates, ...indirectTaskUpdates];
 			}
 		} else if (type === "project") {
 			const hierarchy = this.projectToChildren.get(normalizedKey);
 			if (hierarchy) {
 				updates = hierarchy.tasks
-					.map((taskFilename) => {
-						const fullPath = reconstructPath(taskFilename);
-						return fullPath ? { filePath: fullPath, properties: inheritableProps } : null;
-					})
-					.filter((u): u is InheritanceUpdate => u !== null);
+					.map((taskFilename) => normalizedToFullPath.get(taskFilename))
+					.filter((fullPath): fullPath is string => fullPath !== undefined)
+					.map((fullPath) => ({ filePath: fullPath, properties: inheritableProps }));
 			}
 		}
 
