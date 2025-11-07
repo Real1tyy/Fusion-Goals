@@ -1,7 +1,13 @@
 import { type App, TFile as TFileType } from "obsidian";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Frontmatter, FusionGoalsSettings } from "../src/types/settings";
-import { applyInheritanceUpdates, getInheritableProperties, mergeProperties } from "../src/utils/inheritance";
+import {
+	applyInheritanceRemovals,
+	applyInheritanceUpdates,
+	detectPropertyRemovals,
+	getInheritableProperties,
+	mergeProperties,
+} from "../src/utils/inheritance";
 
 // Mock Obsidian imports
 vi.mock("obsidian", async () => {
@@ -607,5 +613,272 @@ describe("applyInheritanceUpdates", () => {
 
 		expect(testFm.Categories).toEqual(expect.arrayContaining(["cat-1", "cat-2", "cat-3"]));
 		expect(testFm.Categories).toHaveLength(3);
+	});
+});
+
+describe("detectPropertyRemovals", () => {
+	const defaultSettings: FusionGoalsSettings = {
+		enableFrontmatterInheritance: true,
+		inheritanceExcludedProperties: ["Goal", "Project"],
+		projectGoalProp: "Goal",
+		taskGoalProp: "Goal",
+		taskProjectProp: "Project",
+	} as FusionGoalsSettings;
+
+	it("should detect removed array values", () => {
+		const oldFrontmatter: Frontmatter = {
+			"Backlink Tags": ["[[Tags/Health]]", "[[Tags/Exercise]]", "[[Tags/Meditation]]"],
+		};
+
+		const newFrontmatter: Frontmatter = {
+			"Backlink Tags": ["[[Tags/Health]]", "[[Tags/Exercise]]"],
+		};
+
+		const removals = detectPropertyRemovals(oldFrontmatter, newFrontmatter, defaultSettings);
+
+		expect(removals["Backlink Tags"]).toEqual(["[[Tags/Meditation|Meditation]]"]);
+	});
+
+	it("should detect when entire property is removed", () => {
+		const oldFrontmatter: Frontmatter = {
+			Status: "Active",
+			Priority: "High",
+		};
+
+		const newFrontmatter: Frontmatter = {
+			Priority: "High",
+		};
+
+		const removals = detectPropertyRemovals(oldFrontmatter, newFrontmatter, defaultSettings);
+
+		expect(removals.Status).toEqual(["Active"]);
+	});
+
+	it("should detect multiple removed values from same array", () => {
+		const oldFrontmatter: Frontmatter = {
+			Tags: ["tag-a", "tag-b", "tag-c", "tag-d"],
+		};
+
+		const newFrontmatter: Frontmatter = {
+			Tags: ["tag-a", "tag-d"],
+		};
+
+		const removals = detectPropertyRemovals(oldFrontmatter, newFrontmatter, defaultSettings);
+
+		expect(removals.Tags).toEqual(expect.arrayContaining(["tag-b", "tag-c"]));
+		expect(removals.Tags).toHaveLength(2);
+	});
+
+	it("should return empty object when no removals detected", () => {
+		const oldFrontmatter: Frontmatter = {
+			Status: "Active",
+		};
+
+		const newFrontmatter: Frontmatter = {
+			Status: "Active",
+			Priority: "High", // Added property
+		};
+
+		const removals = detectPropertyRemovals(oldFrontmatter, newFrontmatter, defaultSettings);
+
+		expect(removals).toEqual({});
+	});
+
+	it("should return empty object when oldFrontmatter is undefined", () => {
+		const newFrontmatter: Frontmatter = {
+			Status: "Active",
+		};
+
+		const removals = detectPropertyRemovals(undefined, newFrontmatter, defaultSettings);
+
+		expect(removals).toEqual({});
+	});
+
+	it("should normalize wiki links when detecting removals", () => {
+		const oldFrontmatter: Frontmatter = {
+			"Backlink Tags": ["[[Tags/Health]]", "[[Tags/Exercise|Exercise]]"],
+		};
+
+		const newFrontmatter: Frontmatter = {
+			"Backlink Tags": ["[[Tags/Exercise|Exercise]]"],
+		};
+
+		const removals = detectPropertyRemovals(oldFrontmatter, newFrontmatter, defaultSettings);
+
+		expect(removals["Backlink Tags"]).toEqual(["[[Tags/Health|Health]]"]);
+	});
+
+	it("should not detect removals for excluded properties", () => {
+		const oldFrontmatter: Frontmatter = {
+			Goal: "[[Goals/My Goal]]",
+			Priority: "High",
+		};
+
+		const newFrontmatter: Frontmatter = {
+			Priority: "High",
+		};
+
+		const removals = detectPropertyRemovals(oldFrontmatter, newFrontmatter, defaultSettings);
+
+		// Goal is excluded, so it should not be in removals
+		expect(removals).not.toHaveProperty("Goal");
+	});
+});
+
+describe("applyInheritanceRemovals", () => {
+	let mockApp: App;
+	let processFrontMatterSpy: any;
+
+	beforeEach(() => {
+		processFrontMatterSpy = vi.fn(async (_file: any, callback: (fm: Frontmatter) => void) => {
+			// Simulate the callback being called with frontmatter
+			const fm: Frontmatter = {};
+			callback(fm);
+		});
+
+		mockApp = {
+			vault: {
+				getAbstractFileByPath: vi.fn((path: string) => {
+					if (path.includes("nonexistent")) {
+						return null;
+					}
+					return new TFile(path);
+				}),
+			},
+			fileManager: {
+				processFrontMatter: processFrontMatterSpy,
+			},
+		} as unknown as App;
+	});
+
+	it("should remove single value from array", async () => {
+		const removals = [
+			{
+				filePath: "Tasks/Task 1.md",
+				propertyRemovals: {
+					"Backlink Tags": ["[[Tags/Meditation|Meditation]]"],
+				},
+			},
+		];
+
+		await applyInheritanceRemovals(mockApp, removals);
+
+		expect(processFrontMatterSpy).toHaveBeenCalledTimes(1);
+
+		const testFm: Frontmatter = {
+			"Backlink Tags": ["[[Tags/Health]]", "[[Tags/Exercise]]", "[[Tags/Meditation]]"],
+		};
+		processFrontMatterSpy.mock.calls[0][1](testFm);
+
+		expect(testFm["Backlink Tags"]).toEqual(["[[Tags/Health]]", "[[Tags/Exercise]]"]);
+	});
+
+	it("should remove entire property when array becomes empty", async () => {
+		const removals = [
+			{
+				filePath: "Tasks/Task 1.md",
+				propertyRemovals: {
+					Tags: ["only-tag"],
+				},
+			},
+		];
+
+		await applyInheritanceRemovals(mockApp, removals);
+
+		const testFm: Frontmatter = {
+			Tags: ["only-tag"],
+			OtherProp: "value",
+		};
+		processFrontMatterSpy.mock.calls[0][1](testFm);
+
+		expect(testFm).not.toHaveProperty("Tags");
+		expect(testFm.OtherProp).toBe("value");
+	});
+
+	it("should remove single-value property", async () => {
+		const removals = [
+			{
+				filePath: "Tasks/Task 1.md",
+				propertyRemovals: {
+					Status: ["Active"],
+				},
+			},
+		];
+
+		await applyInheritanceRemovals(mockApp, removals);
+
+		const testFm: Frontmatter = {
+			Status: "Active",
+			Priority: "High",
+		};
+		processFrontMatterSpy.mock.calls[0][1](testFm);
+
+		expect(testFm).not.toHaveProperty("Status");
+		expect(testFm.Priority).toBe("High");
+	});
+
+	it("should handle multiple property removals", async () => {
+		const removals = [
+			{
+				filePath: "Tasks/Task 1.md",
+				propertyRemovals: {
+					Tags: ["tag-a", "tag-b"],
+					Categories: ["cat-1"],
+				},
+			},
+		];
+
+		await applyInheritanceRemovals(mockApp, removals);
+
+		const testFm: Frontmatter = {
+			Tags: ["tag-a", "tag-b", "tag-c"],
+			Categories: ["cat-1", "cat-2"],
+		};
+		processFrontMatterSpy.mock.calls[0][1](testFm);
+
+		expect(testFm.Tags).toEqual(["tag-c"]);
+		expect(testFm.Categories).toEqual(["cat-2"]);
+	});
+
+	it("should skip non-existent files", async () => {
+		const removals = [
+			{
+				filePath: "nonexistent.md",
+				propertyRemovals: {
+					Tags: ["tag-a"],
+				},
+			},
+		];
+
+		await applyInheritanceRemovals(mockApp, removals);
+
+		expect(processFrontMatterSpy).not.toHaveBeenCalled();
+	});
+
+	it("should handle empty removals array", async () => {
+		await applyInheritanceRemovals(mockApp, []);
+
+		expect(processFrontMatterSpy).not.toHaveBeenCalled();
+	});
+
+	it("should normalize wiki links when removing", async () => {
+		const removals = [
+			{
+				filePath: "Tasks/Task 1.md",
+				propertyRemovals: {
+					"Backlink Tags": ["[[Tags/Health|Health]]"],
+				},
+			},
+		];
+
+		await applyInheritanceRemovals(mockApp, removals);
+
+		const testFm: Frontmatter = {
+			"Backlink Tags": ["[[Tags/Health]]", "[[Tags/Exercise]]"],
+		};
+		processFrontMatterSpy.mock.calls[0][1](testFm);
+
+		// Should remove [[Tags/Health]] even though removal specified [[Tags/Health|Health]]
+		expect(testFm["Backlink Tags"]).toEqual(["[[Tags/Exercise]]"]);
 	});
 });

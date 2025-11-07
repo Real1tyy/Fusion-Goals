@@ -1024,28 +1024,29 @@ describe("Indexer", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 100));
 
-			// Verify array properties were merged, not replaced
+			// With removal propagation, there should be TWO calls: one for removals, one for additions
 			const callsForProject = processFrontMatterSpy.mock.calls.filter(
 				(call) => call[0].path === "Projects/My Project.md"
 			);
-			expect(callsForProject.length).toBeGreaterThan(0);
+			expect(callsForProject.length).toBeGreaterThanOrEqual(1);
 
-			if (callsForProject.length > 0) {
-				const projectCall = callsForProject[0];
-				const updaterFn = projectCall[1];
-				const testFm: any = {
-					Tags: ["tag-d", "tag-e"], // Existing tags in project
-					SimpleValue: "from-project", // Existing simple value
-				};
+			// Apply all updater functions in sequence to simulate real behavior
+			const testFm: any = {
+				Tags: ["tag-d", "tag-e"], // Existing tags in project
+				SimpleValue: "from-project", // Existing simple value
+			};
+
+			for (const call of callsForProject) {
+				const updaterFn = call[1];
 				updaterFn(testFm);
-
-				// Tags should be merged (union)
-				expect(testFm.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-d", "tag-e", "tag-f"]));
-				expect(testFm.Tags).toHaveLength(5);
-
-				// Simple value should be replaced
-				expect(testFm.SimpleValue).toBe("from-goal");
 			}
+
+			// Tags should be merged (union) - tag-c removed, tag-f added
+			expect(testFm.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-d", "tag-e", "tag-f"]));
+			expect(testFm.Tags).toHaveLength(5);
+
+			// Simple value should be replaced
+			expect(testFm.SimpleValue).toBe("from-goal");
 		});
 	});
 

@@ -7,6 +7,11 @@ export interface InheritanceUpdate {
 	properties: Record<string, unknown>;
 }
 
+export interface InheritanceRemoval {
+	filePath: string;
+	propertyRemovals: Record<string, unknown[]>; // key -> values to remove
+}
+
 /**
  * Normalizes a wiki link to always include an alias if it contains a path.
  * [[Tags/ADA]] becomes [[Tags/ADA|ADA]]
@@ -113,6 +118,52 @@ export function mergeProperties(propsList: Record<string, unknown>[]): Record<st
 }
 
 /**
+ * Detect what values were removed from inheritable properties.
+ * Compares old and new frontmatter to find removed array values.
+ */
+export function detectPropertyRemovals(
+	oldFrontmatter: Frontmatter | undefined,
+	newFrontmatter: Frontmatter,
+	settings: FusionGoalsSettings
+): Record<string, unknown[]> {
+	if (!oldFrontmatter) {
+		return {};
+	}
+
+	const oldProps = getInheritableProperties(oldFrontmatter, settings);
+	const newProps = getInheritableProperties(newFrontmatter, settings);
+	const removals: Record<string, unknown[]> = {};
+
+	// Check each property in old frontmatter
+	for (const [key, oldValue] of Object.entries(oldProps)) {
+		const newValue = newProps[key];
+
+		// Property was completely removed
+		if (newValue === undefined) {
+			if (Array.isArray(oldValue)) {
+				removals[key] = oldValue;
+			} else {
+				removals[key] = [oldValue];
+			}
+			continue;
+		}
+
+		// Check for removed array items
+		if (Array.isArray(oldValue) && Array.isArray(newValue)) {
+			const oldSet = new Set(oldValue.map((v) => (typeof v === "string" ? normalizeWikiLink(v) : v)));
+			const newSet = new Set(newValue.map((v) => (typeof v === "string" ? normalizeWikiLink(v) : v)));
+
+			const removed = [...oldSet].filter((v) => !newSet.has(v));
+			if (removed.length > 0) {
+				removals[key] = removed;
+			}
+		}
+	}
+
+	return removals;
+}
+
+/**
  * Apply inheritance updates to child files.
  * Updates frontmatter for each file with inherited properties.
  * Arrays are merged (union with automatic deduplication via Set).
@@ -132,6 +183,60 @@ export async function applyInheritanceUpdates(app: App, updates: InheritanceUpda
 			});
 		} catch (error) {
 			console.error(`Failed to update frontmatter for ${update.filePath}:`, error);
+		}
+	}
+}
+
+/**
+ * Apply inheritance removals to child files.
+ * Removes specific values from array properties in child files.
+ */
+export async function applyInheritanceRemovals(app: App, removals: InheritanceRemoval[]): Promise<void> {
+	for (const removal of removals) {
+		const file = app.vault.getAbstractFileByPath(removal.filePath);
+		if (!(file instanceof TFile)) {
+			continue;
+		}
+
+		try {
+			await app.fileManager.processFrontMatter(file, (fm: Frontmatter) => {
+				for (const [key, valuesToRemove] of Object.entries(removal.propertyRemovals)) {
+					if (!(key in fm)) {
+						continue;
+					}
+
+					const currentValue = fm[key];
+
+					// If current value is an array, filter out the removed values
+					if (Array.isArray(currentValue)) {
+						const normalizedRemovals = new Set(
+							valuesToRemove.map((v) => (typeof v === "string" ? normalizeWikiLink(v) : v))
+						);
+
+						const filtered = currentValue.filter((item) => {
+							const normalized = typeof item === "string" ? normalizeWikiLink(item) : item;
+							return !normalizedRemovals.has(normalized);
+						});
+
+						// Update or delete the property
+						if (filtered.length === 0) {
+							delete fm[key]; // Remove empty arrays
+						} else {
+							fm[key] = filtered;
+						}
+					} else {
+						// If it's a single value and matches one of the removed values, delete it
+						const normalized = typeof currentValue === "string" ? normalizeWikiLink(currentValue) : currentValue;
+						const normalizedRemovals = valuesToRemove.map((v) => (typeof v === "string" ? normalizeWikiLink(v) : v));
+
+						if (normalizedRemovals.includes(normalized)) {
+							delete fm[key];
+						}
+					}
+				}
+			});
+		} catch (error) {
+			console.error(`Failed to remove inherited properties from ${removal.filePath}:`, error);
 		}
 	}
 }
