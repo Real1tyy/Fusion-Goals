@@ -96,7 +96,6 @@ export default class FusionGoalsPlugin extends Plugin {
 			});
 		}
 
-		// Initialize indexer to scan goals, projects, and tasks directories
 		this.indexer = new Indexer(this.app, this.settingsStore.settings$);
 		await this.indexer.start();
 
