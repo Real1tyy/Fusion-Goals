@@ -483,11 +483,13 @@ export class Indexer {
 		};
 
 		const createInheritanceChanges = (
-			affectedPaths: string[]
+			affectedPaths: string[],
+			customProperties?: Record<string, unknown>
 		): { updates: InheritanceUpdate[]; removals: InheritanceRemoval[] } => {
+			const propsToUse = customProperties ?? inheritableProps;
 			const updates = affectedPaths.map((fullPath) => ({
 				filePath: fullPath,
-				properties: inheritableProps,
+				properties: propsToUse,
 			}));
 
 			const removals =
@@ -510,29 +512,41 @@ export class Indexer {
 				const projectPaths = resolveFullPaths(hierarchy.projects);
 				const directTaskPaths = resolveFullPaths(hierarchy.tasks);
 
-				const directTaskPathSet = new Set(directTaskPaths);
-				const indirectTaskPaths: string[] = [];
-
+				// Performance optimization: Only propagate to tasks that are NOT linked to any project.
+				// Tasks linked to projects will receive updates when their project's modified event fires,
+				// creating a two-step propagation: Goal → Project → Task (via project's event).
+				// This prevents redundant updates and leverages the natural event cascade.
+				const tasksThatHaveProjects = new Set<string>();
 				for (const projectFilename of hierarchy.projects) {
 					const projectHierarchy = this.projectToChildren.get(projectFilename);
 					if (projectHierarchy) {
 						const resolvedTasks = resolveFullPaths(projectHierarchy.tasks);
-						resolvedTasks
-							.filter((taskPath) => !directTaskPathSet.has(taskPath))
-							.forEach((taskPath) => {
-								indirectTaskPaths.push(taskPath);
-							});
+						for (const taskPath of resolvedTasks) {
+							tasksThatHaveProjects.add(taskPath);
+						}
 					}
 				}
 
-				const allAffectedPaths = [...projectPaths, ...directTaskPaths, ...indirectTaskPaths];
+				const tasksWithoutProjects = directTaskPaths.filter((taskPath) => !tasksThatHaveProjects.has(taskPath));
+
+				const allAffectedPaths = [...projectPaths, ...tasksWithoutProjects];
 				({ updates: allUpdates, removals: allRemovals } = createInheritanceChanges(allAffectedPaths));
 			}
 		} else if (type === "project") {
 			const hierarchy = this.projectToChildren.get(normalizedKey);
 			if (hierarchy) {
+				// Projects propagate their own properties to tasks, PLUS the Goal property
+				// so tasks know which goal they're indirectly related to through the project
+				const baseProps = getInheritableProperties(frontmatter, this.settings);
+				const projectInheritableProps: Record<string, unknown> = { ...baseProps };
+
+				// Add Goal property if it exists (tasks inherit the goal from their project)
+				if (frontmatter[this.settings.projectGoalProp]) {
+					projectInheritableProps[this.settings.projectGoalProp] = frontmatter[this.settings.projectGoalProp];
+				}
+
 				const taskPaths = resolveFullPaths(hierarchy.tasks);
-				({ updates: allUpdates, removals: allRemovals } = createInheritanceChanges(taskPaths));
+				({ updates: allUpdates, removals: allRemovals } = createInheritanceChanges(taskPaths, projectInheritableProps));
 			}
 		}
 

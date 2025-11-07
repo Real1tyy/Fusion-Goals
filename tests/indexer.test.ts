@@ -752,25 +752,25 @@ describe("Indexer", () => {
 			);
 			expect(callsForProject.length).toBeGreaterThan(0);
 
+			// Task should NOT receive direct updates (has project, will get updates via project's event)
 			const callsForTask = processFrontMatterSpy.mock.calls.filter((call) => call[0].path === "Tasks/My Task.md");
-			expect(callsForTask.length).toBeGreaterThan(0);
+			expect(callsForTask.length).toBe(0);
 
-			// Verify that the task receives the inherited properties from the goal
-			if (callsForTask.length > 0) {
-				const taskCall = callsForTask[0];
-				const updaterFn = taskCall[1];
+			// Verify that the project receives the inherited properties from the goal
+			if (callsForProject.length > 0) {
+				const projectCall = callsForProject[0];
+				const updaterFn = projectCall[1];
 				const testFm: any = {};
 				updaterFn(testFm);
 
-				// Task should inherit all non-excluded properties from goal
+				// Project should inherit all non-excluded properties from goal
 				expect(testFm).toHaveProperty("Priority", "Critical");
 				expect(testFm).toHaveProperty("Status", "Active");
 				expect(testFm).toHaveProperty("Category", "Work");
 				expect(testFm).toHaveProperty("NewProperty", "New Value");
 
-				// Task should NOT inherit relationship properties
+				// Project should NOT inherit relationship properties
 				expect(testFm).not.toHaveProperty("Goal");
-				expect(testFm).not.toHaveProperty("Project");
 			}
 		});
 
@@ -836,6 +836,76 @@ describe("Indexer", () => {
 					expect(testFm).not.toHaveProperty("Goal");
 					expect(testFm).not.toHaveProperty("ExcludedProp");
 				}
+			}
+		});
+
+		it("should propagate Goal property from project to tasks", async () => {
+			const projectFile = new TFile("Projects/My Project.md");
+			const taskFile = new TFile("Tasks/My Task.md");
+
+			const projectFrontmatter: Frontmatter = {
+				Goal: "[[Goals/My Goal]]",
+				Priority: "High",
+				Category: "Development",
+			};
+
+			const taskFrontmatter: Frontmatter = {
+				Project: "[[Projects/My Project]]",
+			};
+
+			vi.mocked(mockVault.getMarkdownFiles).mockReturnValue([projectFile, taskFile]);
+			vi.mocked(mockMetadataCache.getFileCache).mockImplementation((file) => {
+				if (file.path === "Projects/My Project.md") {
+					return { frontmatter: projectFrontmatter } as CachedMetadata;
+				}
+				if (file.path === "Tasks/My Task.md") {
+					return { frontmatter: taskFrontmatter } as CachedMetadata;
+				}
+				return null;
+			});
+
+			await indexer.start();
+			processFrontMatterSpy.mockClear();
+
+			// Update the project
+			vi.mocked(mockMetadataCache.getFileCache).mockImplementation((file) => {
+				if (file.path === "Projects/My Project.md") {
+					return {
+						frontmatter: {
+							...projectFrontmatter,
+							Status: "Active", // Added property
+						},
+					} as CachedMetadata;
+				}
+				if (file.path === "Tasks/My Task.md") {
+					return { frontmatter: taskFrontmatter } as CachedMetadata;
+				}
+				return null;
+			});
+
+			const buildEvent = (indexer as any).buildEvent.bind(indexer);
+			await buildEvent(projectFile);
+
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
+			// Verify task received updates including Goal property
+			const callsForTask = processFrontMatterSpy.mock.calls.filter((call) => call[0].path === "Tasks/My Task.md");
+			expect(callsForTask.length).toBeGreaterThan(0);
+
+			if (callsForTask.length > 0) {
+				const taskCall = callsForTask[0];
+				const updaterFn = taskCall[1];
+				const testFm: any = {};
+				updaterFn(testFm);
+
+				// Task should inherit Goal property from project
+				expect(testFm).toHaveProperty("Goal", "[[Goals/My Goal]]");
+				// Task should inherit other properties too
+				expect(testFm).toHaveProperty("Priority", "High");
+				expect(testFm).toHaveProperty("Category", "Development");
+				expect(testFm).toHaveProperty("Status", "Active");
+				// Task should NOT inherit Project property
+				expect(testFm).not.toHaveProperty("Project");
 			}
 		});
 
@@ -958,17 +1028,24 @@ describe("Indexer", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 100));
 
-			// Verify task received updates even though it doesn't directly link to goal
+			// Verify task did NOT receive direct updates from goal (performance optimization)
+			// Task will receive updates when project's modified event fires (event cascade)
 			const callsForTask = processFrontMatterSpy.mock.calls.filter((call) => call[0].path === "Tasks/My Task.md");
-			expect(callsForTask.length).toBeGreaterThan(0);
+			expect(callsForTask.length).toBe(0);
 
-			if (callsForTask.length > 0) {
-				const taskCall = callsForTask[0];
-				const updaterFn = taskCall[1];
+			// Verify project DID receive updates from goal
+			const callsForProject = processFrontMatterSpy.mock.calls.filter(
+				(call) => call[0].path === "Projects/My Project.md"
+			);
+			expect(callsForProject.length).toBeGreaterThan(0);
+
+			if (callsForProject.length > 0) {
+				const projectCall = callsForProject[0];
+				const updaterFn = projectCall[1];
 				const testFm: any = {};
 				updaterFn(testFm);
 
-				// Task should inherit properties from goal through project
+				// Project should inherit properties from goal
 				expect(testFm).toHaveProperty("Priority", "Critical");
 				expect(testFm).toHaveProperty("Category", "Work");
 			}

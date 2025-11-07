@@ -614,6 +614,53 @@ describe("applyInheritanceUpdates", () => {
 		expect(testFm.Categories).toEqual(expect.arrayContaining(["cat-1", "cat-2", "cat-3"]));
 		expect(testFm.Categories).toHaveLength(3);
 	});
+
+	it("should normalize existing child wiki links when applying updates", async () => {
+		const updates = [
+			{
+				filePath: "Tasks/Task 1.md",
+				properties: {
+					"Backlink Tags": ["[[Tags/Exercise|Exercise]]"],
+				},
+			},
+		];
+
+		await applyInheritanceUpdates(mockApp, updates);
+
+		const testFm: Frontmatter = {
+			"Backlink Tags": ["[[Tags/Health]]"], // No alias
+			OtherProp: "[[Tags/Wellness]]", // String without alias
+		};
+		processFrontMatterSpy.mock.calls[0][1](testFm);
+
+		// Existing wiki links should be normalized
+		expect(testFm["Backlink Tags"]).toEqual(
+			expect.arrayContaining(["[[Tags/Health|Health]]", "[[Tags/Exercise|Exercise]]"])
+		);
+		expect(testFm.OtherProp).toBe("[[Tags/Wellness|Wellness]]");
+	});
+
+	it("should not duplicate when merging if child has unnormalized wiki link", async () => {
+		const updates = [
+			{
+				filePath: "Tasks/Task 1.md",
+				properties: {
+					"Backlink Tags": ["[[Tags/Health|Health]]"],
+				},
+			},
+		];
+
+		await applyInheritanceUpdates(mockApp, updates);
+
+		const testFm: Frontmatter = {
+			"Backlink Tags": ["[[Tags/Health]]"], // Will be normalized to [[Tags/Health|Health]]
+		};
+		processFrontMatterSpy.mock.calls[0][1](testFm);
+
+		// Should only have one instance after normalization and merge
+		expect(testFm["Backlink Tags"]).toEqual(["[[Tags/Health|Health]]"]);
+		expect(testFm["Backlink Tags"]).toHaveLength(1);
+	});
 });
 
 describe("detectPropertyRemovals", () => {
@@ -770,7 +817,8 @@ describe("applyInheritanceRemovals", () => {
 		};
 		processFrontMatterSpy.mock.calls[0][1](testFm);
 
-		expect(testFm["Backlink Tags"]).toEqual(["[[Tags/Health]]", "[[Tags/Exercise]]"]);
+		// Should remove [[Tags/Meditation]] and normalize remaining links
+		expect(testFm["Backlink Tags"]).toEqual(["[[Tags/Health|Health]]", "[[Tags/Exercise|Exercise]]"]);
 	});
 
 	it("should remove entire property when array becomes empty", async () => {
@@ -878,7 +926,33 @@ describe("applyInheritanceRemovals", () => {
 		};
 		processFrontMatterSpy.mock.calls[0][1](testFm);
 
-		// Should remove [[Tags/Health]] even though removal specified [[Tags/Health|Health]]
-		expect(testFm["Backlink Tags"]).toEqual(["[[Tags/Exercise]]"]);
+		// Should remove [[Tags/Health]] and normalize [[Tags/Exercise]]
+		expect(testFm["Backlink Tags"]).toEqual(["[[Tags/Exercise|Exercise]]"]);
+	});
+
+	it("should normalize all existing child wiki links when applying removals", async () => {
+		const removals = [
+			{
+				filePath: "Tasks/Task 1.md",
+				propertyRemovals: {
+					"Backlink Tags": ["[[Tags/Health|Health]]"],
+				},
+			},
+		];
+
+		await applyInheritanceRemovals(mockApp, removals);
+
+		const testFm: Frontmatter = {
+			"Backlink Tags": ["[[Tags/Health]]", "[[Tags/Exercise]]", "[[Tags/Meditation]]"],
+			OtherProp: "[[Tags/Wellness]]",
+		};
+		processFrontMatterSpy.mock.calls[0][1](testFm);
+
+		// Should normalize all wiki links and remove the specified one
+		expect(testFm["Backlink Tags"]).toEqual(
+			expect.arrayContaining(["[[Tags/Exercise|Exercise]]", "[[Tags/Meditation|Meditation]]"])
+		);
+		expect(testFm["Backlink Tags"]).toHaveLength(2);
+		expect(testFm.OtherProp).toBe("[[Tags/Wellness|Wellness]]");
 	});
 });

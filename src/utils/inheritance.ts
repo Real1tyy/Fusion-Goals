@@ -17,9 +17,16 @@ export interface InheritanceRemoval {
  * [[Tags/ADA]] becomes [[Tags/ADA|ADA]]
  * [[Tags/Cold Approach|Cold Approach]] stays as is
  * [[SimpleTag]] stays as is (no path, no alias needed)
+ *
+ * Handles both raw wiki links and quoted wiki links (from YAML serialization)
  */
 function normalizeWikiLink(link: string): string {
-	const wikiLinkMatch = link.match(/^\[\[([^\]|]+)(?:\|([^\]]+))?\]\]$/);
+	if (typeof link !== "string") {
+		return link;
+	}
+
+	// Match wiki link pattern (may or may not be wrapped in quotes)
+	const wikiLinkMatch = link.match(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/);
 	if (!wikiLinkMatch) {
 		return link;
 	}
@@ -40,7 +47,9 @@ function normalizeWikiLink(link: string): string {
 	}
 
 	const alias = path.substring(lastSlashIndex + 1);
-	return `[[${path}|${alias}]]`;
+
+	// Replace the wiki link in the original string (preserves any surrounding quotes)
+	return link.replace(/\[\[([^\]|]+)\]\]/, `[[${path}|${alias}]]`);
 }
 
 /**
@@ -167,6 +176,7 @@ export function detectPropertyRemovals(
  * Apply inheritance updates to child files.
  * Updates frontmatter for each file with inherited properties.
  * Arrays are merged (union with automatic deduplication via Set).
+ * Also normalizes existing wiki links in the child's frontmatter.
  */
 export async function applyInheritanceUpdates(app: App, updates: InheritanceUpdate[]): Promise<void> {
 	for (const update of updates) {
@@ -177,6 +187,11 @@ export async function applyInheritanceUpdates(app: App, updates: InheritanceUpda
 
 		try {
 			await app.fileManager.processFrontMatter(file, (fm: Frontmatter) => {
+				for (const [key, existingValue] of Object.entries(fm)) {
+					if (existingValue !== undefined && existingValue !== null) {
+						fm[key] = normalizeValue(existingValue);
+					}
+				}
 				for (const [key, value] of Object.entries(update.properties)) {
 					fm[key] = key in fm ? mergeValues(fm[key], value) : value;
 				}
@@ -190,6 +205,7 @@ export async function applyInheritanceUpdates(app: App, updates: InheritanceUpda
 /**
  * Apply inheritance removals to child files.
  * Removes specific values from array properties in child files.
+ * Also normalizes existing wiki links in the child's frontmatter.
  */
 export async function applyInheritanceRemovals(app: App, removals: InheritanceRemoval[]): Promise<void> {
 	for (const removal of removals) {
@@ -200,6 +216,12 @@ export async function applyInheritanceRemovals(app: App, removals: InheritanceRe
 
 		try {
 			await app.fileManager.processFrontMatter(file, (fm: Frontmatter) => {
+				for (const [key, existingValue] of Object.entries(fm)) {
+					if (existingValue !== undefined && existingValue !== null) {
+						fm[key] = normalizeValue(existingValue);
+					}
+				}
+
 				for (const [key, valuesToRemove] of Object.entries(removal.propertyRemovals)) {
 					if (!(key in fm)) {
 						continue;
