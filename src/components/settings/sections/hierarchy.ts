@@ -68,21 +68,51 @@ export class HierarchySection implements SettingsSection {
 			placeholder: "Project",
 		});
 
+		this.renderInheritanceSection(containerEl);
 		this.renderIndexingSection(containerEl);
+	}
+
+	private renderInheritanceSection(containerEl: HTMLElement): void {
+		new Setting(containerEl).setName("Frontmatter Inheritance").setHeading();
+
+		const descEl = containerEl.createDiv("setting-item-description");
+		descEl.createEl("p", {
+			text: "Automatically propagate frontmatter properties from parent to child files in the hierarchy:",
+		});
+		descEl.createEl("ul", {}, (ul) => {
+			ul.createEl("li", { text: "Goals → All linked projects and tasks" });
+			ul.createEl("li", { text: "Projects → All linked tasks" });
+		});
+		descEl.createEl("p", {
+			text: "When you update a property in a goal or project, it will be inherited by all children. Relationship properties (Goal, Project) are always excluded from inheritance.",
+		});
+
+		this.uiBuilder.addToggle(containerEl, {
+			key: "enableFrontmatterInheritance",
+			name: "Enable frontmatter inheritance",
+			desc: "When enabled, changes to goal/project frontmatter will automatically propagate to children",
+		});
+
+		this.uiBuilder.addTextArray(containerEl, {
+			key: "inheritanceExcludedProperties",
+			name: "Excluded properties",
+			desc: "Property names to exclude from inheritance (e.g., 'tasks', 'CustomField'). Relationship properties are always excluded.",
+			placeholder: "Enter property name",
+		});
 	}
 
 	private renderIndexingSection(containerEl: HTMLElement): void {
 		new Setting(containerEl).setName("Indexing").setHeading();
 
 		const descEl = containerEl.createDiv("setting-item-description");
-		descEl.setText(
-			"Manually index all files in your vault and assign relationship properties based on your configured settings. This process will scan all files in the configured directories and update their frontmatter with bidirectional and computed relationships."
-		);
+		descEl.createEl("p", {
+			text: "Manually rescan and reindex all files in your vault. This will rebuild the hierarchical cache and, if inheritance is enabled, propagate properties from goals to projects/tasks.",
+		});
 
 		new Setting(containerEl)
-			.setName("Index and assign properties to all files")
+			.setName("Rescan everything")
 			.setDesc(
-				"Scan all files in configured directories and update their relationship properties. This may take some time for large vaults."
+				"Scan all files in configured directories, rebuild cache, and apply inheritance. This may take some time for large vaults."
 			)
 			.addButton((button) => {
 				button

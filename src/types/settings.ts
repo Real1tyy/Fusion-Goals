@@ -161,6 +161,16 @@ export const FusionGoalsSettingsSchema = z.object({
 	basesDaysRemainingProperty: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_DAYS_REMAINING_PROPERTY),
 	basesDaysSinceStartEnabled: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_DAYS_SINCE_START_ENABLED),
 	basesDaysSinceStartProperty: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_DAYS_SINCE_START_PROPERTY),
+
+	// Frontmatter inheritance settings
+	enableFrontmatterInheritance: z
+		.boolean()
+		.optional()
+		.default(SETTINGS_DEFAULTS.DEFAULT_ENABLE_FRONTMATTER_INHERITANCE),
+	inheritanceExcludedProperties: z
+		.array(z.string())
+		.optional()
+		.default([...SETTINGS_DEFAULTS.DEFAULT_INHERITANCE_EXCLUDED_PROPERTIES]),
 });
 
 export type FusionGoalsSettings = z.infer<typeof FusionGoalsSettingsSchema>;
