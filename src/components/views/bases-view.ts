@@ -164,6 +164,11 @@ export class BasesView extends RegisteredEventsComponent {
 				await this.render();
 			}
 		});
+
+		selectEl.addEventListener("contextmenu", async (e) => {
+			e.preventDefault();
+			await this.toggleViewForward();
+		});
 	}
 
 	private createViewSelector(): void {
@@ -196,6 +201,11 @@ export class BasesView extends RegisteredEventsComponent {
 				this.lastFilePath = null;
 				await this.render();
 			}
+		});
+
+		selectEl.addEventListener("contextmenu", async (e) => {
+			e.preventDefault();
+			await this.toggleSubviewForward();
 		});
 	}
 
@@ -254,6 +264,80 @@ export class BasesView extends RegisteredEventsComponent {
 				goalsHandler.setSelectedTopLevelView(state.goalsTopLevel);
 			}
 		}
+	}
+
+	async toggleViewForward(): Promise<void> {
+		await this.navigateView("view", 1);
+	}
+
+	async toggleViewBackward(): Promise<void> {
+		await this.navigateView("view", -1);
+	}
+
+	async toggleSubviewForward(): Promise<void> {
+		await this.navigateView("subview", 1);
+	}
+
+	async toggleSubviewBackward(): Promise<void> {
+		await this.navigateView("subview", -1);
+	}
+
+	async goToViewByIndex(index: number): Promise<void> {
+		await this.navigateToIndex("view", index);
+	}
+
+	async goToSubviewByIndex(index: number): Promise<void> {
+		await this.navigateToIndex("subview", index);
+	}
+
+	private async navigateView(type: "view" | "subview", direction: 1 | -1): Promise<void> {
+		if (!this.currentHandler) return;
+
+		if (type === "view") {
+			// View = top-level selector (Projects/Tasks for Goals)
+			const topLevelOptions = this.currentHandler.getTopLevelOptions();
+			if (topLevelOptions.length <= 1) return;
+
+			const currentTopLevel = this.currentHandler.getSelectedTopLevelView();
+			const currentIndex = topLevelOptions.findIndex((opt) => opt.id === currentTopLevel);
+			const nextIndex = (currentIndex + direction + topLevelOptions.length) % topLevelOptions.length;
+
+			this.currentHandler.setSelectedTopLevelView(topLevelOptions[nextIndex].id);
+		} else {
+			// Subview = bottom selector (status categories)
+			const viewOptions = this.currentHandler.getViewOptions();
+			if (viewOptions.length === 0) return;
+
+			const currentView = this.currentHandler.getSelectedView();
+			const currentIndex = viewOptions.findIndex((opt) => opt.type === currentView);
+			const nextIndex = (currentIndex + direction + viewOptions.length) % viewOptions.length;
+
+			this.currentHandler.setSelectedView(viewOptions[nextIndex].type);
+		}
+
+		this.lastFilePath = null;
+		await this.render();
+	}
+
+	private async navigateToIndex(type: "view" | "subview", index: number): Promise<void> {
+		if (!this.currentHandler) return;
+
+		if (type === "view") {
+			// View = top-level selector (Projects/Tasks for Goals)
+			const topLevelOptions = this.currentHandler.getTopLevelOptions();
+			if (topLevelOptions.length <= 1 || index < 0 || index >= topLevelOptions.length) return;
+
+			this.currentHandler.setSelectedTopLevelView(topLevelOptions[index].id);
+		} else {
+			// Subview = bottom selector (status categories)
+			const viewOptions = this.currentHandler.getViewOptions();
+			if (index < 0 || index >= viewOptions.length) return;
+
+			this.currentHandler.setSelectedView(viewOptions[index].type);
+		}
+
+		this.lastFilePath = null;
+		await this.render();
 	}
 
 	destroy(): void {

@@ -307,4 +307,28 @@ export class FusionViewSwitcher extends ItemView {
 	toggleHideFrontmatter(): void {
 		this.graphView?.toggleHideFrontmatter();
 	}
+
+	async toggleBasesViewForward(): Promise<void> {
+		await this.basesView?.toggleViewForward();
+	}
+
+	async toggleBasesViewBackward(): Promise<void> {
+		await this.basesView?.toggleViewBackward();
+	}
+
+	async toggleBasesSubviewForward(): Promise<void> {
+		await this.basesView?.toggleSubviewForward();
+	}
+
+	async toggleBasesSubviewBackward(): Promise<void> {
+		await this.basesView?.toggleSubviewBackward();
+	}
+
+	async goToBasesViewByIndex(index: number): Promise<void> {
+		await this.basesView?.goToViewByIndex(index);
+	}
+
+	async goToBasesSubviewByIndex(index: number): Promise<void> {
+		await this.basesView?.goToSubviewByIndex(index);
+	}
 }

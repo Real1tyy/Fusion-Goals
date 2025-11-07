@@ -108,8 +108,9 @@ export const FusionGoalsSettingsSchema = z.object({
 	startDateProperty: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_START_DATE_PROPERTY),
 	endDateProperty: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_END_DATE_PROPERTY),
 
-	// Node color rules
+	// Node appearance settings
 	defaultNodeColor: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_NODE_COLOR),
+	differentiateNodesByType: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_DIFFERENTIATE_NODES_BY_TYPE),
 	colorRules: z.array(ColorRuleSchema).optional().default([]),
 
 	// Excluded properties for node creation

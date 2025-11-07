@@ -35,8 +35,9 @@ export const SETTINGS_DEFAULTS = {
 	DEFAULT_SHOW_FILTER_BAR: true,
 	DEFAULT_SHOW_VIEW_SWITCHER_HEADER: true,
 
-	// Node color defaults
+	// Node appearance defaults
 	DEFAULT_NODE_COLOR: "#e9f2ff",
+	DEFAULT_DIFFERENTIATE_NODES_BY_TYPE: true,
 
 	// Node creation defaults
 	DEFAULT_EXCLUDED_PROPERTIES: ["goal", "project", "tasks"],

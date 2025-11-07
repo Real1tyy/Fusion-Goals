@@ -80,6 +80,46 @@ export default class FusionGoalsPlugin extends Plugin {
 				),
 		});
 
+		this.addCommand({
+			id: "bases-view-forward",
+			name: "Bases: Next View",
+			callback: () => this.executeViewSwitcherMethod("toggleBasesViewForward"),
+		});
+
+		this.addCommand({
+			id: "bases-view-backward",
+			name: "Bases: Previous View",
+			callback: () => this.executeViewSwitcherMethod("toggleBasesViewBackward"),
+		});
+
+		this.addCommand({
+			id: "bases-subview-forward",
+			name: "Bases: Next Subview",
+			callback: () => this.executeViewSwitcherMethod("toggleBasesSubviewForward"),
+		});
+
+		this.addCommand({
+			id: "bases-subview-backward",
+			name: "Bases: Previous Subview",
+			callback: () => this.executeViewSwitcherMethod("toggleBasesSubviewBackward"),
+		});
+
+		for (let i = 0; i < 10; i++) {
+			this.addCommand({
+				id: `bases-go-to-view-${i}`,
+				name: `Bases: Go to View ${i + 1}`,
+				callback: () => this.executeViewSwitcherMethodWithArg("goToBasesViewByIndex", i),
+			});
+		}
+
+		for (let i = 0; i < 10; i++) {
+			this.addCommand({
+				id: `bases-go-to-subview-${i}`,
+				name: `Bases: Go to Subview ${i + 1}`,
+				callback: () => this.executeViewSwitcherMethodWithArg("goToBasesSubviewByIndex", i),
+			});
+		}
+
 		this.initializePlugin();
 	}
 
@@ -146,6 +186,21 @@ export default class FusionGoalsPlugin extends Plugin {
 
 		if (noticeMessage) {
 			new Notice(noticeMessage);
+		}
+	}
+
+	private executeViewSwitcherMethodWithArg(methodName: string, arg: number): void {
+		const { workspace } = this.app;
+		const existingLeaves = workspace.getLeavesOfType(VIEW_TYPE_FUSION_SWITCHER);
+
+		if (existingLeaves.length > 0) {
+			const viewSwitcher = existingLeaves[0].view;
+			if (viewSwitcher instanceof FusionViewSwitcher) {
+				const method = viewSwitcher[methodName as keyof FusionViewSwitcher];
+				if (typeof method === "function") {
+					(method as (arg: number) => void).call(viewSwitcher, arg);
+				}
+			}
 		}
 	}
 }

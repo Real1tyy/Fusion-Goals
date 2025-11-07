@@ -677,6 +677,33 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 						"transition-timing-function": "ease-out",
 					},
 				},
+				// Node type differentiation (when enabled)
+				// Goals: Hexagon shape with prominent borders
+				{
+					selector: "node[fileType = 'goal']",
+					style: {
+						shape: this.plugin.settingsStore.settings$.value.differentiateNodesByType ? "hexagon" : "ellipse",
+						"border-width": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? 3 : 2,
+						"border-opacity": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? 1 : 0.8,
+					},
+				},
+				// Projects: Rounded rectangle with solid borders
+				{
+					selector: "node[fileType = 'project']",
+					style: {
+						shape: this.plugin.settingsStore.settings$.value.differentiateNodesByType ? "round-rectangle" : "ellipse",
+						"border-width": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? 2.5 : 2,
+					},
+				},
+				// Tasks: Circle with distinctive border (stays circular but more defined)
+				{
+					selector: "node[fileType = 'task']",
+					style: {
+						shape: "ellipse", // Always circular
+						"border-width": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? 2 : 2,
+						"border-style": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? "double" : "solid",
+					},
+				},
 				// Source node (central star) - larger and brighter
 				{
 					selector: "node[?isSource]",
