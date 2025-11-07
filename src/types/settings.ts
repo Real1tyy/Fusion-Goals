@@ -89,6 +89,7 @@ export const FusionGoalsSettingsSchema = z.object({
 	// Tooltip settings
 	showGraphTooltips: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_SHOW_GRAPH_TOOLTIPS),
 	graphTooltipWidth: z.number().min(150).max(500).optional().default(SETTINGS_DEFAULTS.DEFAULT_GRAPH_TOOLTIP_WIDTH),
+	graphTooltipShowDates: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_GRAPH_TOOLTIP_SHOW_DATES),
 
 	// Graph UI settings
 	showSearchBar: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_SHOW_SEARCH_BAR),

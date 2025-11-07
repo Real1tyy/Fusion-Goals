@@ -121,5 +121,11 @@ export class GraphDisplaySettingsSection implements SettingsSection {
 			max: 500,
 			step: 5,
 		});
+
+		this.uiBuilder.addToggle(containerEl, {
+			key: "graphTooltipShowDates",
+			name: "Show dates in tooltips",
+			desc: "Display days since start and days remaining in node tooltips. Uses the same date settings as graph display.",
+		});
 	}
 }

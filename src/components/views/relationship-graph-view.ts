@@ -601,26 +601,27 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 		}
 	}
 
-	private formatNodeLabel(ele: NodeSingular): string {
+	private formatNodeLabelWithDates(ele: NodeSingular): string {
 		const settings = this.plugin.settingsStore.settings$.value;
 		const label = ele.data("label") as string;
 		const daysSince = ele.data("daysSince") as string;
 		const daysRemaining = ele.data("daysRemaining") as string;
 
-		const parts: string[] = [];
+		const dateParts: string[] = [];
 
-		// Add days since on the left if enabled and available
 		if (settings.graphShowDaysSince && daysSince) {
-			parts.push(`[${daysSince}]`);
+			dateParts.push(daysSince);
 		}
-
-		parts.push(label);
 
 		if (settings.graphShowDaysRemaining && daysRemaining) {
-			parts.push(`[${daysRemaining}]`);
+			dateParts.push(daysRemaining);
 		}
 
-		return parts.join(" ");
+		if (dateParts.length === 0) {
+			return label;
+		}
+
+		return `${label}\n${dateParts.join(" • ")}`;
 	}
 
 	private destroyGraph(): void {
@@ -657,7 +658,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 						"border-color": "#ffffff",
 						"border-opacity": 0.8,
 						shape: "ellipse",
-						label: (ele: NodeSingular) => this.formatNodeLabel(ele),
+						label: (ele: NodeSingular) => this.formatNodeLabelWithDates(ele),
 						"font-size": 11,
 						color: "#d4e4ff",
 						"text-margin-y": -18,
