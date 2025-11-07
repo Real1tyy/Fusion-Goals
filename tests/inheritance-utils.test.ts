@@ -21,6 +21,89 @@ describe("getInheritableProperties", () => {
 		taskProjectProp: "Project",
 	} as FusionGoalsSettings;
 
+	describe("wiki link normalization", () => {
+		it("should normalize wiki links without aliases to include aliases", () => {
+			const frontmatter: Frontmatter = {
+				"Backlink Tags": ["[[Tags/ADA]]", "[[Tags/Health]]"],
+			};
+
+			const result = getInheritableProperties(frontmatter, defaultSettings);
+
+			expect(result["Backlink Tags"]).toEqual(["[[Tags/ADA|ADA]]", "[[Tags/Health|Health]]"]);
+		});
+
+		it("should preserve wiki links that already have aliases", () => {
+			const frontmatter: Frontmatter = {
+				"Backlink Tags": ["[[Tags/Cold Approach|Cold Approach]]", "[[Tags/Dating|Dating]]"],
+			};
+
+			const result = getInheritableProperties(frontmatter, defaultSettings);
+
+			expect(result["Backlink Tags"]).toEqual(["[[Tags/Cold Approach|Cold Approach]]", "[[Tags/Dating|Dating]]"]);
+		});
+
+		it("should normalize mixed wiki links (with and without aliases)", () => {
+			const frontmatter: Frontmatter = {
+				"Backlink Tags": [
+					"[[Tags/Females|Females]]",
+					"[[Tags/Dating|Dating]]",
+					"[[Tags/Cold Approach|Cold Approach]]",
+					"[[Tags/Health]]",
+					"[[Tags/Exercise]]",
+					"[[Tags/Meditation]]",
+					"[[Tags/ADA]]",
+				],
+			};
+
+			const result = getInheritableProperties(frontmatter, defaultSettings);
+
+			expect(result["Backlink Tags"]).toEqual([
+				"[[Tags/Females|Females]]",
+				"[[Tags/Dating|Dating]]",
+				"[[Tags/Cold Approach|Cold Approach]]",
+				"[[Tags/Health|Health]]",
+				"[[Tags/Exercise|Exercise]]",
+				"[[Tags/Meditation|Meditation]]",
+				"[[Tags/ADA|ADA]]",
+			]);
+		});
+
+		it("should normalize wiki links in string properties", () => {
+			const frontmatter: Frontmatter = {
+				Category: "[[Categories/Work/Tech]]",
+			};
+
+			const result = getInheritableProperties(frontmatter, defaultSettings);
+
+			expect(result.Category).toBe("[[Categories/Work/Tech|Tech]]");
+		});
+
+		it("should not modify non-wiki-link strings", () => {
+			const frontmatter: Frontmatter = {
+				Status: "Active",
+				Priority: "High",
+			};
+
+			const result = getInheritableProperties(frontmatter, defaultSettings);
+
+			expect(result).toEqual({
+				Status: "Active",
+				Priority: "High",
+			});
+		});
+
+		it("should not normalize wiki links without directory paths", () => {
+			const frontmatter: Frontmatter = {
+				Tags: ["[[SimpleTag]]", "[[AnotherTag]]"],
+			};
+
+			const result = getInheritableProperties(frontmatter, defaultSettings);
+
+			// Links without paths (no /) should stay as is
+			expect(result.Tags).toEqual(["[[SimpleTag]]", "[[AnotherTag]]"]);
+		});
+	});
+
 	describe("when inheritance is enabled", () => {
 		it("should return all non-excluded properties", () => {
 			const frontmatter: Frontmatter = {

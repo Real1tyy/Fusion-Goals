@@ -8,8 +8,56 @@ export interface InheritanceUpdate {
 }
 
 /**
+ * Normalizes a wiki link to always include an alias if it contains a path.
+ * [[Tags/ADA]] becomes [[Tags/ADA|ADA]]
+ * [[Tags/Cold Approach|Cold Approach]] stays as is
+ * [[SimpleTag]] stays as is (no path, no alias needed)
+ */
+function normalizeWikiLink(link: string): string {
+	const wikiLinkMatch = link.match(/^\[\[([^\]|]+)(?:\|([^\]]+))?\]\]$/);
+	if (!wikiLinkMatch) {
+		return link;
+	}
+
+	const path = wikiLinkMatch[1];
+	const existingAlias = wikiLinkMatch[2];
+
+	// If already has alias, keep it
+	if (existingAlias) {
+		return link;
+	}
+
+	// Only add alias if the link contains a path (has a /)
+	const lastSlashIndex = path.lastIndexOf("/");
+	if (lastSlashIndex < 0) {
+		// No path separator, keep as is
+		return link;
+	}
+
+	const alias = path.substring(lastSlashIndex + 1);
+	return `[[${path}|${alias}]]`;
+}
+
+/**
+ * Normalizes a value by ensuring all wiki links have aliases.
+ * Handles strings and arrays of strings.
+ */
+function normalizeValue(value: unknown): unknown {
+	if (typeof value === "string") {
+		return normalizeWikiLink(value);
+	}
+
+	if (Array.isArray(value)) {
+		return value.map((item) => (typeof item === "string" ? normalizeWikiLink(item) : item));
+	}
+
+	return value;
+}
+
+/**
  * Extract inheritable properties from frontmatter.
  * Filters out relationship properties and user-configured exclusions.
+ * Normalizes wiki links to always include aliases.
  */
 export function getInheritableProperties(
 	frontmatter: Frontmatter,
@@ -23,18 +71,28 @@ export function getInheritableProperties(
 
 	const excludedProps = new Set([...inheritanceExcludedProperties, projectGoalProp, taskGoalProp, taskProjectProp]);
 
-	return Object.fromEntries(
+	const filtered = Object.fromEntries(
 		Object.entries(frontmatter).filter(
 			([key, value]) => !excludedProps.has(key) && value !== undefined && value !== null
 		)
 	);
+
+	return Object.fromEntries(Object.entries(filtered).map(([key, value]) => [key, normalizeValue(value)]));
 }
 
+/**
+ * Merge two values, handling arrays specially by creating a union with deduplication.
+ * For non-array values, the new value replaces the existing one.
+ * Normalizes wiki links in both existing and new values.
+ */
 function mergeValues(existing: unknown, newValue: unknown): unknown {
 	if (Array.isArray(existing) && Array.isArray(newValue)) {
-		return [...new Set([...existing, ...newValue])];
+		// Normalize both arrays before merging
+		const normalizedExisting = existing.map((item) => (typeof item === "string" ? normalizeWikiLink(item) : item));
+		const normalizedNew = newValue.map((item) => (typeof item === "string" ? normalizeWikiLink(item) : item));
+		return [...new Set([...normalizedExisting, ...normalizedNew])];
 	}
-	return newValue;
+	return normalizeValue(newValue);
 }
 
 /**
