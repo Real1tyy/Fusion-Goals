@@ -103,11 +103,11 @@ export abstract class BaseHandler {
 		const settings = this.plugin.settingsStore.settings$.value;
 		const orderProps = ["file.name", ...properties];
 
-		if (settings.basesDaysRemainingEnabled && settings.basesDaysRemainingProperty?.trim()) {
+		if (settings.basesDaysRemainingEnabled && settings.endDateProperty?.trim()) {
 			orderProps.push("formula.Days Remaining");
 		}
 
-		if (settings.basesDaysSinceStartEnabled && settings.basesDaysSinceStartProperty?.trim()) {
+		if (settings.basesDaysSinceStartEnabled && settings.startDateProperty?.trim()) {
 			orderProps.push("formula.Days Since");
 		}
 
@@ -118,9 +118,9 @@ export abstract class BaseHandler {
 		const settings = this.plugin.settingsStore.settings$.value;
 		const customFormulas = settings.basesCustomFormulas;
 		const daysRemainingEnabled = settings.basesDaysRemainingEnabled;
-		const daysRemainingProperty = settings.basesDaysRemainingProperty;
+		const daysRemainingProperty = settings.endDateProperty;
 		const daysSinceStartEnabled = settings.basesDaysSinceStartEnabled;
-		const daysSinceStartProperty = settings.basesDaysSinceStartProperty;
+		const daysSinceStartProperty = settings.startDateProperty;
 
 		const hasCustomFormulas = customFormulas && customFormulas.trim() !== "";
 		const hasDaysRemaining = daysRemainingEnabled && daysRemainingProperty && daysRemainingProperty.trim() !== "";

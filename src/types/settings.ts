@@ -104,6 +104,10 @@ export const FusionGoalsSettingsSchema = z.object({
 		.optional()
 		.default([...SETTINGS_DEFAULTS.DEFAULT_DISPLAY_NODE_PROPERTIES]),
 
+	// Shared date property names (used by both bases view and graph display)
+	startDateProperty: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_START_DATE_PROPERTY),
+	endDateProperty: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_END_DATE_PROPERTY),
+
 	// Node color rules
 	defaultNodeColor: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_NODE_COLOR),
 	colorRules: z.array(ColorRuleSchema).optional().default([]),
@@ -158,9 +162,11 @@ export const FusionGoalsSettingsSchema = z.object({
 
 	// Date formula configuration for bases view
 	basesDaysRemainingEnabled: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_DAYS_REMAINING_ENABLED),
-	basesDaysRemainingProperty: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_DAYS_REMAINING_PROPERTY),
 	basesDaysSinceStartEnabled: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_DAYS_SINCE_START_ENABLED),
-	basesDaysSinceStartProperty: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_BASES_DAYS_SINCE_START_PROPERTY),
+
+	// Graph date display configuration
+	graphShowDaysRemaining: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_GRAPH_SHOW_DAYS_REMAINING),
+	graphShowDaysSince: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_GRAPH_SHOW_DAYS_SINCE),
 
 	// Frontmatter inheritance settings
 	enableFrontmatterInheritance: z

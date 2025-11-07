@@ -35,5 +35,21 @@ export class PropertyDisplaySettingsSection implements SettingsSection {
 			name: "Zoom: hide content by default",
 			desc: "When entering zoom preview, file content starts hidden by default",
 		});
+
+		new Setting(containerEl).setName("Date Properties").setHeading();
+
+		this.uiBuilder.addText(containerEl, {
+			key: "startDateProperty",
+			name: "Start date property",
+			desc: "Frontmatter property name containing the start date. Used by both bases view formulas and graph date display.",
+			placeholder: "Start Date",
+		});
+
+		this.uiBuilder.addText(containerEl, {
+			key: "endDateProperty",
+			name: "End date property",
+			desc: "Frontmatter property name containing the end date. Used by both bases view formulas and graph date display.",
+			placeholder: "End Date",
+		});
 	}
 }

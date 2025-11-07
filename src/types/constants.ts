@@ -41,6 +41,10 @@ export const SETTINGS_DEFAULTS = {
 	// Node creation defaults
 	DEFAULT_EXCLUDED_PROPERTIES: ["goal", "project", "tasks"],
 
+	// Shared date property names (used by both bases view and graph display)
+	DEFAULT_START_DATE_PROPERTY: "Start Date",
+	DEFAULT_END_DATE_PROPERTY: "End Date",
+
 	DEFAULT_BASES_GOALS_PROPERTIES: ["Status", "Priority"],
 	DEFAULT_BASES_PROJECTS_PROPERTIES: ["Status", "Priority", "Difficulty"],
 	DEFAULT_BASES_TASKS_PROPERTIES: ["Goal", "Project", "Status", "Priority"],
@@ -59,9 +63,11 @@ export const SETTINGS_DEFAULTS = {
 
 	// Bases date formula defaults
 	DEFAULT_BASES_DAYS_REMAINING_ENABLED: true,
-	DEFAULT_BASES_DAYS_REMAINING_PROPERTY: "End Date",
 	DEFAULT_BASES_DAYS_SINCE_START_ENABLED: false,
-	DEFAULT_BASES_DAYS_SINCE_START_PROPERTY: "Start Date",
+
+	// Graph date display defaults
+	DEFAULT_GRAPH_SHOW_DAYS_REMAINING: false,
+	DEFAULT_GRAPH_SHOW_DAYS_SINCE: false,
 
 	// Frontmatter inheritance defaults
 	DEFAULT_ENABLE_FRONTMATTER_INHERITANCE: true,

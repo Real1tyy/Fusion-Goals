@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-    calculateDaysDifference,
-    calculateDaysRemainingFromFrontmatter,
-    formatDaysRelative,
-    parseDateFromFrontmatter,
+	calculateDaysDifference,
+	calculateDaysRemainingFromFrontmatter,
+	formatDaysRelative,
+	parseDateFromFrontmatter,
 } from "../src/utils/date";
 
 describe("calculateDaysDifference", () => {

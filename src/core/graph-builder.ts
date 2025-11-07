@@ -70,6 +70,10 @@ export class GraphBuilder {
 		const { frontmatter } = getFileContext(this.app, filePath);
 		const nodeColor = this.colorEvaluator.evaluateColor(frontmatter ?? {});
 
+		const relationships = this.indexer.getRelationships(filePath);
+		const daysSince = relationships?.daysSince || "";
+		const daysRemaining = relationships?.daysRemaining || "";
+
 		return {
 			data: {
 				id: filePath,
@@ -79,6 +83,8 @@ export class GraphBuilder {
 				width: estimatedWidth,
 				height: estimatedHeight,
 				nodeColor: nodeColor,
+				daysSince: daysSince,
+				daysRemaining: daysRemaining,
 			},
 		};
 	}
