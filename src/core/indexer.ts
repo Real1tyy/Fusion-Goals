@@ -11,6 +11,7 @@ import {
 	type Subscription,
 } from "rxjs";
 import { debounceTime, filter, groupBy, map, mergeMap, switchMap, toArray } from "rxjs/operators";
+import { calculateDaysRemainingFromFrontmatter } from "src/utils/date";
 import {
 	applyInheritanceRemovals,
 	applyInheritanceUpdates,
@@ -28,6 +29,8 @@ export interface FileRelationships {
 	mtime: number;
 	type: FileType;
 	frontmatter: Frontmatter;
+	daysSince?: string; // Calculated: days since start date
+	daysRemaining?: string; // Calculated: days remaining until end date
 }
 
 export type IndexerEventType = "file-changed" | "file-deleted";
@@ -312,12 +315,16 @@ export class Indexer {
 			return null;
 		}
 
+		const { daysSince, daysRemaining } = this.calculateDateValues(frontmatter);
+
 		const oldRelationships = this.relationshipsCache.get(file.path);
 		const newRelationships: FileRelationships = {
 			filePath: file.path,
 			mtime: file.stat.mtime,
 			type: fileType,
 			frontmatter,
+			daysSince,
+			daysRemaining,
 		};
 
 		this.relationshipsCache.set(file.path, newRelationships);
@@ -334,6 +341,26 @@ export class Indexer {
 			oldRelationships,
 			newRelationships,
 		};
+	}
+
+	private calculateDateValues(frontmatter: Frontmatter): { daysSince?: string; daysRemaining?: string } {
+		const { graphShowDaysSince, graphShowDaysRemaining, startDateProperty, endDateProperty } = this.settings;
+		const result: { daysSince?: string; daysRemaining?: string } = {};
+
+		const setDateValue = (enabled: boolean, property: string | undefined, key: "daysSince" | "daysRemaining") => {
+			if (enabled && property) {
+				const value = frontmatter[property];
+				const days = calculateDaysRemainingFromFrontmatter(value);
+				if (days !== null) {
+					result[key] = days;
+				}
+			}
+		};
+
+		setDateValue(graphShowDaysSince, startDateProperty, "daysSince");
+		setDateValue(graphShowDaysRemaining, endDateProperty, "daysRemaining");
+
+		return result;
 	}
 
 	private updateHierarchicalCache(relationships: FileRelationships): void {
@@ -461,6 +488,10 @@ export class Indexer {
 				return filename;
 			})
 			.filter((path) => path !== undefined);
+	}
+
+	getRelationships(filePath: string): FileRelationships | null {
+		return this.relationshipsCache.get(filePath) ?? null;
 	}
 
 	getSettings(): Readonly<FusionGoalsSettings> {

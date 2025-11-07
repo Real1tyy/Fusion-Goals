@@ -2,6 +2,7 @@ import { type App, Modal, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { SettingsStore } from "../core/settings-store";
 import type { FusionGoalsSettings } from "../types/settings";
+import { extractDateInfo } from "../utils/date";
 import { filterPropertiesForDisplay } from "../utils/frontmatter-value";
 import { PropertyRenderer } from "./property-renderer";
 
@@ -78,6 +79,9 @@ export class NodePreviewModal extends Modal {
 			this.close();
 		};
 
+		// Date info section (if enabled and available)
+		this.renderDateInfo(contentEl);
+
 		// Frontmatter section
 		const section = contentEl.createDiv("node-preview-section");
 
@@ -100,6 +104,29 @@ export class NodePreviewModal extends Modal {
 
 		for (const [key, value] of filteredProperties) {
 			this.propertyRenderer.renderProperty(grid, key, value);
+		}
+	}
+
+	private renderDateInfo(containerEl: HTMLElement): void {
+		const dateParts = extractDateInfo({
+			frontmatter: this.frontmatter,
+			startDateProperty: this.settings.startDateProperty,
+			endDateProperty: this.settings.endDateProperty,
+			showDaysSince: this.settings.graphShowDaysSince,
+			showDaysRemaining: this.settings.graphShowDaysRemaining,
+		});
+
+		if (dateParts.length === 0) return;
+
+		// Render date info section
+		const dateSection = containerEl.createDiv("node-preview-date-info");
+
+		for (const { label, value, type } of dateParts) {
+			const dateItem = dateSection.createDiv("node-preview-date-item");
+			dateItem.addClass(`node-preview-date-${type}`);
+
+			dateItem.createSpan({ text: `${label}: `, cls: "node-preview-date-label" });
+			dateItem.createSpan({ text: value, cls: "node-preview-date-value" });
 		}
 	}
 

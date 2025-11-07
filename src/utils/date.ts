@@ -78,3 +78,49 @@ export function calculateDaysRemainingFromFrontmatter(dateValue: unknown): strin
 	const days = calculateDaysDifference(date);
 	return formatDaysRelative(days);
 }
+
+export interface DateInfo {
+	label: string;
+	value: string;
+	type: "since" | "remaining";
+}
+
+export interface DateInfoOptions {
+	frontmatter: Record<string, unknown>;
+	startDateProperty?: string;
+	endDateProperty?: string;
+	showDaysSince: boolean;
+	showDaysRemaining: boolean;
+}
+
+/**
+ * Extract date information (days since start, days remaining) from frontmatter.
+ * Returns an array of formatted date info that can be rendered by UI components.
+ *
+ * @param options - Configuration options
+ * @returns Array of date info objects
+ */
+export function extractDateInfo(options: DateInfoOptions): DateInfo[] {
+	const { frontmatter, startDateProperty, endDateProperty, showDaysSince, showDaysRemaining } = options;
+	const dateParts: DateInfo[] = [];
+
+	// Calculate days since start
+	if (showDaysSince && startDateProperty) {
+		const startValue = frontmatter[startDateProperty];
+		const daysSince = calculateDaysRemainingFromFrontmatter(startValue);
+		if (daysSince) {
+			dateParts.push({ label: "Started", value: daysSince, type: "since" });
+		}
+	}
+
+	// Calculate days remaining
+	if (showDaysRemaining && endDateProperty) {
+		const endValue = frontmatter[endDateProperty];
+		const daysRemaining = calculateDaysRemainingFromFrontmatter(endValue);
+		if (daysRemaining) {
+			dateParts.push({ label: "Due", value: daysRemaining, type: "remaining" });
+		}
+	}
+
+	return dateParts;
+}

@@ -2,6 +2,7 @@ import type { App } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { SettingsStore } from "../core/settings-store";
 import type { FusionGoalsSettings } from "../types/settings";
+import { extractDateInfo } from "../utils/date";
 import { extractDisplayName, getFileContext } from "../utils/file";
 import { filterSpecificProperties, formatValue, parseInlineWikiLinks } from "../utils/frontmatter-value";
 
@@ -17,6 +18,8 @@ export class PropertyTooltip {
 	private hideTimer: number | null = null;
 	private settings: FusionGoalsSettings;
 	private settingsSubscription: Subscription | null = null;
+	private currentFilePath: string | null = null;
+	private currentMouseEvent: MouseEvent | null = null;
 
 	constructor(
 		private app: App,
@@ -24,16 +27,31 @@ export class PropertyTooltip {
 	) {
 		this.settings = options.settingsStore.currentSettings;
 
-		// Subscribe to settings changes to update tooltip width dynamically
+		// Subscribe to settings changes to update tooltip dynamically
 		this.settingsSubscription = options.settingsStore.settings$.subscribe((settings) => {
+			const previousSettings = this.settings;
 			this.settings = settings;
-			if (this.tooltipEl) {
-				this.tooltipEl.style.maxWidth = `${settings.graphTooltipWidth}px`;
+
+			if (this.tooltipEl && this.currentFilePath && this.currentMouseEvent) {
+				if (
+					previousSettings.graphTooltipShowDates !== settings.graphTooltipShowDates ||
+					previousSettings.graphShowDaysSince !== settings.graphShowDaysSince ||
+					previousSettings.graphShowDaysRemaining !== settings.graphShowDaysRemaining ||
+					previousSettings.startDateProperty !== settings.startDateProperty ||
+					previousSettings.endDateProperty !== settings.endDateProperty
+				) {
+					this.show(this.currentFilePath, this.currentMouseEvent);
+				} else {
+					this.tooltipEl.style.maxWidth = `${settings.graphTooltipWidth}px`;
+				}
 			}
 		});
 	}
 
 	show(filePath: string, mouseEvent: MouseEvent): void {
+		this.currentFilePath = filePath;
+		this.currentMouseEvent = mouseEvent;
+
 		// Don't show tooltip if setting is disabled
 		if (!this.settings.showGraphTooltips) {
 			return;
@@ -88,7 +106,10 @@ export class PropertyTooltip {
 			}
 		});
 
-		if (propertyData.length > 0) {
+		// Add date info if available
+		const hasDateInfo = this.renderDateInfo(this.tooltipEl, frontmatter);
+
+		if (hasDateInfo || propertyData.length > 0) {
 			this.tooltipEl.createDiv("nexus-property-tooltip-separator");
 		}
 
@@ -137,6 +158,10 @@ export class PropertyTooltip {
 			this.tooltipEl.remove();
 			this.tooltipEl = null;
 		}
+
+		// Clear current state when hiding
+		this.currentFilePath = null;
+		this.currentMouseEvent = null;
 	}
 
 	scheduleHide(delayMs = 300): void {
@@ -210,6 +235,34 @@ export class PropertyTooltip {
 				});
 			}
 		}
+	}
+
+	private renderDateInfo(tooltipEl: HTMLElement, frontmatter: Record<string, unknown>): boolean {
+		// Don't show dates if the setting is disabled
+		if (!this.settings.graphTooltipShowDates) {
+			return false;
+		}
+
+		const dateParts = extractDateInfo({
+			frontmatter,
+			startDateProperty: this.settings.startDateProperty,
+			endDateProperty: this.settings.endDateProperty,
+			showDaysSince: this.settings.graphShowDaysSince,
+			showDaysRemaining: this.settings.graphShowDaysRemaining,
+		});
+
+		if (dateParts.length === 0) return false;
+
+		// Render date info
+		const dateContainer = tooltipEl.createDiv("nexus-property-tooltip-dates");
+
+		for (const { label, value } of dateParts) {
+			const dateItem = dateContainer.createDiv("nexus-property-tooltip-date-item");
+			dateItem.createSpan({ text: `${label}: `, cls: "nexus-property-tooltip-date-label" });
+			dateItem.createSpan({ text: value, cls: "nexus-property-tooltip-date-value" });
+		}
+
+		return true;
 	}
 
 	destroy(): void {

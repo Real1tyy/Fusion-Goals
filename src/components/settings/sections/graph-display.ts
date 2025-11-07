@@ -85,6 +85,22 @@ export class GraphDisplaySettingsSection implements SettingsSection {
 			placeholder: "e.g., status, priority",
 		});
 
+		new Setting(containerEl).setName("Date Display").setHeading();
+
+		this.uiBuilder.addToggle(containerEl, {
+			key: "graphShowDaysSince",
+			name: "Show days since start",
+			desc: "Display days since start date on the left side of graph nodes (e.g., '5 days ago', 'today'). Uses the Start Date property from Property Display settings.",
+		});
+
+		this.uiBuilder.addToggle(containerEl, {
+			key: "graphShowDaysRemaining",
+			name: "Show days remaining",
+			desc: "Display days remaining until end date on the right side of graph nodes (e.g., 'in 10 days', 'today'). Uses the End Date property from Property Display settings.",
+		});
+
+		new Setting(containerEl).setName("Tooltips").setHeading();
+
 		this.uiBuilder.addToggle(containerEl, {
 			key: "differentiateNodesByType",
 			name: "Differentiate nodes by type",
@@ -104,6 +120,12 @@ export class GraphDisplaySettingsSection implements SettingsSection {
 			min: 150,
 			max: 500,
 			step: 5,
+		});
+
+		this.uiBuilder.addToggle(containerEl, {
+			key: "graphTooltipShowDates",
+			name: "Show dates in tooltips",
+			desc: "Display days since start and days remaining in node tooltips. Uses the same date settings as graph display.",
 		});
 	}
 }

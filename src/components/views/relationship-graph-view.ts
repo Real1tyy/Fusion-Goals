@@ -1,4 +1,4 @@
-import cytoscape, { type Core, type ElementDefinition } from "cytoscape";
+import cytoscape, { type Core, type ElementDefinition, type NodeSingular } from "cytoscape";
 import cytoscapeDagre from "cytoscape-dagre";
 import { type App, TFile } from "obsidian";
 import type { Subscription } from "rxjs";
@@ -601,6 +601,29 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 		}
 	}
 
+	private formatNodeLabelWithDates(ele: NodeSingular): string {
+		const settings = this.plugin.settingsStore.settings$.value;
+		const label = ele.data("label") as string;
+		const daysSince = ele.data("daysSince") as string;
+		const daysRemaining = ele.data("daysRemaining") as string;
+
+		const dateParts: string[] = [];
+
+		if (settings.graphShowDaysSince && daysSince) {
+			dateParts.push(daysSince);
+		}
+
+		if (settings.graphShowDaysRemaining && daysRemaining) {
+			dateParts.push(daysRemaining);
+		}
+
+		if (dateParts.length === 0) {
+			return label;
+		}
+
+		return `${label}\n${dateParts.join(" • ")}`;
+	}
+
 	private destroyGraph(): void {
 		if (this.cy) {
 			// Stop all ongoing animations before destroying
@@ -635,7 +658,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 						"border-color": "#ffffff",
 						"border-opacity": 0.8,
 						shape: "ellipse",
-						label: "data(label)",
+						label: (ele: NodeSingular) => this.formatNodeLabelWithDates(ele),
 						"font-size": 11,
 						color: "#d4e4ff",
 						"text-margin-y": -18,

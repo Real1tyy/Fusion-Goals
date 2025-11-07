@@ -71,6 +71,10 @@ export class GraphBuilder {
 		const nodeColor = this.colorEvaluator.evaluateColor(frontmatter ?? {});
 		const fileType = this.indexer.getFileType(filePath);
 
+		const relationships = this.indexer.getRelationships(filePath);
+		const daysSince = relationships?.daysSince || "";
+		const daysRemaining = relationships?.daysRemaining || "";
+
 		return {
 			data: {
 				id: filePath,
@@ -81,6 +85,8 @@ export class GraphBuilder {
 				height: estimatedHeight,
 				nodeColor: nodeColor,
 				fileType: fileType,
+				daysSince: daysSince,
+				daysRemaining: daysRemaining,
 			},
 		};
 	}
