@@ -1,5 +1,5 @@
 import type { BehaviorSubject, Subscription } from "rxjs";
-import { buildPropertyMapping, sanitizeExpression } from "./expression-utils";
+import { buildPropertyMapping, sanitizeExpression } from "./expression";
 
 export interface BaseRule {
 	id: string;

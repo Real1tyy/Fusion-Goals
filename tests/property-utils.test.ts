@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseLinkedPathsFromProperty } from "../src/utils/property-utils";
+import { parseLinkedPathsFromProperty } from "../src/utils/property";
 
 describe("parseLinkedPathsFromProperty", () => {
 	describe("string values", () => {

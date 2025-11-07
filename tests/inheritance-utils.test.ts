@@ -1,7 +1,7 @@
 import { type App, TFile as TFileType } from "obsidian";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Frontmatter, FusionGoalsSettings } from "../src/types/settings";
-import { applyInheritanceUpdates, getInheritableProperties } from "../src/utils/inheritance-utils";
+import { applyInheritanceUpdates, getInheritableProperties } from "../src/utils/inheritance";
 
 // Mock Obsidian imports
 vi.mock("obsidian", async () => {

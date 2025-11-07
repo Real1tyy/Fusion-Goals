@@ -3,7 +3,7 @@ import type { App } from "obsidian";
 import { ColorEvaluator } from "../utils/colors";
 import { extractDisplayName, extractFilePath, type FileContext, getFileContext } from "../utils/file";
 import { FilterEvaluator } from "../utils/filters";
-import { parseLinkedPathsFromProperty } from "../utils/property-utils";
+import { parseLinkedPathsFromProperty } from "../utils/property";
 import type { Indexer } from "./indexer";
 import type { SettingsStore } from "./settings-store";
 

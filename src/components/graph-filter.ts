@@ -1,4 +1,4 @@
-import { buildPropertyMapping, sanitizeExpression } from "../utils/expression-utils";
+import { buildPropertyMapping, sanitizeExpression } from "../utils/expression";
 import { InputFilterManager } from "./input-filter-manager";
 
 export class GraphFilter extends InputFilterManager {
