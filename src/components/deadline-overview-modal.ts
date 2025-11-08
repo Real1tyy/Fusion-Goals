@@ -77,8 +77,13 @@ export class DeadlineOverviewModal extends Modal {
 	}
 
 	async onOpen(): Promise<void> {
-		const { contentEl } = this;
+		const { contentEl, modalEl } = this;
 		contentEl.addClass("startup-overview-modal");
+
+		// Add class to modal container for CSS styling
+		if (modalEl) {
+			modalEl.addClass("startup-overview-modal-container");
+		}
 
 		await this.setupAndRender();
 
@@ -222,10 +227,24 @@ export class DeadlineOverviewModal extends Modal {
 		if (this.isInitialRender) {
 			contentEl.empty();
 
-			const headerEl = contentEl.createEl("div", { cls: "startup-overview-header" });
-			headerEl.createEl("h2", { text: "Deadlines Overview" });
+			const headerRow = contentEl.createEl("div", { cls: "startup-overview-header-row" });
 
-			this.renderPastEventsToggle(contentEl);
+			// Left toggle
+			const leftToggle = headerRow.createEl("div", { cls: "startup-overview-header-left" });
+			this.createToggle(leftToggle, "Past events", this.showPastEvents, (checked) => {
+				this.showPastEvents = checked;
+			});
+
+			// Center title
+			const headerCenter = headerRow.createEl("div", { cls: "startup-overview-header-center" });
+			headerCenter.createEl("h2", { text: "Deadlines Overview" });
+
+			// Right toggle
+			const rightToggle = headerRow.createEl("div", { cls: "startup-overview-header-right" });
+			this.createToggle(rightToggle, "Future events", this.showFutureEvents, (checked) => {
+				this.showFutureEvents = checked;
+			});
+
 			contentEl.createEl("div", { cls: "deadline-overview-tabs-container" });
 
 			this.renderSearchAndFilter(contentEl);
@@ -275,33 +294,27 @@ export class DeadlineOverviewModal extends Modal {
 		return this.getFilteredItemsForType(fileType).length;
 	}
 
-	private renderPastEventsToggle(container: HTMLElement): void {
-		const toggleContainer = container.createEl("div", { cls: "deadline-overview-toggle-container" });
+	private createToggle(
+		container: HTMLElement,
+		labelText: string,
+		checked: boolean,
+		onChange: (checked: boolean) => void
+	): void {
+		const label = container.createEl("label", { cls: "deadline-overview-toggle-label" });
 
-		const createToggle = (labelText: string, checked: boolean, onChange: (checked: boolean) => void) => {
-			const label = toggleContainer.createEl("label", { cls: "deadline-overview-toggle-label" });
-
-			const checkbox = label.createEl("input", {
-				type: "checkbox",
-				cls: "deadline-overview-toggle-checkbox",
-			});
-			checkbox.checked = checked;
-
-			checkbox.addEventListener("change", () => {
-				onChange(checkbox.checked);
-				this.currentPage = 1;
-				this.renderContent();
-			});
-
-			label.createEl("span", { text: labelText, cls: "deadline-overview-toggle-text" });
-		};
-
-		createToggle("Past events", this.showPastEvents, (checked) => {
-			this.showPastEvents = checked;
+		const checkbox = label.createEl("input", {
+			type: "checkbox",
+			cls: "deadline-overview-toggle-checkbox",
 		});
-		createToggle("Future events", this.showFutureEvents, (checked) => {
-			this.showFutureEvents = checked;
+		checkbox.checked = checked;
+
+		checkbox.addEventListener("change", () => {
+			onChange(checkbox.checked);
+			this.currentPage = 1;
+			this.renderContent();
 		});
+
+		label.createEl("span", { text: labelText, cls: "deadline-overview-toggle-text" });
 	}
 
 	private renderSearchAndFilter(container: HTMLElement): void {

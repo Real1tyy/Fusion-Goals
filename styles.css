@@ -1566,34 +1566,38 @@
 }
 
 /* Deadline Overview Modal */
-.startup-overview-modal .modal-content {
-	max-width: 1350px;
+.startup-overview-modal-container {
+	width: 90vw !important;
+	max-width: 1600px !important;
+}
+
+.startup-overview-modal.modal-content {
 	max-height: 80vh;
 }
 
-.startup-overview-header {
+/* Header Row with Toggles */
+.startup-overview-header-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	margin-bottom: 1.5em;
+	gap: 1em;
+}
+
+.startup-overview-header-left,
+.startup-overview-header-right {
+	flex: 0 0 auto;
+	min-width: 150px;
+}
+
+.startup-overview-header-center {
+	flex: 1;
 	text-align: center;
 }
 
-.startup-overview-header h2 {
-	margin: 0 0 0.5em 0;
-	color: var(--text-normal);
-}
-
-.startup-overview-subtitle {
+.startup-overview-header-center h2 {
 	margin: 0;
-	color: var(--text-muted);
-	font-size: 0.95em;
-}
-
-/* Past/Future Events Toggles */
-.deadline-overview-toggle-container {
-	display: flex;
-	justify-content: flex-end;
-	gap: 1.5em;
-	margin-bottom: 1em;
-	padding: 0.5em 0;
+	color: var(--text-normal);
 }
 
 .deadline-overview-toggle-label {
@@ -1602,6 +1606,7 @@
 	gap: 0.5em;
 	cursor: pointer;
 	user-select: none;
+	white-space: nowrap;
 }
 
 .deadline-overview-toggle-checkbox {
@@ -1611,8 +1616,8 @@
 }
 
 .deadline-overview-toggle-text {
-	color: var(--text-normal);
-	font-size: 0.95em;
+	color: var(--text-muted);
+	font-size: 0.9em;
 }
 
 .deadline-overview-toggle-label:hover .deadline-overview-toggle-text {
@@ -1845,6 +1850,10 @@
 }
 
 /* Pagination */
+.deadline-overview-pagination-container {
+	margin-bottom: 2em;
+}
+
 .startup-overview-pagination {
 	display: flex;
 	flex-direction: column;
