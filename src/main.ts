@@ -1,5 +1,6 @@
 import { Notice, Plugin } from "obsidian";
 import { FusionGoalsSettingsTab } from "./components";
+import { DeadlineOverviewModal } from "./components/deadline-overview-modal";
 import { FusionViewSwitcher, VIEW_TYPE_FUSION_SWITCHER } from "./components/views/fusion-view-switcher";
 import { Indexer } from "./core/indexer";
 import { SettingsStore } from "./core/settings-store";
@@ -35,6 +36,12 @@ export default class FusionGoalsPlugin extends Plugin {
 			id: "toggle-view-mode",
 			name: "Toggle View Mode (Graph/Bases)",
 			callback: () => this.executeViewSwitcherMethod("toggleView"),
+		});
+
+		this.addCommand({
+			id: "show-startup-overview",
+			name: "Show Deadlines Overview",
+			callback: () => this.showStartupOverview(),
 		});
 
 		// Graph manipulation commands
@@ -142,6 +149,15 @@ export default class FusionGoalsPlugin extends Plugin {
 		this.registerView(VIEW_TYPE_FUSION_SWITCHER, (leaf) => new FusionViewSwitcher(leaf, this.indexer, this));
 
 		console.log("✅ Fusion Goals plugin loaded successfully");
+
+		if (this.settingsStore.settings$.value.showStartupOverview) {
+			this.showStartupOverview();
+		}
+	}
+
+	private showStartupOverview(): void {
+		const deadlineModal = new DeadlineOverviewModal(this.app, this.indexer, this.settingsStore);
+		deadlineModal.open();
 	}
 
 	async onunload() {
