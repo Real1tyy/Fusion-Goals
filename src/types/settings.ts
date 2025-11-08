@@ -43,6 +43,13 @@ export const FusionGoalsSettingsSchema = z.object({
 
 	// UI settings
 	showRibbonIcon: z.boolean().optional().default(true),
+	showStartupOverview: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_SHOW_STARTUP_OVERVIEW),
+
+	// Deadline overview filters
+	deadlineFilterExpressions: z
+		.array(z.string())
+		.optional()
+		.default(SETTINGS_DEFAULTS.DEFAULT_DEADLINE_FILTER_EXPRESSIONS),
 
 	// Preview settings
 	hideEmptyProperties: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_HIDE_EMPTY_PROPERTIES),

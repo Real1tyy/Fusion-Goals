@@ -124,3 +124,31 @@ export function extractDateInfo(options: DateInfoOptions): DateInfo[] {
 
 	return dateParts;
 }
+
+/**
+ * Parse a relative date string into a numeric day count.
+ * Converts human-readable strings like "in 5 days", "5 days ago", "today"
+ * into numeric values (positive = future, negative = past, 0 = today).
+ *
+ * @param daysString - Formatted string from calculateDaysRemainingFromFrontmatter
+ * @returns Numeric day count or null if invalid
+ */
+export function parseDaysFromString(daysString?: string): number | null {
+	if (!daysString) return null;
+
+	// Handle "today" case
+	if (daysString === "today") return 0;
+
+	// Extract the numeric value from strings like "in 5 days" or "5 days ago"
+	const match = daysString.match(/-?\d+/);
+	if (!match) return null;
+
+	let days = parseInt(match[0], 10);
+
+	// If the string contains "ago", make it negative (past dates)
+	if (daysString.includes("ago")) {
+		days = -Math.abs(days);
+	}
+
+	return days;
+}
