@@ -52,8 +52,7 @@ export class GraphFilter extends InputFilterManager {
 
 			const values = Array.from(this.propertyMapping.keys()).map((key) => frontmatter[key]);
 			return this.compiledFunc(...values);
-		} catch (error) {
-			console.warn("Invalid filter expression:", this.currentValue, error);
+		} catch (_error) {
 			return true;
 		}
 	}

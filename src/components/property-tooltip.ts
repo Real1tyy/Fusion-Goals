@@ -11,6 +11,8 @@ export interface PropertyTooltipOptions {
 	currentFilePath?: string;
 	onFileOpen?: (filePath: string, event: MouseEvent) => void;
 	isZoomMode?: () => boolean;
+	hideDateInfo?: boolean;
+	tooltipWidth?: number;
 }
 
 export class PropertyTooltip {
@@ -76,7 +78,8 @@ export class PropertyTooltip {
 		this.hide();
 		this.tooltipEl = document.createElement("div");
 		this.tooltipEl.addClass("nexus-property-tooltip");
-		this.tooltipEl.style.maxWidth = `${this.settings.graphTooltipWidth}px`;
+		const tooltipWidth = this.options.tooltipWidth ?? this.settings.graphTooltipWidth;
+		this.tooltipEl.style.maxWidth = `${tooltipWidth}px`;
 
 		// Keep tooltip open when hovering over it
 		this.tooltipEl.addEventListener("mouseenter", () => {
@@ -106,8 +109,7 @@ export class PropertyTooltip {
 			}
 		});
 
-		// Add date info if available
-		const hasDateInfo = this.renderDateInfo(this.tooltipEl, frontmatter);
+		const hasDateInfo = !this.options.hideDateInfo && this.renderDateInfo(this.tooltipEl, frontmatter);
 
 		if (hasDateInfo || propertyData.length > 0) {
 			this.tooltipEl.createDiv("nexus-property-tooltip-separator");

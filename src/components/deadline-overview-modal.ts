@@ -7,6 +7,7 @@ import { parseDaysFromString } from "../utils/date";
 import { buildPropertyMapping, sanitizeExpression } from "../utils/expression";
 import { DeadlineTable, type DeadlineTableItem } from "./deadline-table";
 import { GraphFilter } from "./graph-filter";
+import { GraphFilterPresetSelector } from "./graph-filter-preset-selector";
 import { GraphSearch } from "./graph-search";
 import { PropertyTooltip } from "./property-tooltip";
 
@@ -38,6 +39,7 @@ export class DeadlineOverviewModal extends Modal {
 	private showFutureEvents = false;
 	private graphSearch: GraphSearch | null = null;
 	private graphFilter: GraphFilter | null = null;
+	private graphFilterPresetSelector: GraphFilterPresetSelector | null = null;
 	private searchFilterContainer: HTMLElement | null = null;
 	private isInitialRender = true;
 	private propertyTooltip: PropertyTooltip;
@@ -53,6 +55,8 @@ export class DeadlineOverviewModal extends Modal {
 
 		this.propertyTooltip = new PropertyTooltip(this.app, {
 			settingsStore: this.settingsStore,
+			hideDateInfo: true,
+			tooltipWidth: 500,
 			onFileOpen: async (filePath, event) => {
 				const file = this.app.vault.getAbstractFileByPath(filePath);
 				if (!(file instanceof TFile)) return;
@@ -93,8 +97,8 @@ export class DeadlineOverviewModal extends Modal {
 			if (!(file instanceof TFile)) continue;
 
 			const settings = this.settingsStore.settings$.value;
-			if (settings.deadlineFilterExpressions.length > 0) {
-				const passesFilters = this.evaluateGlobalFilters(relationships.frontmatter, settings.deadlineFilterExpressions);
+			if (settings.filterExpressions.length > 0) {
+				const passesFilters = this.evaluateGlobalFilters(relationships.frontmatter, settings.filterExpressions);
 				if (!passesFilters) {
 					continue;
 				}
@@ -196,9 +200,8 @@ export class DeadlineOverviewModal extends Modal {
 				const func = new Function(...params, `"use strict"; return ${sanitized};`) as (...args: any[]) => boolean;
 				const values = Array.from(propertyMapping.keys()).map((key) => frontmatter[key]);
 				return func(...values);
-			} catch (error) {
-				console.warn("Invalid global filter expression:", expression, error);
-				return true; // Skip invalid filters
+			} catch (_error) {
+				return true;
 			}
 		});
 	}
@@ -319,6 +322,20 @@ export class DeadlineOverviewModal extends Modal {
 			this.graphFilter = new GraphFilter(
 				filterInputContainer,
 				() => {
+					this.currentPage = 1;
+					this.renderContent();
+				},
+				true
+			);
+
+			const settings = this.settingsStore.settings$.value;
+			this.graphFilterPresetSelector = new GraphFilterPresetSelector(
+				this.searchFilterContainer,
+				settings.filterPresets,
+				(expression: string) => {
+					if (this.graphFilter) {
+						this.graphFilter.setFilterValue(expression);
+					}
 					this.currentPage = 1;
 					this.renderContent();
 				},
@@ -532,6 +549,8 @@ export class DeadlineOverviewModal extends Modal {
 		// Clean up components
 		this.graphSearch = null;
 		this.graphFilter = null;
+		this.graphFilterPresetSelector?.destroy();
+		this.graphFilterPresetSelector = null;
 		this.searchFilterContainer = null;
 		this.deadlineTable = null;
 		this.isInitialRender = true;
