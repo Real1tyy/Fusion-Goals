@@ -145,10 +145,11 @@ export function parseDaysFromString(daysString?: string): number | null {
 
 	let days = parseInt(match[0], 10);
 
-	// If the string contains "ago", make it negative (past dates)
-	if (daysString.includes("ago")) {
+	// If the string contains "ago" (case-insensitive), make it negative (past dates)
+	if (daysString.toLowerCase().includes("ago")) {
 		days = -Math.abs(days);
 	}
 
-	return days;
+	// Handle -0 case (convert to 0)
+	return days === 0 ? 0 : days;
 }

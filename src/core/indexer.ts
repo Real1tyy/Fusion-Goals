@@ -29,8 +29,8 @@ export interface FileRelationships {
 	mtime: number;
 	type: FileType;
 	frontmatter: Frontmatter;
-	daysSince?: string; // Calculated: days since start date
-	daysRemaining?: string; // Calculated: days remaining until end date
+	daysSince: string | null;
+	daysRemaining: string | null;
 }
 
 export type IndexerEventType = "file-changed" | "file-deleted";
@@ -163,10 +163,6 @@ export class Indexer {
 		}
 	}
 
-	/**
-	 * Determine file type based on directory path.
-	 * Returns null if file is not in any of the tracked directories.
-	 */
 	getFileType(filePath: string): FileType | null {
 		const { goalsDirectory, projectsDirectory, tasksDirectory } = this.settings;
 
@@ -287,6 +283,8 @@ export class Indexer {
 			mtime: newFile.stat.mtime,
 			type: oldRelationships.type,
 			frontmatter,
+			daysSince: oldRelationships.daysSince,
+			daysRemaining: oldRelationships.daysRemaining,
 		};
 		this.relationshipsCache.delete(oldPath);
 		this.relationshipsCache.set(newFile.path, newRelationships);
@@ -323,8 +321,8 @@ export class Indexer {
 			mtime: file.stat.mtime,
 			type: fileType,
 			frontmatter,
-			daysSince,
-			daysRemaining,
+			daysSince: daysSince ?? null,
+			daysRemaining: daysRemaining ?? null,
 		};
 
 		this.relationshipsCache.set(file.path, newRelationships);
@@ -344,11 +342,12 @@ export class Indexer {
 	}
 
 	private calculateDateValues(frontmatter: Frontmatter): { daysSince?: string; daysRemaining?: string } {
-		const { graphShowDaysSince, graphShowDaysRemaining, startDateProperty, endDateProperty } = this.settings;
+		const { startDateProperty, endDateProperty } = this.settings;
 		const result: { daysSince?: string; daysRemaining?: string } = {};
 
-		const setDateValue = (enabled: boolean, property: string | undefined, key: "daysSince" | "daysRemaining") => {
-			if (enabled && property) {
+		// Always calculate date values for use in deadlines overview and other features
+		const setDateValue = (property: string | undefined, key: "daysSince" | "daysRemaining") => {
+			if (property) {
 				const value = frontmatter[property];
 				const days = calculateDaysRemainingFromFrontmatter(value);
 				if (days !== null) {
@@ -357,8 +356,8 @@ export class Indexer {
 			}
 		};
 
-		setDateValue(graphShowDaysSince, startDateProperty, "daysSince");
-		setDateValue(graphShowDaysRemaining, endDateProperty, "daysRemaining");
+		setDateValue(startDateProperty, "daysSince");
+		setDateValue(endDateProperty, "daysRemaining");
 
 		return result;
 	}
@@ -492,6 +491,10 @@ export class Indexer {
 
 	getRelationships(filePath: string): FileRelationships | null {
 		return this.relationshipsCache.get(filePath) ?? null;
+	}
+
+	getRelationshipsCache(): ReadonlyMap<string, FileRelationships> {
+		return this.relationshipsCache;
 	}
 
 	getSettings(): Readonly<FusionGoalsSettings> {
