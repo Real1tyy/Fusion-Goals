@@ -153,3 +153,34 @@ export function parseDaysFromString(daysString?: string): number | null {
 	// Handle -0 case (convert to 0)
 	return days === 0 ? 0 : days;
 }
+
+/**
+ * Format days remaining with special handling for Today/Tomorrow/Yesterday.
+ * Used in deadline overview UI.
+ *
+ * @param days - Number of days (positive = future, negative = past)
+ * @returns Formatted string like "Today", "Tomorrow", "in 5 days", etc.
+ */
+export function formatDaysRemaining(days: number): string {
+	if (days === 0) return "Today";
+	if (days === 1) return "Tomorrow";
+	if (days === -1) return "Yesterday";
+	if (days > 0) return `in ${days} days`;
+	return `${Math.abs(days)} days ago`;
+}
+
+export type DaysRemainingClass = "past" | "today" | "urgent" | "soon" | "future";
+
+/**
+ * Get CSS class name based on days remaining for styling urgency.
+ *
+ * @param days - Number of days remaining
+ * @returns Class name for styling
+ */
+export function getDaysRemainingClass(days: number): DaysRemainingClass {
+	if (days < 0) return "past";
+	if (days === 0) return "today";
+	if (days <= 3) return "urgent";
+	if (days <= 7) return "soon";
+	return "future";
+}

@@ -3,6 +3,8 @@ import {
 	calculateDaysDifference,
 	calculateDaysRemainingFromFrontmatter,
 	formatDaysRelative,
+	formatDaysRemaining,
+	getDaysRemainingClass,
 	parseDateFromFrontmatter,
 } from "../src/utils/date";
 
@@ -127,5 +129,63 @@ describe("calculateDaysRemainingFromFrontmatter", () => {
 		const now = new Date();
 		const result = calculateDaysRemainingFromFrontmatter(now);
 		expect(result).toBe("today");
+	});
+});
+
+describe("formatDaysRemaining", () => {
+	it("should format 0 days as 'Today'", () => {
+		expect(formatDaysRemaining(0)).toBe("Today");
+	});
+
+	it("should format 1 day as 'Tomorrow'", () => {
+		expect(formatDaysRemaining(1)).toBe("Tomorrow");
+	});
+
+	it("should format -1 day as 'Yesterday'", () => {
+		expect(formatDaysRemaining(-1)).toBe("Yesterday");
+	});
+
+	it("should format positive days as 'in X days'", () => {
+		expect(formatDaysRemaining(2)).toBe("in 2 days");
+		expect(formatDaysRemaining(5)).toBe("in 5 days");
+		expect(formatDaysRemaining(30)).toBe("in 30 days");
+	});
+
+	it("should format negative days as 'X days ago'", () => {
+		expect(formatDaysRemaining(-2)).toBe("2 days ago");
+		expect(formatDaysRemaining(-5)).toBe("5 days ago");
+		expect(formatDaysRemaining(-30)).toBe("30 days ago");
+	});
+});
+
+describe("getDaysRemainingClass", () => {
+	it("should return 'past' for negative days", () => {
+		expect(getDaysRemainingClass(-1)).toBe("past");
+		expect(getDaysRemainingClass(-5)).toBe("past");
+		expect(getDaysRemainingClass(-100)).toBe("past");
+	});
+
+	it("should return 'today' for 0 days", () => {
+		expect(getDaysRemainingClass(0)).toBe("today");
+	});
+
+	it("should return 'urgent' for 1-3 days", () => {
+		expect(getDaysRemainingClass(1)).toBe("urgent");
+		expect(getDaysRemainingClass(2)).toBe("urgent");
+		expect(getDaysRemainingClass(3)).toBe("urgent");
+	});
+
+	it("should return 'soon' for 4-7 days", () => {
+		expect(getDaysRemainingClass(4)).toBe("soon");
+		expect(getDaysRemainingClass(5)).toBe("soon");
+		expect(getDaysRemainingClass(6)).toBe("soon");
+		expect(getDaysRemainingClass(7)).toBe("soon");
+	});
+
+	it("should return 'future' for 8+ days", () => {
+		expect(getDaysRemainingClass(8)).toBe("future");
+		expect(getDaysRemainingClass(10)).toBe("future");
+		expect(getDaysRemainingClass(30)).toBe("future");
+		expect(getDaysRemainingClass(100)).toBe("future");
 	});
 });
