@@ -19,9 +19,25 @@ export class UserInterfaceSettingsSection implements SettingsSection {
 		});
 
 		this.uiBuilder.addToggle(containerEl, {
+			key: "showStartupOverview",
+			name: "Show deadlines overview on load",
+			desc: "Display the Goals & Projects deadlines overview modal when the plugin loads. You can always open it manually with the 'Show Deadlines Overview' command.",
+		});
+
+		this.uiBuilder.addToggle(containerEl, {
 			key: "showViewSwitcherHeader",
 			name: "Show view switcher header",
 			desc: "Display the header with toggle button in the Fusion Goals view. Changes apply immediately.",
+		});
+
+		new Setting(containerEl).setName("Deadlines Overview Filters").setHeading();
+
+		this.uiBuilder.addTextArray(containerEl, {
+			key: "deadlineFilterExpressions",
+			name: "Global filter expressions",
+			desc: "One per line. Changes apply on blur or Ctrl/Cmd+Enter. Only items matching all expressions will be shown in the Deadlines Overview modal. Leave empty to show all items.",
+			placeholder: "status === 'active'\npriority === 'high'",
+			multiline: true,
 		});
 	}
 }
