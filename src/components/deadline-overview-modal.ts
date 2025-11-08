@@ -2,9 +2,10 @@ import { type App, Modal, TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { Indexer } from "../core/indexer";
 import type { SettingsStore } from "../core/settings-store";
-import type { FileType } from "../types/constants";
+import { FILE_TYPE_CONFIG, type FileType } from "../types/constants";
 import { parseDaysFromString } from "../utils/date";
 import { buildPropertyMapping, sanitizeExpression } from "../utils/expression";
+import { DeadlineTable, type DeadlineTableItem } from "./deadline-table";
 import { GraphFilter } from "./graph-filter";
 import { GraphSearch } from "./graph-search";
 import { PropertyTooltip } from "./property-tooltip";
@@ -21,14 +22,13 @@ interface TableItem {
 
 type SortMode = "days-remaining" | "days-incoming";
 type SortOrder = "asc" | "desc";
-type TabMode = "goals" | "projects" | "tasks";
 
 const ITEMS_PER_PAGE = 20;
 
 export class DeadlineOverviewModal extends Modal {
 	private indexer: Indexer;
 	private settingsSubscription?: Subscription;
-	private currentTab: TabMode = "goals";
+	private currentTab: FileType = "goal";
 	private currentPage = 1;
 	private itemsPerPage = ITEMS_PER_PAGE;
 	private sortMode: SortMode = "days-remaining";
@@ -41,6 +41,7 @@ export class DeadlineOverviewModal extends Modal {
 	private searchFilterContainer: HTMLElement | null = null;
 	private isInitialRender = true;
 	private propertyTooltip: PropertyTooltip;
+	private deadlineTable: DeadlineTable | null = null;
 
 	constructor(
 		app: App,
@@ -130,9 +131,7 @@ export class DeadlineOverviewModal extends Modal {
 		this.allItems.set("task", tasks);
 	}
 
-	private getSortedItems(): TableItem[] {
-		const fileType: FileType =
-			this.currentTab === "goals" ? "goal" : this.currentTab === "projects" ? "project" : "task";
+	private getFilteredItemsForType(fileType: FileType): TableItem[] {
 		let items = this.allItems.get(fileType) || [];
 
 		// Filter based on past/future event toggles
@@ -160,6 +159,12 @@ export class DeadlineOverviewModal extends Modal {
 		if (this.graphFilter) {
 			items = items.filter((item) => this.graphFilter!.shouldInclude(item.frontmatter));
 		}
+
+		return items;
+	}
+
+	private getSortedItems(): TableItem[] {
+		const items = this.getFilteredItemsForType(this.currentTab);
 
 		return [...items].sort((a, b) => {
 			let aValue: number | null;
@@ -243,25 +248,20 @@ export class DeadlineOverviewModal extends Modal {
 		container.empty();
 		const tabsContainer = container.createEl("div", { cls: "startup-overview-tabs" });
 
-		const tabs: Array<{ mode: TabMode; label: string; icon: string }> = [
-			{ mode: "goals", label: "Goals", icon: "🎯" },
-			{ mode: "projects", label: "Projects", icon: "📁" },
-			{ mode: "tasks", label: "Tasks", icon: "✓" },
-		];
-
-		for (const tab of tabs) {
+		for (const [fileType, config] of Object.entries(FILE_TYPE_CONFIG) as Array<
+			[FileType, (typeof FILE_TYPE_CONFIG)[FileType]]
+		>) {
 			const tabEl = tabsContainer.createEl("button", {
-				cls: `startup-overview-tab${this.currentTab === tab.mode ? " active" : ""}`,
+				cls: `startup-overview-tab${this.currentTab === fileType ? " active" : ""}`,
 			});
-			tabEl.createEl("span", { text: tab.icon });
-			tabEl.createEl("span", { text: tab.label });
+			tabEl.createEl("span", { text: config.icon });
+			tabEl.createEl("span", { text: config.tabLabel });
 
-			const fileType: FileType = tab.mode === "goals" ? "goal" : tab.mode === "projects" ? "project" : "task";
 			const count = this.getFilteredCountForType(fileType);
 			tabEl.createEl("span", { text: `(${count})`, cls: "startup-overview-tab-count" });
 
 			tabEl.addEventListener("click", () => {
-				this.currentTab = tab.mode;
+				this.currentTab = fileType;
 				this.currentPage = 1;
 				this.renderContent();
 			});
@@ -269,32 +269,7 @@ export class DeadlineOverviewModal extends Modal {
 	}
 
 	private getFilteredCountForType(fileType: FileType): number {
-		let items = this.allItems.get(fileType) || [];
-
-		// Apply same filtering logic as getSortedItems
-		items = items.filter((item) => {
-			const isPastEvent = item.daysRemaining !== null && item.daysRemaining < 0;
-			const isFutureEvent = item.daysIncoming !== null && item.daysIncoming > 0;
-			const isCurrentEvent = !isPastEvent && !isFutureEvent;
-
-			if (isCurrentEvent) return true;
-			if (isPastEvent && this.showPastEvents) return true;
-			if (isFutureEvent && this.showFutureEvents) return true;
-
-			return false;
-		});
-
-		// Apply search filter
-		if (this.graphSearch) {
-			items = items.filter((item) => this.graphSearch!.shouldInclude(item.title));
-		}
-
-		// Apply frontmatter filter
-		if (this.graphFilter) {
-			items = items.filter((item) => this.graphFilter!.shouldInclude(item.frontmatter));
-		}
-
-		return items.length;
+		return this.getFilteredItemsForType(fileType).length;
 	}
 
 	private renderPastEventsToggle(container: HTMLElement): void {
@@ -401,108 +376,37 @@ export class DeadlineOverviewModal extends Modal {
 		const container = this.contentEl.querySelector(".deadline-overview-table-container") as HTMLElement;
 		if (!container) return;
 
-		container.empty();
+		if (!this.deadlineTable) {
+			this.deadlineTable = new DeadlineTable({
+				app: this.app,
+				container,
+				items: [],
+				emptyMessage: "",
+				propertyTooltip: this.propertyTooltip,
+				onFileOpen: async (file: TFile, ctrlKey: boolean) => {
+					if (ctrlKey) {
+						await this.app.workspace.getLeaf("tab").openFile(file);
+					} else {
+						await this.app.workspace.getLeaf().openFile(file);
+						this.close();
+					}
+				},
+			});
+		}
+
 		const items = this.getPaginatedItems();
+		const config = FILE_TYPE_CONFIG[this.currentTab];
+		const emptyMessage = `No ${config.plural} found`;
 
-		if (items.length === 0) {
-			container.createEl("div", {
-				cls: "startup-overview-empty",
-				text: `No ${this.currentTab} found`,
-			});
-			return;
-		}
+		// Convert TableItem to DeadlineTableItem
+		const tableItems: DeadlineTableItem[] = items.map((item) => ({
+			file: item.file,
+			title: item.title,
+			daysRemaining: item.daysRemaining,
+			daysIncoming: item.daysIncoming,
+		}));
 
-		const tableEl = container.createEl("table", { cls: "startup-overview-table" });
-
-		// Table header
-		const thead = tableEl.createEl("thead");
-		const headerRow = thead.createEl("tr");
-		headerRow.createEl("th", { text: "Title" });
-		headerRow.createEl("th", { text: "Days Remaining" });
-		headerRow.createEl("th", { text: "Days Incoming" });
-
-		// Table body
-		const tbody = tableEl.createEl("tbody");
-		for (const item of items) {
-			const row = tbody.createEl("tr");
-
-			// Title cell (clickable link with hover preview)
-			const titleCell = row.createEl("td");
-			const link = titleCell.createEl("a", {
-				cls: "startup-overview-link",
-				text: item.title,
-			});
-
-			// Show PropertyTooltip on normal hover
-			link.addEventListener("mouseenter", (e) => {
-				this.propertyTooltip.show(item.file.path, e);
-			});
-
-			link.addEventListener("mouseleave", () => {
-				this.propertyTooltip.scheduleHide(300);
-			});
-
-			// Trigger Obsidian hover preview with Ctrl+hover
-			link.addEventListener("mouseover", (e) => {
-				if (e.ctrlKey || e.metaKey) {
-					this.app.workspace.trigger("hover-link", {
-						event: e,
-						source: "deadline-overview-modal",
-						hoverParent: this,
-						targetEl: link,
-						linktext: item.file.path,
-						sourcePath: "",
-					});
-				}
-			});
-
-			link.addEventListener("click", async (e) => {
-				e.preventDefault();
-
-				if (e.ctrlKey || e.metaKey) {
-					await this.app.workspace.getLeaf("tab").openFile(item.file);
-				} else {
-					await this.app.workspace.getLeaf().openFile(item.file);
-					this.close();
-				}
-			});
-
-			// Days remaining cell
-			const daysRemainingCell = row.createEl("td");
-			if (item.daysRemaining !== null) {
-				daysRemainingCell.setText(this.formatDays(item.daysRemaining));
-				daysRemainingCell.addClass(this.getDaysClass(item.daysRemaining));
-			} else {
-				daysRemainingCell.setText("—");
-				daysRemainingCell.addClass("startup-overview-empty-cell");
-			}
-
-			// Days incoming cell
-			const daysIncomingCell = row.createEl("td");
-			if (item.daysIncoming !== null) {
-				daysIncomingCell.setText(this.formatDays(item.daysIncoming));
-				daysIncomingCell.addClass(this.getDaysClass(item.daysIncoming));
-			} else {
-				daysIncomingCell.setText("—");
-				daysIncomingCell.addClass("startup-overview-empty-cell");
-			}
-		}
-	}
-
-	private formatDays(days: number): string {
-		if (days === 0) return "Today";
-		if (days === 1) return "Tomorrow";
-		if (days === -1) return "Yesterday";
-		if (days > 0) return `in ${days} days`;
-		return `${Math.abs(days)} days ago`;
-	}
-
-	private getDaysClass(days: number): string {
-		if (days < 0) return "startup-overview-past";
-		if (days === 0) return "startup-overview-today";
-		if (days <= 3) return "startup-overview-urgent";
-		if (days <= 7) return "startup-overview-soon";
-		return "startup-overview-future";
+		this.deadlineTable.render(tableItems, emptyMessage);
 	}
 
 	private updatePagination(): void {
@@ -625,10 +529,11 @@ export class DeadlineOverviewModal extends Modal {
 		contentEl.empty();
 		this.settingsSubscription?.unsubscribe();
 
-		// Clean up search and filter
+		// Clean up components
 		this.graphSearch = null;
 		this.graphFilter = null;
 		this.searchFilterContainer = null;
+		this.deadlineTable = null;
 		this.isInitialRender = true;
 
 		// Clean up property tooltip

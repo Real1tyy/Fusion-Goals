@@ -83,3 +83,29 @@ export const SETTINGS_DEFAULTS = {
 export const SCAN_CONCURRENCY = 10;
 
 export type FileType = "goal" | "project" | "task";
+
+export const FILE_TYPE_CONFIG = {
+	goal: {
+		singular: "goal",
+		plural: "goals",
+		tabLabel: "Goals",
+		icon: "🎯",
+		tabMode: "goals" as const,
+	},
+	project: {
+		singular: "project",
+		plural: "projects",
+		tabLabel: "Projects",
+		icon: "📁",
+		tabMode: "projects" as const,
+	},
+	task: {
+		singular: "task",
+		plural: "tasks",
+		tabLabel: "Tasks",
+		icon: "✓",
+		tabMode: "tasks" as const,
+	},
+} as const;
+
+export type TabMode = (typeof FILE_TYPE_CONFIG)[FileType]["tabMode"];
