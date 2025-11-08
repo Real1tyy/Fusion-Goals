@@ -146,10 +146,6 @@ export class DeadlineOverviewModal extends Modal {
 			// Current/active events: not past and not future
 			const isCurrentEvent = !isPastEvent && !isFutureEvent;
 
-			// Show item if:
-			// - It's a current/active event (always shown)
-			// - It's a past event AND showPastEvents is true
-			// - It's a future event AND showFutureEvents is true
 			if (isCurrentEvent) return true;
 			if (isPastEvent && this.showPastEvents) return true;
 			if (isFutureEvent && this.showFutureEvents) return true;
@@ -157,17 +153,15 @@ export class DeadlineOverviewModal extends Modal {
 			return false;
 		});
 
-		// Apply search filter using GraphSearch
 		if (this.graphSearch) {
 			items = items.filter((item) => this.graphSearch!.shouldInclude(item.title));
 		}
 
-		// Apply frontmatter filter using GraphFilter
 		if (this.graphFilter) {
 			items = items.filter((item) => this.graphFilter!.shouldInclude(item.frontmatter));
 		}
 
-		const sorted = [...items].sort((a, b) => {
+		return [...items].sort((a, b) => {
 			let aValue: number | null;
 			let bValue: number | null;
 
@@ -179,7 +173,6 @@ export class DeadlineOverviewModal extends Modal {
 				bValue = b.daysIncoming;
 			}
 
-			// Handle null values (push to end)
 			if (aValue === null && bValue === null) return 0;
 			if (aValue === null) return 1;
 			if (bValue === null) return -1;
@@ -187,8 +180,6 @@ export class DeadlineOverviewModal extends Modal {
 			const diff = aValue - bValue;
 			return this.sortOrder === "asc" ? diff : -diff;
 		});
-
-		return sorted;
 	}
 
 	private evaluateGlobalFilters(frontmatter: Record<string, unknown>, expressions: string[]): boolean {
@@ -208,44 +199,31 @@ export class DeadlineOverviewModal extends Modal {
 	}
 
 	private getPaginatedItems(): TableItem[] {
-		const sorted = this.getSortedItems();
 		const startIdx = (this.currentPage - 1) * this.itemsPerPage;
 		const endIdx = startIdx + this.itemsPerPage;
-		return sorted.slice(startIdx, endIdx);
+		return this.getSortedItems().slice(startIdx, endIdx);
 	}
 
 	private getTotalPages(): number {
-		const sorted = this.getSortedItems();
-		return Math.ceil(sorted.length / this.itemsPerPage);
+		return Math.ceil(this.getSortedItems().length / this.itemsPerPage);
 	}
 
 	private renderContent(): void {
 		const { contentEl } = this;
 
 		if (this.isInitialRender) {
-			// Full render on first load
 			contentEl.empty();
 
-			// Header
 			const headerEl = contentEl.createEl("div", { cls: "startup-overview-header" });
 			headerEl.createEl("h2", { text: "Deadlines Overview" });
 
-			// Show past events toggle
 			this.renderPastEventsToggle(contentEl);
-
-			// Tab navigation
 			contentEl.createEl("div", { cls: "deadline-overview-tabs-container" });
 
-			// Search and filter
 			this.renderSearchAndFilter(contentEl);
 
-			// Sorting controls
 			contentEl.createEl("div", { cls: "deadline-overview-sort-container" });
-
-			// Table
 			contentEl.createEl("div", { cls: "deadline-overview-table-container" });
-
-			// Pagination
 			contentEl.createEl("div", { cls: "deadline-overview-pagination-container" });
 
 			this.isInitialRender = false;

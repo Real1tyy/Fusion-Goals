@@ -82,5 +82,4 @@ export const SETTINGS_DEFAULTS = {
 
 export const SCAN_CONCURRENCY = 10;
 
-// Hierarchical file types
 export type FileType = "goal" | "project" | "task";
