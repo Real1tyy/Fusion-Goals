@@ -21,7 +21,7 @@ const TFile = TFileType as unknown as new (path: string) => TFileType;
 describe("getInheritableProperties", () => {
 	const defaultSettings: FusionGoalsSettings = {
 		enableFrontmatterInheritance: true,
-		inheritanceExcludedProperties: ["Goal", "Project"],
+		inheritanceExcludedProperties: ["Goal"],
 		taskGoalProp: "Goal",
 	} as FusionGoalsSettings;
 
@@ -125,10 +125,9 @@ describe("getInheritableProperties", () => {
 			});
 		});
 
-		it("should exclude relationship properties (Goal, Project)", () => {
+		it("should exclude relationship properties (Goal)", () => {
 			const frontmatter: Frontmatter = {
 				Goal: "[[Goals/My Goal]]",
-				Project: "[[Projects/My Project]]",
 				Priority: "High",
 			};
 
@@ -138,13 +137,12 @@ describe("getInheritableProperties", () => {
 				Priority: "High",
 			});
 			expect(result).not.toHaveProperty("Goal");
-			expect(result).not.toHaveProperty("Project");
 		});
 
 		it("should exclude custom excluded properties from settings including tasks", () => {
 			const settings: FusionGoalsSettings = {
 				...defaultSettings,
-				inheritanceExcludedProperties: ["Goal", "Project", "tasks", "CustomProp"],
+				inheritanceExcludedProperties: ["Goal", "tasks", "CustomProp"],
 			};
 
 			const frontmatter: Frontmatter = {
@@ -201,7 +199,6 @@ describe("getInheritableProperties", () => {
 		it("should return empty object when no inheritable properties exist", () => {
 			const frontmatter: Frontmatter = {
 				Goal: "[[Goals/My Goal]]",
-				Project: "[[Projects/My Project]]",
 			};
 
 			const result = getInheritableProperties(frontmatter, defaultSettings);
@@ -236,7 +233,6 @@ describe("getInheritableProperties", () => {
 			});
 			expect(result).not.toHaveProperty("ParentGoal");
 			expect(result).not.toHaveProperty("LinkedGoal");
-			expect(result).not.toHaveProperty("ParentProject");
 		});
 	});
 
@@ -417,7 +413,7 @@ describe("applyInheritanceUpdates", () => {
 				properties: { Priority: "Low" },
 			},
 			{
-				filePath: "Projects/Project 1.md",
+				filePath: "Goals/Goal 1.md",
 				properties: { Status: "Active" },
 			},
 		];
@@ -427,7 +423,7 @@ describe("applyInheritanceUpdates", () => {
 		expect(processFrontMatterSpy).toHaveBeenCalledTimes(3);
 		expect(processFrontMatterSpy.mock.calls[0][0].path).toBe("Tasks/Task 1.md");
 		expect(processFrontMatterSpy.mock.calls[1][0].path).toBe("Tasks/Task 2.md");
-		expect(processFrontMatterSpy.mock.calls[2][0].path).toBe("Projects/Project 1.md");
+		expect(processFrontMatterSpy.mock.calls[2][0].path).toBe("Goals/Goal 1.md");
 	});
 
 	it("should handle empty updates array", async () => {

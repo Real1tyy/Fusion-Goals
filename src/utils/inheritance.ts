@@ -85,10 +85,24 @@ export function getInheritableProperties(
 
 	const excludedProps = new Set([...inheritanceExcludedProperties, taskGoalProp]);
 
+	// Check if a property name should be excluded
+	// Exclude if it exactly matches an excluded property, or if it contains an excluded property name
+	const isExcluded = (key: string): boolean => {
+		if (excludedProps.has(key)) {
+			return true;
+		}
+		// Check if key contains any excluded property name (case-insensitive)
+		const keyLower = key.toLowerCase();
+		for (const excludedProp of excludedProps) {
+			if (keyLower.includes(excludedProp.toLowerCase())) {
+				return true;
+			}
+		}
+		return false;
+	};
+
 	const filtered = Object.fromEntries(
-		Object.entries(frontmatter).filter(
-			([key, value]) => !excludedProps.has(key) && value !== undefined && value !== null
-		)
+		Object.entries(frontmatter).filter(([key, value]) => !isExcluded(key) && value !== undefined && value !== null)
 	);
 
 	return Object.fromEntries(Object.entries(filtered).map(([key, value]) => [key, normalizeValue(value)]));

@@ -59,11 +59,6 @@ export class RulesSection implements SettingsSection {
 				description: "Active nodes in green",
 			},
 			{
-				expression: "type === 'project'",
-				color: "#3b82f6",
-				description: "Project nodes in blue",
-			},
-			{
 				expression: "Priority === 'High'",
 				color: "#ef4444",
 				description: "High priority nodes in red",
@@ -134,10 +129,6 @@ export class RulesSection implements SettingsSection {
 				description: "Only show nodes with Status = 'Active'",
 			},
 			{
-				expression: "type === 'project'",
-				description: "Only show project-type nodes",
-			},
-			{
 				expression: "Array.isArray(tags) && tags.includes('important')",
 				description: "Only show nodes tagged as important",
 			},
@@ -160,7 +151,7 @@ export class RulesSection implements SettingsSection {
 			key: "filterExpressions",
 			name: "Filter expressions",
 			desc: "One per line. Changes apply on blur or Ctrl/Cmd+Enter. Only nodes matching all expressions are shown in the graph.",
-			placeholder: "Status === 'Active'\ntype === 'project'",
+			placeholder: "Status === 'Active'\nPriority === 'High'",
 			multiline: true,
 		});
 

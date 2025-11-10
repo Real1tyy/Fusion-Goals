@@ -1,10 +1,17 @@
+import {
+	ColorEvaluator,
+	extractDisplayName,
+	extractFilePath,
+	type FileContext,
+	FilterEvaluator,
+	getFileContext,
+} from "@real1ty-obsidian-plugins/utils";
 import type { ElementDefinition } from "cytoscape";
 import type { App } from "obsidian";
-import { FilterEvaluator, ColorEvaluator, extractDisplayName, extractFilePath, type FileContext, getFileContext } from "@real1ty-obsidian-plugins/utils";
+import type { FusionGoalsSettings } from "../types/settings";
 import { parseLinkedPathsFromProperty } from "../utils/property";
 import type { Indexer } from "./indexer";
 import type { SettingsStore } from "./settings-store";
-import type { FusionGoalsSettings } from "../types/settings";
 
 export interface GraphData {
 	nodes: ElementDefinition[];

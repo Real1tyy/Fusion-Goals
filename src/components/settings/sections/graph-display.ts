@@ -104,7 +104,7 @@ export class GraphDisplaySettingsSection implements SettingsSection {
 		this.uiBuilder.addToggle(containerEl, {
 			key: "differentiateNodesByType",
 			name: "Differentiate nodes by type",
-			desc: "Apply different visual styles to distinguish goals (hexagons), projects (rounded squares), and tasks (circles with double borders). When disabled, all nodes use the same circular shape.",
+			desc: "Apply different visual styles to distinguish goals (hexagons), and tasks (circles with double borders). When disabled, all nodes use the same circular shape.",
 		});
 
 		this.uiBuilder.addToggle(containerEl, {

@@ -23,6 +23,7 @@ describe("Indexer", () => {
 	const defaultSettings: FusionGoalsSettings = {
 		goalsDirectory: "Goals",
 		tasksDirectory: "Tasks",
+		taskGoalProp: "Goal",
 		version: 1,
 		showRibbonIcon: true,
 		showStartupOverview: true,
@@ -285,7 +286,7 @@ describe("Indexer", () => {
 				Goal: "[[Goals/My Goal]]",
 			};
 
-			vi.mocked(mockVault.getMarkdownFiles).mockReturnValue([taskFile]);
+			vi.mocked(mockVault.getMarkdownFiles).mockReturnValue([goalFile, taskFile]);
 			vi.mocked(mockMetadataCache.getFileCache).mockImplementation((file) => {
 				if (file.path === "Tasks/My Task.md") {
 					return { frontmatter: taskFrontmatter } as CachedMetadata;
@@ -323,7 +324,6 @@ describe("Indexer", () => {
 			const callsForTask = processFrontMatterSpy.mock.calls.filter((call) => call[0].path === "Tasks/My Task.md");
 			expect(callsForTask.length).toBeGreaterThan(0);
 		});
-
 	});
 
 	describe("stop", () => {

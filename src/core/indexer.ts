@@ -21,8 +21,8 @@ import { normalizePathToFilename } from "src/utils/path";
 import { parseLinkedPathsFromProperty } from "src/utils/property";
 import { type FileType, SCAN_CONCURRENCY } from "../types/constants";
 import type { Frontmatter, FusionGoalsSettings } from "../types/settings";
-import type { InheritanceRemoval, InheritanceUpdate } from "../utils/inheritance";
 import { calculateDaysRemainingFromFrontmatter } from "../utils/date";
+import type { InheritanceRemoval, InheritanceUpdate } from "../utils/inheritance";
 
 export interface FileRelationships {
 	filePath: string;
