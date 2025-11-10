@@ -1,15 +1,13 @@
 import { type App, Component, MarkdownRenderer, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type FusionGoalsPlugin from "../../main";
-import { type BaseHandler, GoalsBaseHandler, ProjectsBaseHandler, type ViewType } from "./bases";
+import { type BaseHandler, GoalsBaseHandler, type ViewType } from "./bases";
 import { RegisteredEventsComponent } from "./component";
 
 export const VIEW_TYPE_BASES = "fusion-bases-view";
 
 export interface BasesViewState {
-	projectsView: ViewType;
 	goalsView: ViewType;
-	goalsTopLevel: string;
 }
 
 /**
@@ -37,7 +35,7 @@ export class BasesView extends RegisteredEventsComponent {
 		this.component = new Component();
 		this.component.load();
 
-		this.handlers = [new ProjectsBaseHandler(app, plugin), new GoalsBaseHandler(app, plugin)];
+		this.handlers = [new GoalsBaseHandler(app, plugin)];
 
 		this.settingsSubscription = this.plugin.settingsStore.settings$.subscribe(async (settings) => {
 			this.validateAllHandlers(settings);
@@ -213,7 +211,7 @@ export class BasesView extends RegisteredEventsComponent {
 		const isTaskFile = file.path.startsWith("Tasks/") && file.name !== "Tasks.md";
 
 		if (isTaskFile) {
-			this.renderEmptyState("This view only works with Projects and Goals. Tasks don't have a bases view.");
+			this.renderEmptyState("This view only works with Goals. Tasks don't have a bases view.");
 		} else {
 			this.renderEmptyState("Bases are not configured for this directory.");
 		}
@@ -231,7 +229,6 @@ export class BasesView extends RegisteredEventsComponent {
 	}
 
 	getState(): BasesViewState {
-		const projectsHandler = this.handlers.find((h) => h instanceof ProjectsBaseHandler);
 		const goalsHandler = this.handlers.find((h) => h instanceof GoalsBaseHandler);
 
 		// Get first view option as fallback (respects custom views first)
@@ -242,27 +239,15 @@ export class BasesView extends RegisteredEventsComponent {
 		};
 
 		return {
-			projectsView: projectsHandler?.getSelectedView() ?? getFirstViewType(projectsHandler),
 			goalsView: goalsHandler?.getSelectedView() ?? getFirstViewType(goalsHandler),
-			goalsTopLevel: goalsHandler?.getSelectedTopLevelView() ?? "projects",
 		};
 	}
 
 	restoreState(state: BasesViewState): void {
-		const projectsHandler = this.handlers.find((h) => h instanceof ProjectsBaseHandler);
 		const goalsHandler = this.handlers.find((h) => h instanceof GoalsBaseHandler);
 
-		if (projectsHandler && state.projectsView) {
-			projectsHandler.setSelectedView(state.projectsView);
-		}
-
-		if (goalsHandler) {
-			if (state.goalsView) {
-				goalsHandler.setSelectedView(state.goalsView);
-			}
-			if (state.goalsTopLevel) {
-				goalsHandler.setSelectedTopLevelView(state.goalsTopLevel);
-			}
+		if (goalsHandler && state.goalsView) {
+			goalsHandler.setSelectedView(state.goalsView);
 		}
 	}
 
@@ -294,7 +279,7 @@ export class BasesView extends RegisteredEventsComponent {
 		if (!this.currentHandler) return;
 
 		if (type === "view") {
-			// View = top-level selector (Projects/Tasks for Goals)
+			// View = top-level selector (no longer used with just tasks)
 			const topLevelOptions = this.currentHandler.getTopLevelOptions();
 			if (topLevelOptions.length <= 1) return;
 
@@ -323,7 +308,7 @@ export class BasesView extends RegisteredEventsComponent {
 		if (!this.currentHandler) return;
 
 		if (type === "view") {
-			// View = top-level selector (Projects/Tasks for Goals)
+			// View = top-level selector (no longer used with just tasks)
 			const topLevelOptions = this.currentHandler.getTopLevelOptions();
 			if (topLevelOptions.length <= 1 || index < 0 || index >= topLevelOptions.length) return;
 

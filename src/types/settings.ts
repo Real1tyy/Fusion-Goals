@@ -33,13 +33,10 @@ export const FusionGoalsSettingsSchema = z.object({
 
 	// Hierarchical directory structure (required - must be defined)
 	goalsDirectory: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_GOALS_DIRECTORY),
-	projectsDirectory: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_PROJECTS_DIRECTORY),
 	tasksDirectory: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_TASKS_DIRECTORY),
 
 	// Property names for hierarchical linking
-	projectGoalProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_PROJECT_GOAL_PROP),
 	taskGoalProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_TASK_GOAL_PROP),
-	taskProjectProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_TASK_PROJECT_PROP),
 
 	// UI settings
 	showRibbonIcon: z.boolean().optional().default(true),
@@ -127,10 +124,6 @@ export const FusionGoalsSettingsSchema = z.object({
 		.array(z.string())
 		.optional()
 		.default([...SETTINGS_DEFAULTS.DEFAULT_BASES_GOALS_PROPERTIES]),
-	basesProjectsProperties: z
-		.array(z.string())
-		.optional()
-		.default([...SETTINGS_DEFAULTS.DEFAULT_BASES_PROJECTS_PROPERTIES]),
 	basesTasksProperties: z
 		.array(z.string())
 		.optional()

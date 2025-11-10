@@ -22,9 +22,7 @@ describe("getInheritableProperties", () => {
 	const defaultSettings: FusionGoalsSettings = {
 		enableFrontmatterInheritance: true,
 		inheritanceExcludedProperties: ["Goal", "Project"],
-		projectGoalProp: "Goal",
 		taskGoalProp: "Goal",
-		taskProjectProp: "Project",
 	} as FusionGoalsSettings;
 
 	describe("wiki link normalization", () => {
@@ -222,15 +220,12 @@ describe("getInheritableProperties", () => {
 		it("should respect custom relationship property names", () => {
 			const settings: FusionGoalsSettings = {
 				...defaultSettings,
-				projectGoalProp: "ParentGoal",
 				taskGoalProp: "LinkedGoal",
-				taskProjectProp: "ParentProject",
 			};
 
 			const frontmatter: Frontmatter = {
 				ParentGoal: "[[Goals/My Goal]]",
 				LinkedGoal: "[[Goals/My Goal]]",
-				ParentProject: "[[Projects/My Project]]",
 				Priority: "High",
 			};
 
@@ -666,10 +661,8 @@ describe("applyInheritanceUpdates", () => {
 describe("detectPropertyRemovals", () => {
 	const defaultSettings: FusionGoalsSettings = {
 		enableFrontmatterInheritance: true,
-		inheritanceExcludedProperties: ["Goal", "Project"],
-		projectGoalProp: "Goal",
+		inheritanceExcludedProperties: ["Goal"],
 		taskGoalProp: "Goal",
-		taskProjectProp: "Project",
 	} as FusionGoalsSettings;
 
 	it("should detect removed array values", () => {

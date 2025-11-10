@@ -81,9 +81,9 @@ export function getInheritableProperties(
 		return {};
 	}
 
-	const { inheritanceExcludedProperties, projectGoalProp, taskGoalProp, taskProjectProp } = settings;
+	const { inheritanceExcludedProperties, taskGoalProp } = settings;
 
-	const excludedProps = new Set([...inheritanceExcludedProperties, projectGoalProp, taskGoalProp, taskProjectProp]);
+	const excludedProps = new Set([...inheritanceExcludedProperties, taskGoalProp]);
 
 	const filtered = Object.fromEntries(
 		Object.entries(frontmatter).filter(

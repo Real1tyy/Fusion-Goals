@@ -18,22 +18,13 @@ export class HierarchySection implements SettingsSection {
 
 		containerEl
 			.createDiv("setting-item-description")
-			.setText(
-				"Configure the three-level hierarchy: Goals → Projects → Tasks. Each level must have its own directory."
-			);
+			.setText("Configure the two-level hierarchy: Goals → Tasks. Each level must have its own directory.");
 
 		this.uiBuilder.addText(containerEl, {
 			key: "goalsDirectory",
 			name: "Goals directory",
 			desc: "Directory where goal files are stored (required)",
 			placeholder: "Goals",
-		});
-
-		this.uiBuilder.addText(containerEl, {
-			key: "projectsDirectory",
-			name: "Projects directory",
-			desc: "Directory where project files are stored (required)",
-			placeholder: "Projects",
 		});
 
 		this.uiBuilder.addText(containerEl, {
@@ -47,29 +38,13 @@ export class HierarchySection implements SettingsSection {
 
 		containerEl
 			.createDiv("setting-item-description")
-			.setText(
-				"Property names used to link files in the hierarchy. Projects link to Goals, Tasks link to both Goals and Projects."
-			);
-
-		this.uiBuilder.addText(containerEl, {
-			key: "projectGoalProp",
-			name: "Project → Goal property",
-			desc: "Property name in projects that links to their parent goal",
-			placeholder: "Goal",
-		});
+			.setText("Property name used to link tasks to goals in the hierarchy.");
 
 		this.uiBuilder.addText(containerEl, {
 			key: "taskGoalProp",
 			name: "Task → Goal property",
 			desc: "Property name in tasks that links to their goal",
 			placeholder: "Goal",
-		});
-
-		this.uiBuilder.addText(containerEl, {
-			key: "taskProjectProp",
-			name: "Task → Project property",
-			desc: "Property name in tasks that links to their parent project",
-			placeholder: "Project",
 		});
 
 		this.renderInheritanceSection(containerEl);
@@ -81,20 +56,16 @@ export class HierarchySection implements SettingsSection {
 
 		const descEl = containerEl.createDiv("setting-item-description");
 		descEl.createEl("p", {
-			text: "Automatically propagate frontmatter properties from parent to child files in the hierarchy:",
-		});
-		descEl.createEl("ul", {}, (ul) => {
-			ul.createEl("li", { text: "Goals → All linked projects and tasks" });
-			ul.createEl("li", { text: "Projects → All linked tasks" });
+			text: "Automatically propagate frontmatter properties from goals to linked tasks.",
 		});
 		descEl.createEl("p", {
-			text: "When you update a property in a goal or project, it will be inherited by all children. Relationship properties (Goal, Project) are always excluded from inheritance.",
+			text: "When you update a property in a goal, it will be inherited by all linked tasks. Relationship properties (Goal) are always excluded from inheritance.",
 		});
 
 		this.uiBuilder.addToggle(containerEl, {
 			key: "enableFrontmatterInheritance",
 			name: "Enable frontmatter inheritance",
-			desc: "When enabled, changes to goal/project frontmatter will automatically propagate to children",
+			desc: "When enabled, changes to goal frontmatter will automatically propagate to linked tasks",
 		});
 
 		this.uiBuilder.addTextArray(containerEl, {
@@ -110,7 +81,7 @@ export class HierarchySection implements SettingsSection {
 
 		const descEl = containerEl.createDiv("setting-item-description");
 		descEl.createEl("p", {
-			text: "Manually rescan and reindex all files in your vault. This will rebuild the hierarchical cache and, if inheritance is enabled, propagate properties from goals to projects/tasks.",
+			text: "Manually rescan and reindex all files in your vault. This will rebuild the hierarchical cache and, if inheritance is enabled, propagate properties from goals to tasks.",
 		});
 
 		new Setting(containerEl)

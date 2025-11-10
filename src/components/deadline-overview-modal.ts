@@ -1,10 +1,10 @@
 import { type App, Modal, TFile } from "obsidian";
 import type { Subscription } from "rxjs";
-import type { Indexer } from "../core/indexer";
+import type { Indexer } from "src/core/indexer";
+import { parseDaysFromString } from "src/utils/date";
+import { buildPropertyMapping, sanitizeExpression } from "src/utils/expression";
 import type { SettingsStore } from "../core/settings-store";
 import { FILE_TYPE_CONFIG, type FileType } from "../types/constants";
-import { parseDaysFromString } from "../utils/date";
-import { buildPropertyMapping, sanitizeExpression } from "../utils/expression";
 import { DeadlineTable, type DeadlineTableItem } from "./deadline-table";
 import { GraphFilter } from "./graph-filter";
 import { GraphFilterPresetSelector } from "./graph-filter-preset-selector";
@@ -94,7 +94,6 @@ export class DeadlineOverviewModal extends Modal {
 
 	private async loadData(): Promise<void> {
 		const goals: TableItem[] = [];
-		const projects: TableItem[] = [];
 		const tasks: TableItem[] = [];
 
 		for (const [filePath, relationships] of this.indexer.getRelationshipsCache()) {
@@ -126,9 +125,6 @@ export class DeadlineOverviewModal extends Modal {
 				case "goal":
 					goals.push(item);
 					break;
-				case "project":
-					projects.push(item);
-					break;
 				case "task":
 					tasks.push(item);
 					break;
@@ -136,7 +132,6 @@ export class DeadlineOverviewModal extends Modal {
 		}
 
 		this.allItems.set("goal", goals);
-		this.allItems.set("project", projects);
 		this.allItems.set("task", tasks);
 	}
 

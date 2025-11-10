@@ -5,13 +5,10 @@ export const SETTINGS_VERSION = 1;
 export const SETTINGS_DEFAULTS = {
 	// Hierarchical directories
 	DEFAULT_GOALS_DIRECTORY: "Goals",
-	DEFAULT_PROJECTS_DIRECTORY: "Projects",
 	DEFAULT_TASKS_DIRECTORY: "Tasks",
 
 	// Property names for hierarchical linking
-	DEFAULT_PROJECT_GOAL_PROP: "Goal",
 	DEFAULT_TASK_GOAL_PROP: "Goal",
-	DEFAULT_TASK_PROJECT_PROP: "Project",
 
 	DEFAULT_HIDE_EMPTY_PROPERTIES: true,
 	DEFAULT_HIDE_UNDERSCORE_PROPERTIES: true,
@@ -41,15 +38,14 @@ export const SETTINGS_DEFAULTS = {
 	DEFAULT_DIFFERENTIATE_NODES_BY_TYPE: true,
 
 	// Node creation defaults
-	DEFAULT_EXCLUDED_PROPERTIES: ["goal", "project", "tasks"],
+	DEFAULT_EXCLUDED_PROPERTIES: ["goal", "tasks"],
 
 	// Shared date property names (used by both bases view and graph display)
 	DEFAULT_START_DATE_PROPERTY: "Start Date",
 	DEFAULT_END_DATE_PROPERTY: "End Date",
 
 	DEFAULT_BASES_GOALS_PROPERTIES: ["Status", "Priority"],
-	DEFAULT_BASES_PROJECTS_PROPERTIES: ["Status", "Priority", "Difficulty"],
-	DEFAULT_BASES_TASKS_PROPERTIES: ["Goal", "Project", "Status", "Priority"],
+	DEFAULT_BASES_TASKS_PROPERTIES: ["Goal", "Status", "Priority"],
 
 	// Bases archived filtering defaults
 	DEFAULT_EXCLUDE_ARCHIVED: false,
@@ -77,12 +73,12 @@ export const SETTINGS_DEFAULTS = {
 
 	// Frontmatter inheritance defaults
 	DEFAULT_ENABLE_FRONTMATTER_INHERITANCE: true,
-	DEFAULT_INHERITANCE_EXCLUDED_PROPERTIES: ["Goal", "Project"],
+	DEFAULT_INHERITANCE_EXCLUDED_PROPERTIES: ["Goal"],
 } as const;
 
 export const SCAN_CONCURRENCY = 10;
 
-export type FileType = "goal" | "project" | "task";
+export type FileType = "goal" | "task";
 
 export const FILE_TYPE_CONFIG = {
 	goal: {
@@ -91,13 +87,6 @@ export const FILE_TYPE_CONFIG = {
 		tabLabel: "Goals",
 		icon: "🎯",
 		tabMode: "goals" as const,
-	},
-	project: {
-		singular: "project",
-		plural: "projects",
-		tabLabel: "Projects",
-		icon: "📁",
-		tabMode: "projects" as const,
 	},
 	task: {
 		singular: "task",

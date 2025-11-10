@@ -3,11 +3,12 @@ import { BaseHandler, type BaseHandlerConfig, type TopLevelViewOption } from "./
 
 /**
  * Handler for goals-specific base code blocks
+ * Shows tasks associated with the goal
  */
 export class GoalsBaseHandler extends BaseHandler {
 	constructor(app: any, plugin: any) {
 		super(app, plugin);
-		this.selectedTopLevelView = "projects";
+		this.selectedTopLevelView = "tasks";
 	}
 
 	canHandle(file: TFile): boolean {
@@ -17,16 +18,13 @@ export class GoalsBaseHandler extends BaseHandler {
 	protected getConfig(): BaseHandlerConfig {
 		const settings = this.plugin.settingsStore.settings$.value;
 		return {
-			folder: this.selectedTopLevelView === "projects" ? "Projects" : "Tasks",
+			folder: "Tasks",
 			properties: settings.basesGoalsProperties,
 		};
 	}
 
 	getTopLevelOptions(): TopLevelViewOption[] {
-		return [
-			{ id: "projects", label: "Projects" },
-			{ id: "tasks", label: "Tasks" },
-		];
+		return [{ id: "tasks", label: "Tasks" }];
 	}
 
 	generateBasesMarkdown(_file: TFile): string {
@@ -34,13 +32,12 @@ export class GoalsBaseHandler extends BaseHandler {
 		const orderArray = this.generateOrderArray(config.properties);
 		const viewContent = this.generateViewConfig(this.selectedView, orderArray);
 		const formulasSection = this.buildFormulasSection();
-		const folder = config.folder;
 
 		return `\`\`\`base
 filters:
   and:
     - Goal.contains(this.file.asLink())
-    - file.inFolder("${folder}")
+    - file.inFolder("Tasks")
 ${formulasSection}views:
 ${viewContent}
 \`\`\``;

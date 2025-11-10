@@ -166,17 +166,10 @@ export class BasesViewSettingsSection implements SettingsSection {
 		});
 
 		this.uiBuilder.addTextArray(container, {
-			key: "basesProjectsProperties",
-			name: "Projects properties",
-			desc: "Comma-separated list of frontmatter properties to show as columns when viewing Projects files (e.g., Status, Priority, Difficulty)",
-			placeholder: "Status, Priority, Difficulty",
-		});
-
-		this.uiBuilder.addTextArray(container, {
 			key: "basesTasksProperties",
 			name: "Tasks properties",
-			desc: "Comma-separated list of frontmatter properties to show as columns when viewing Tasks files (e.g., Goal, Project, Status, Priority)",
-			placeholder: "Goal, Project, Status, Priority",
+			desc: "Comma-separated list of frontmatter properties to show as columns when viewing Tasks files (e.g., Goal, Status, Priority)",
+			placeholder: "Goal, Status, Priority",
 		});
 
 		const infoBox = container.createDiv("fusion-bases-settings-info-box");
