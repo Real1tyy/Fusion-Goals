@@ -1,7 +1,6 @@
-import { buildPropertyMapping, sanitizeExpression } from "@real1ty-obsidian-plugins/utils";
-import { InputFilterManager } from "./input-filter-manager";
+import { buildPropertyMapping, InputFilterManager, sanitizeExpression } from "@real1ty-obsidian-plugins/utils";
 
-export class GraphFilter extends InputFilterManager {
+export class GraphFilter extends InputFilterManager<Record<string, any>> {
 	private compiledFunc: ((...args: any[]) => boolean) | null = null;
 	private propertyMapping = new Map<string, string>();
 
@@ -11,14 +10,14 @@ export class GraphFilter extends InputFilterManager {
 		initiallyVisible: boolean = false,
 		onHide?: () => void
 	) {
-		super(
-			parentEl,
-			"Filter nodes (e.g., status === 'active')",
-			"nexus-graph-filter-input",
+		super(parentEl, {
+			placeholder: "Filter nodes (e.g., status === 'active')",
+			cssClass: "nexus-graph-filter-input",
+			cssPrefix: "nexus",
 			onFilterChange,
 			initiallyVisible,
-			onHide
-		);
+			onHide,
+		});
 	}
 
 	protected updateFilterValue(value: string): void {

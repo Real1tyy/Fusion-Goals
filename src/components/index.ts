@@ -4,7 +4,6 @@ export { GraphFilterPresetSelector } from "./graph-filter-preset-selector";
 export { GraphHeader } from "./graph-header";
 export { GraphSearch } from "./graph-search";
 export { GraphZoomPreview } from "./graph-zoom-preview";
-export { InputFilterManager } from "./input-filter-manager";
 // NodeContextMenu and NodeEditModal removed - no property management
 export { NodePreviewModal } from "./node-preview-modal";
 export { PropertyTooltip } from "./property-tooltip";
