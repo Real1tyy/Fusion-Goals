@@ -1,9 +1,9 @@
+import { filterPropertiesForDisplay } from "@real1ty-obsidian-plugins/utils";
 import { type App, Modal, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { SettingsStore } from "../core/settings-store";
 import type { FusionGoalsSettings } from "../types/settings";
 import { extractDateInfo } from "../utils/date";
-import { filterPropertiesForDisplay } from "../utils/frontmatter-value";
 import { PropertyRenderer } from "./property-renderer";
 
 export class NodePreviewModal extends Modal {

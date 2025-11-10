@@ -1,8 +1,8 @@
+import { filterPropertiesForDisplay } from "@real1ty-obsidian-plugins/utils";
 import { type App, Component, MarkdownRenderer, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { SettingsStore } from "../core/settings-store";
 import type { FusionGoalsSettings } from "../types/settings";
-import { filterPropertiesForDisplay } from "../utils/frontmatter-value";
 import { PropertyRenderer } from "./property-renderer";
 
 export interface GraphZoomPreviewProps {

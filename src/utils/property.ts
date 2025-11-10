@@ -1,4 +1,4 @@
-import { parseWikiLink } from "./frontmatter-value";
+import { parseWikiLinkWithDisplay } from "@real1ty-obsidian-plugins/utils";
 
 /**
  * Parse wiki links from a frontmatter property value.
@@ -33,7 +33,7 @@ export function parseLinkedPathsFromProperty(value: unknown): string[] {
 
 	// Handle string values - convert to single-element array
 	if (typeof value === "string" && value.trim()) {
-		const parsed = parseWikiLink(value);
+		const parsed = parseWikiLinkWithDisplay(value);
 		if (parsed?.linkPath) {
 			results.push(`${parsed.linkPath}.md`);
 		}
@@ -43,7 +43,7 @@ export function parseLinkedPathsFromProperty(value: unknown): string[] {
 	if (Array.isArray(value)) {
 		for (const item of value) {
 			if (typeof item === "string" && item.trim()) {
-				const parsed = parseWikiLink(item);
+				const parsed = parseWikiLinkWithDisplay(item);
 				if (parsed?.linkPath) {
 					results.push(`${parsed.linkPath}.md`);
 				}

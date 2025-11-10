@@ -1,4 +1,4 @@
-import { buildPropertyMapping, sanitizeExpression } from "../utils/expression";
+import { buildPropertyMapping, sanitizeExpression } from "@real1ty-obsidian-plugins/utils";
 import { InputFilterManager } from "./input-filter-manager";
 
 export class GraphFilter extends InputFilterManager {

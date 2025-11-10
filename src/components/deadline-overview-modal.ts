@@ -1,8 +1,8 @@
+import { buildPropertyMapping, sanitizeExpression } from "@real1ty-obsidian-plugins/utils";
 import { type App, Modal, TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { Indexer } from "src/core/indexer";
 import { parseDaysFromString } from "src/utils/date";
-import { buildPropertyMapping, sanitizeExpression } from "src/utils/expression";
 import type { SettingsStore } from "../core/settings-store";
 import { FILE_TYPE_CONFIG, type FileType } from "../types/constants";
 import { DeadlineTable, type DeadlineTableItem } from "./deadline-table";
