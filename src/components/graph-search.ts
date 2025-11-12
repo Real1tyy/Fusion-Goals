@@ -4,8 +4,8 @@ export class GraphSearch extends InputFilterManager<string> {
 	constructor(parentEl: HTMLElement, onSearchChange: () => void, initiallyVisible: boolean, onHide?: () => void) {
 		super(parentEl, {
 			placeholder: "Search nodes by name...",
-			cssClass: "nexus-graph-search-input",
-			cssPrefix: "nexus",
+			cssClass: "fusion-graph-search-input",
+			cssPrefix: "fusion",
 			onFilterChange: onSearchChange,
 			initiallyVisible,
 			onHide,

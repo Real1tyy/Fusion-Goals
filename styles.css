@@ -1,7 +1,7 @@
 /* Fusion Goals Plugin Styles */
 
 /* Settings Navigation */
-.nexus-settings-nav {
+.fusion-settings-nav {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
@@ -10,7 +10,7 @@
 	border-bottom: 2px solid var(--background-modifier-border);
 }
 
-.nexus-settings-nav-button {
+.fusion-settings-nav-button {
 	padding: 8px 16px;
 	background-color: var(--background-secondary);
 	border: 1px solid var(--background-modifier-border);
@@ -22,24 +22,24 @@
 	transition: all 0.2s ease;
 }
 
-.nexus-settings-nav-button:hover {
+.fusion-settings-nav-button:hover {
 	background-color: var(--background-modifier-hover);
 	border-color: var(--interactive-accent);
 }
 
-.nexus-settings-nav-button-active {
+.fusion-settings-nav-button-active {
 	background-color: var(--interactive-accent);
 	color: var(--text-on-accent);
 	border-color: var(--interactive-accent);
 }
 
-.nexus-settings-nav-button-active:hover {
+.fusion-settings-nav-button-active:hover {
 	background-color: var(--interactive-accent-hover);
 	border-color: var(--interactive-accent-hover);
 }
 
 /* Settings section container */
-.nexus-settings-section-container {
+.fusion-settings-section-container {
 	margin-top: 1em;
 }
 
@@ -416,17 +416,17 @@
 }
 
 /* Utility classes */
-.nexus-hidden {
+.fusion-hidden {
 	display: none;
 }
 
 /* Override display for toggle containers when hidden */
-.nexus-graph-toggle-container.nexus-hidden {
+.fusion-graph-toggle-container.fusion-hidden {
 	display: none;
 }
 
 /* Relationship Graph View */
-.nexus-graph-view-content {
+.fusion-graph-view-content {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
@@ -434,7 +434,7 @@
 	overflow: hidden;
 }
 
-.nexus-graph-view-header {
+.fusion-graph-view-header {
 	display: flex;
 	flex-direction: row;
 	align-items: flex-start;
@@ -445,7 +445,7 @@
 	flex-shrink: 0;
 }
 
-.nexus-graph-view-title {
+.fusion-graph-view-title {
 	margin: 0;
 	color: var(--text-normal);
 	font-size: 1.1em;
@@ -457,7 +457,7 @@
 	word-break: break-word;
 }
 
-.nexus-graph-controls-container {
+.fusion-graph-controls-container {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -465,31 +465,31 @@
 	flex-shrink: 0;
 }
 
-.nexus-graph-toggle-container {
+.fusion-graph-toggle-container {
 	display: flex;
 	align-items: center;
 	gap: 0.5em;
 	font-size: 0.9em;
 }
 
-.nexus-graph-toggle-checkbox {
+.fusion-graph-toggle-checkbox {
 	cursor: pointer;
 	width: 16px;
 	height: 16px;
 }
 
-.nexus-graph-toggle-label {
+.fusion-graph-toggle-label {
 	color: var(--text-muted);
 	cursor: pointer;
 	user-select: none;
 }
 
-.nexus-graph-toggle-label:hover {
+.fusion-graph-toggle-label:hover {
 	color: var(--text-normal);
 }
 
 /* Search Row - contains search input (matches filter row structure) */
-.nexus-graph-search-row {
+.fusion-graph-search-row {
 	display: flex;
 	gap: 0.5em;
 	padding: 0.75em 1em;
@@ -499,19 +499,19 @@
 	animation: slideDown 0.2s ease-out;
 }
 
-.nexus-graph-search-row.nexus-hidden {
+.fusion-graph-search-row.fusion-hidden {
 	display: none;
 }
 
 /* Search input container */
-.nexus-graph-search-input-container {
+.fusion-graph-search-input-container {
 	flex: 1;
 }
 
 /* Shared input styling for consistency - force exact same height */
-.nexus-graph-view-content .nexus-graph-search-input,
-.nexus-graph-view-content .nexus-graph-filter-input,
-.nexus-graph-view-content .nexus-graph-filter-preset-select {
+.fusion-graph-view-content .fusion-graph-search-input,
+.fusion-graph-view-content .fusion-graph-filter-input,
+.fusion-graph-view-content .fusion-graph-filter-preset-select {
 	width: 100%;
 	height: 2.8em; /* Fixed height to ensure consistency */
 	padding: 0.65em 1em;
@@ -533,21 +533,21 @@
 	-moz-appearance: none;
 }
 
-.nexus-graph-view-content .nexus-graph-search-input:focus,
-.nexus-graph-view-content .nexus-graph-filter-input:focus,
-.nexus-graph-view-content .nexus-graph-filter-preset-select:focus {
+.fusion-graph-view-content .fusion-graph-search-input:focus,
+.fusion-graph-view-content .fusion-graph-filter-input:focus,
+.fusion-graph-view-content .fusion-graph-filter-preset-select:focus {
 	outline: none;
 	border-color: var(--interactive-accent);
 	box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.1);
 }
 
-.nexus-graph-view-content .nexus-graph-search-input::placeholder,
-.nexus-graph-view-content .nexus-graph-filter-input::placeholder {
+.fusion-graph-view-content .fusion-graph-search-input::placeholder,
+.fusion-graph-view-content .fusion-graph-filter-input::placeholder {
 	color: var(--text-faint);
 }
 
 /* Graph filter row - contains preset selector and filter input */
-.nexus-graph-filter-row {
+.fusion-graph-filter-row {
 	display: flex;
 	gap: 0.5em;
 	padding: 0.75em 1em;
@@ -557,17 +557,17 @@
 	animation: slideDown 0.2s ease-out;
 }
 
-.nexus-graph-filter-row.nexus-hidden {
+.fusion-graph-filter-row.fusion-hidden {
 	display: none;
 }
 
 /* Preset selector container */
-.nexus-graph-filter-preset-container {
+.fusion-graph-filter-preset-container {
 	flex-shrink: 0;
 	position: relative;
 }
 
-.nexus-graph-filter-preset-container::after {
+.fusion-graph-filter-preset-container::after {
 	content: "▼";
 	position: absolute;
 	right: 0.85em;
@@ -580,50 +580,50 @@
 }
 
 /* Preset selector specific overrides */
-.nexus-graph-view-content .nexus-graph-filter-preset-select {
+.fusion-graph-view-content .fusion-graph-filter-preset-select {
 	width: auto;
 	min-width: 120px;
 	padding: 0.65em 2.2em 0.65em 1em; /* Override padding for dropdown arrow space */
 	cursor: pointer;
 }
 
-.nexus-graph-filter-preset-select option {
+.fusion-graph-filter-preset-select option {
 	background-color: var(--background-primary);
 	color: var(--text-normal);
 	padding: 0.5em;
 }
 
-.nexus-graph-view-content .nexus-graph-filter-preset-select:hover {
+.fusion-graph-view-content .fusion-graph-filter-preset-select:hover {
 	border-color: var(--interactive-accent);
 }
 
-.nexus-graph-filter-preset-container:hover::after {
+.fusion-graph-filter-preset-container:hover::after {
 	color: var(--text-normal);
 }
 
 /* Filter input container */
-.nexus-graph-filter-input-container {
+.fusion-graph-filter-input-container {
 	flex: 1;
 }
 
 /* Filter input specific override - use monospace font for expressions */
-.nexus-graph-view-content .nexus-graph-filter-input {
+.fusion-graph-view-content .fusion-graph-filter-input {
 	font-family: var(--font-monospace);
 }
 
-.nexus-graph-view-content .nexus-graph-filter-input::placeholder {
+.fusion-graph-view-content .fusion-graph-filter-input::placeholder {
 	font-family: var(--font-text); /* Placeholder uses regular font */
 }
 
 /* Wrapper for zoom preview - sits between header and graph */
-.nexus-graph-zoom-preview-wrapper {
+.fusion-graph-zoom-preview-wrapper {
 	width: 100%;
 	flex-shrink: 0;
 	position: relative;
 	z-index: 10;
 }
 
-.nexus-graph-view-container {
+.fusion-graph-view-container {
 	flex: 1;
 	width: 100%;
 	min-height: 0;
@@ -632,7 +632,7 @@
 	background: var(--background-primary);
 }
 
-.nexus-graph-empty-state {
+.fusion-graph-empty-state {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -644,7 +644,7 @@
 }
 
 /* Ensure Cytoscape renders properly */
-.nexus-graph-view-container > div {
+.fusion-graph-view-container > div {
 	position: relative;
 	z-index: 1;
 }
@@ -813,7 +813,7 @@
 }
 
 /* Toggle containers */
-.nexus-graph-toggle-container {
+.fusion-graph-toggle-container {
 	display: flex;
 	align-items: center;
 	gap: 0.5em;
@@ -828,23 +828,23 @@
 	user-select: none;
 }
 
-.nexus-graph-toggle-container:hover {
+.fusion-graph-toggle-container:hover {
 	background-color: var(--background-secondary);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.nexus-graph-toggle-container:active {
+.fusion-graph-toggle-container:active {
 	transform: scale(0.98);
 }
 
 /* Make label not selectable and clickable */
-.nexus-graph-toggle-container .nexus-graph-toggle-label {
+.fusion-graph-toggle-container .fusion-graph-toggle-label {
 	cursor: pointer;
 	user-select: none;
 }
 
 /* Zoom Mode Preview Overlay */
-.nexus-graph-zoom-preview {
+.fusion-graph-zoom-preview {
 	position: relative;
 	width: 100%;
 	max-height: var(--zoom-preview-max-height, 280px);
@@ -870,7 +870,7 @@
 }
 
 /* Controls container - header and toggles in flexbox */
-.nexus-graph-zoom-preview-controls {
+.fusion-graph-zoom-preview-controls {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -880,7 +880,7 @@
 	gap: 1em;
 }
 
-.nexus-graph-zoom-preview-title {
+.fusion-graph-zoom-preview-title {
 	margin: 0;
 	color: var(--text-normal);
 	font-size: 1.3em;
@@ -891,19 +891,19 @@
 	transition: color 0.2s ease;
 }
 
-.nexus-graph-zoom-preview-title:hover {
+.fusion-graph-zoom-preview-title:hover {
 	color: var(--interactive-accent);
 }
 
 /* Toggles container - right side */
-.nexus-graph-zoom-preview-toggles {
+.fusion-graph-zoom-preview-toggles {
 	display: flex;
 	gap: 0.75em;
 	align-items: center;
 }
 
 /* Body container that wraps frontmatter and content */
-.nexus-graph-zoom-preview-body {
+.fusion-graph-zoom-preview-body {
 	flex: 1;
 	min-height: 0;
 	display: flex;
@@ -911,7 +911,7 @@
 	overflow: hidden;
 }
 
-.nexus-graph-zoom-preview-frontmatter {
+.fusion-graph-zoom-preview-frontmatter {
 	padding: 0.7em 1.4em;
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
@@ -924,7 +924,7 @@
 	font-size: 0.9em;
 }
 
-.nexus-graph-zoom-preview-property {
+.fusion-graph-zoom-preview-property {
 	display: flex;
 	flex-direction: column;
 	gap: 0.25em;
@@ -934,7 +934,7 @@
 	border-left: 2px solid var(--interactive-accent);
 }
 
-.nexus-graph-zoom-preview-property-key {
+.fusion-graph-zoom-preview-property-key {
 	font-size: 0.75em;
 	font-weight: 600;
 	color: var(--text-muted);
@@ -942,7 +942,7 @@
 	letter-spacing: 0.5px;
 }
 
-.nexus-graph-zoom-preview-property-value {
+.fusion-graph-zoom-preview-property-value {
 	font-size: 0.9em;
 	color: var(--text-normal);
 	word-break: break-word;
@@ -951,38 +951,38 @@
 	gap: 0.25em;
 }
 
-.nexus-graph-zoom-preview-property-link {
+.fusion-graph-zoom-preview-property-link {
 	color: var(--link-color);
 	text-decoration: none;
 	cursor: pointer;
 	transition: color 0.2s ease;
 }
 
-.nexus-graph-zoom-preview-property-link:hover {
+.fusion-graph-zoom-preview-property-link:hover {
 	color: var(--link-color-hover);
 	text-decoration: underline;
 }
 
-.nexus-graph-zoom-preview-property-text {
+.fusion-graph-zoom-preview-property-text {
 	color: var(--text-normal);
 }
 
-.nexus-graph-zoom-preview-property-empty {
+.fusion-graph-zoom-preview-property-empty {
 	color: var(--text-faint);
 	font-style: italic;
 }
 
-.nexus-graph-zoom-preview-property-separator {
+.fusion-graph-zoom-preview-property-separator {
 	color: var(--text-muted);
 }
 
-.nexus-graph-zoom-preview-empty {
+.fusion-graph-zoom-preview-empty {
 	color: var(--text-muted);
 	font-style: italic;
 	padding: 0.5em 0;
 }
 
-.nexus-graph-zoom-preview-content {
+.fusion-graph-zoom-preview-content {
 	flex: 1;
 	padding: 0.3em 2em 0.5em 2em;
 	overflow-y: auto;
@@ -990,7 +990,7 @@
 	min-height: 0;
 }
 
-.nexus-graph-zoom-preview-content-text {
+.fusion-graph-zoom-preview-content-text {
 	color: var(--text-muted);
 	font-size: 0.95em;
 	line-height: 1.6;
@@ -1000,49 +1000,49 @@
 
 /* CSS overrides for hidden sections - MUST come after base styles for proper cascade */
 /* These have higher specificity (2 classes) than base styles (1 class) */
-.nexus-graph-zoom-preview-body.nexus-hidden {
+.fusion-graph-zoom-preview-body.fusion-hidden {
 	display: none;
 }
 
-.nexus-graph-zoom-preview-frontmatter.nexus-hidden {
+.fusion-graph-zoom-preview-frontmatter.fusion-hidden {
 	display: none;
 }
 
-.nexus-graph-zoom-preview-content.nexus-hidden {
+.fusion-graph-zoom-preview-content.fusion-hidden {
 	display: none;
 }
 
 /* When frontmatter is hidden, content should only take needed space */
-.nexus-graph-zoom-preview-body:has(.nexus-graph-zoom-preview-frontmatter.nexus-hidden)
-.nexus-graph-zoom-preview-content {
+.fusion-graph-zoom-preview-body:has(.fusion-graph-zoom-preview-frontmatter.fusion-hidden)
+.fusion-graph-zoom-preview-content {
 	flex: 0 1 auto;
 }
 
 /* Scrollbar styling for preview */
-.nexus-graph-zoom-preview-frontmatter::-webkit-scrollbar,
-.nexus-graph-zoom-preview-content::-webkit-scrollbar {
+.fusion-graph-zoom-preview-frontmatter::-webkit-scrollbar,
+.fusion-graph-zoom-preview-content::-webkit-scrollbar {
 	width: 8px;
 }
 
-.nexus-graph-zoom-preview-frontmatter::-webkit-scrollbar-track,
-.nexus-graph-zoom-preview-content::-webkit-scrollbar-track {
+.fusion-graph-zoom-preview-frontmatter::-webkit-scrollbar-track,
+.fusion-graph-zoom-preview-content::-webkit-scrollbar-track {
 	background: var(--background-secondary);
 	border-radius: 4px;
 }
 
-.nexus-graph-zoom-preview-frontmatter::-webkit-scrollbar-thumb,
-.nexus-graph-zoom-preview-content::-webkit-scrollbar-thumb {
+.fusion-graph-zoom-preview-frontmatter::-webkit-scrollbar-thumb,
+.fusion-graph-zoom-preview-content::-webkit-scrollbar-thumb {
 	background: var(--background-modifier-border);
 	border-radius: 4px;
 }
 
-.nexus-graph-zoom-preview-frontmatter::-webkit-scrollbar-thumb:hover,
-.nexus-graph-zoom-preview-content::-webkit-scrollbar-thumb:hover {
+.fusion-graph-zoom-preview-frontmatter::-webkit-scrollbar-thumb:hover,
+.fusion-graph-zoom-preview-content::-webkit-scrollbar-thumb:hover {
 	background: var(--text-faint);
 }
 
 /* Property Tooltip */
-.nexus-property-tooltip {
+.fusion-property-tooltip {
 	position: fixed;
 	z-index: 1000;
 	background-color: var(--background-primary);
@@ -1055,14 +1055,14 @@
 	pointer-events: auto;
 }
 
-.nexus-property-tooltip-title {
+.fusion-property-tooltip-title {
 	margin-bottom: 0.5em;
 	word-wrap: break-word;
 	word-break: break-word;
 	overflow-wrap: break-word;
 }
 
-.nexus-property-tooltip-title-link {
+.fusion-property-tooltip-title-link {
 	color: var(--text-normal);
 	font-size: 1.1em;
 	font-weight: 600;
@@ -1071,50 +1071,50 @@
 	transition: color 0.2s;
 }
 
-.nexus-property-tooltip-title-link:hover {
+.fusion-property-tooltip-title-link:hover {
 	color: var(--link-color);
 }
 
-.nexus-property-tooltip-separator {
+.fusion-property-tooltip-separator {
 	height: 1px;
 	background-color: var(--background-modifier-border);
 	margin: 0.5em -0.85em 0.65em -0.85em;
 }
 
-.nexus-property-tooltip-item {
+.fusion-property-tooltip-item {
 	display: flex;
 	gap: 0.5em;
 	margin-bottom: 0.25em;
 }
 
-.nexus-property-tooltip-item:last-child {
+.fusion-property-tooltip-item:last-child {
 	margin-bottom: 0;
 }
 
-.nexus-property-tooltip-key {
+.fusion-property-tooltip-key {
 	color: var(--text-muted);
 	font-weight: 600;
 	flex-shrink: 0;
 }
 
-.nexus-property-tooltip-value {
+.fusion-property-tooltip-value {
 	color: var(--text-normal);
 	word-break: break-word;
 }
 
-.nexus-property-link {
+.fusion-property-link {
 	color: var(--link-color);
 	text-decoration: none;
 	cursor: pointer;
 	transition: color 0.2s;
 }
 
-.nexus-property-link:hover {
+.fusion-property-link:hover {
 	color: var(--link-color-hover);
 	text-decoration: underline;
 }
 
-.nexus-property-separator {
+.fusion-property-separator {
 	color: var(--text-muted);
 }
 

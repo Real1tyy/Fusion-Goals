@@ -12,8 +12,8 @@ export class GraphFilter extends InputFilterManager<Record<string, any>> {
 	) {
 		super(parentEl, {
 			placeholder: "Filter nodes (e.g., status === 'active')",
-			cssClass: "nexus-graph-filter-input",
-			cssPrefix: "nexus",
+			cssClass: "fusion-graph-filter-input",
+			cssPrefix: "fusion",
 			onFilterChange,
 			initiallyVisible,
 			onHide,

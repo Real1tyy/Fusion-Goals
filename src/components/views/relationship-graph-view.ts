@@ -18,7 +18,7 @@ import { RegisteredEventsComponent } from "./component";
 
 cytoscape.use(cytoscapeDagre);
 
-export const VIEW_TYPE_RELATIONSHIP_GRAPH = "nexus-relationship-graph-view";
+export const VIEW_TYPE_RELATIONSHIP_GRAPH = "fusion-relationship-graph-view";
 
 /**
  * Graph rendering component (not an ItemView)
@@ -112,7 +112,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 
 	async render(): Promise<void> {
 		this.containerEl.empty();
-		this.containerEl.addClass("nexus-graph-view-content");
+		this.containerEl.addClass("fusion-graph-view-content");
 
 		this.header = new GraphHeader(this.containerEl, {
 			currentFileName: "No file selected",
@@ -128,7 +128,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 		const showFilterBar = settings.showFilterBar;
 
 		// Create search row wrapper
-		const searchRowClasses = `nexus-graph-search-row${showSearchBar ? "" : " nexus-hidden"}`;
+		const searchRowClasses = `fusion-graph-search-row${showSearchBar ? "" : " fusion-hidden"}`;
 		this.searchRowEl = this.containerEl.createEl("div", {
 			cls: searchRowClasses,
 		});
@@ -148,7 +148,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 		this.graphSearch.setPersistentlyVisible(showSearchBar);
 
 		// Create filter preset selector and filter (in a row)
-		const filterRowClasses = `nexus-graph-filter-row${showFilterBar ? "" : " nexus-hidden"}`;
+		const filterRowClasses = `fusion-graph-filter-row${showFilterBar ? "" : " fusion-hidden"}`;
 		const filterRowEl = this.containerEl.createEl("div", {
 			cls: filterRowClasses,
 		});
@@ -180,12 +180,12 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 		// Create a wrapper for zoom preview (sits between header and graph)
 		// This container will hold the zoom preview when active
 		this.previewWrapperEl = this.containerEl.createEl("div", {
-			cls: "nexus-graph-zoom-preview-wrapper",
+			cls: "fusion-graph-zoom-preview-wrapper",
 		});
 
 		// Create graph container
 		this.graphContainerEl = this.containerEl.createEl("div", {
-			cls: "nexus-graph-view-container",
+			cls: "fusion-graph-view-container",
 		});
 
 		// Register event listeners
@@ -409,7 +409,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 			if (!this.graphSearch.isVisible()) {
 				// Currently hidden, show it temporarily
 				this.showSearchRow();
-				this.graphSearch.show(); // This removes nexus-hidden from inner container AND focuses
+				this.graphSearch.show(); // This removes fusion-hidden from inner container AND focuses
 			} else {
 				// Currently visible, hide it
 				this.graphSearch.hide(); // This will trigger onHide callback which hides searchRowEl
@@ -429,7 +429,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 			if (!this.graphFilter.isVisible()) {
 				// Currently hidden, show it temporarily
 				this.showFilterRow();
-				this.graphFilter.show(); // This removes nexus-hidden from inner container AND focuses
+				this.graphFilter.show(); // This removes fusion-hidden from inner container AND focuses
 				this.graphFilterPresetSelector?.show();
 			} else {
 				// Currently visible, hide it
@@ -465,28 +465,28 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 
 	private showSearchRow(): void {
 		if (this.searchRowEl) {
-			this.searchRowEl.removeClass("nexus-hidden");
+			this.searchRowEl.removeClass("fusion-hidden");
 		}
 		// Note: graphSearch is inside searchRowEl, so showing the row shows it automatically
 	}
 
 	private hideSearchRow(): void {
 		if (this.searchRowEl) {
-			this.searchRowEl.addClass("nexus-hidden");
+			this.searchRowEl.addClass("fusion-hidden");
 		}
 	}
 
 	private showFilterRow(): void {
-		const filterRow = this.containerEl.querySelector(".nexus-graph-filter-row");
+		const filterRow = this.containerEl.querySelector(".fusion-graph-filter-row");
 		if (filterRow) {
-			filterRow.removeClass("nexus-hidden");
+			filterRow.removeClass("fusion-hidden");
 		}
 	}
 
 	private hideFilterRow(): void {
-		const filterRow = this.containerEl.querySelector(".nexus-graph-filter-row");
+		const filterRow = this.containerEl.querySelector(".fusion-graph-filter-row");
 		if (filterRow) {
-			filterRow.addClass("nexus-hidden");
+			filterRow.addClass("fusion-hidden");
 		}
 		// Also explicitly hide the preset selector when hiding the filter row
 		this.graphFilterPresetSelector?.hide();
@@ -553,7 +553,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 			this.graphContainerEl.empty();
 			this.graphContainerEl.createEl("div", {
 				text: message,
-				cls: "nexus-graph-empty-state",
+				cls: "fusion-graph-empty-state",
 			});
 		}
 	}

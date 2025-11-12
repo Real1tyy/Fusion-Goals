@@ -34,16 +34,16 @@ export class FusionGoalsSettingsTab extends PluginSettingTab {
 		containerEl.createEl("h1", { text: "Fusion Goals Settings" });
 
 		if (this.sections.length > 0) {
-			const navContainer = containerEl.createDiv("nexus-settings-nav");
+			const navContainer = containerEl.createDiv("fusion-settings-nav");
 
 			this.sections.forEach((section) => {
 				const button = navContainer.createEl("button", {
 					text: section.label,
-					cls: "nexus-settings-nav-button",
+					cls: "fusion-settings-nav-button",
 				});
 
 				if (this.selectedSectionId === section.id) {
-					button.addClass("nexus-settings-nav-button-active");
+					button.addClass("fusion-settings-nav-button-active");
 				}
 
 				button.addEventListener("click", () => {
@@ -53,7 +53,7 @@ export class FusionGoalsSettingsTab extends PluginSettingTab {
 			});
 		}
 
-		this.sectionContainer = containerEl.createDiv({ cls: "nexus-settings-section-container" });
+		this.sectionContainer = containerEl.createDiv({ cls: "fusion-settings-section-container" });
 
 		this.renderSelectedSection();
 

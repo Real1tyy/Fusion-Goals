@@ -14,7 +14,7 @@ export class GraphHeader {
 		private containerEl: HTMLElement,
 		private props: GraphHeaderProps
 	) {
-		this.headerEl = this.containerEl.createEl("div", { cls: "nexus-graph-view-header" });
+		this.headerEl = this.containerEl.createEl("div", { cls: "fusion-graph-view-header" });
 		this.render();
 	}
 
@@ -33,21 +33,21 @@ export class GraphHeader {
 		// Title
 		this.titleEl = this.headerEl.createEl("h4", {
 			text: this.props.currentFileName || "No file selected",
-			cls: "nexus-graph-view-title",
+			cls: "fusion-graph-view-title",
 		});
 
 		// Controls container
-		const controlsContainer = this.headerEl.createEl("div", { cls: "nexus-graph-controls-container" });
+		const controlsContainer = this.headerEl.createEl("div", { cls: "fusion-graph-controls-container" });
 
 		// Start from current file checkbox
-		this.startFromCurrentContainer = controlsContainer.createEl("div", { cls: "nexus-graph-toggle-container" });
+		this.startFromCurrentContainer = controlsContainer.createEl("div", { cls: "fusion-graph-toggle-container" });
 		this.toggleCheckbox = this.startFromCurrentContainer.createEl("input", { type: "checkbox" });
-		this.toggleCheckbox.addClass("nexus-graph-toggle-checkbox");
+		this.toggleCheckbox.addClass("fusion-graph-toggle-checkbox");
 		this.toggleCheckbox.checked = this.props.startFromCurrent;
 
 		this.startFromCurrentContainer.createEl("label", {
 			text: "Current file only",
-			cls: "nexus-graph-toggle-label",
+			cls: "fusion-graph-toggle-label",
 		});
 
 		this.toggleCheckbox.addEventListener("change", () => {

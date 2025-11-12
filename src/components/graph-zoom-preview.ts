@@ -40,18 +40,18 @@ export class GraphZoomPreview {
 			this.app,
 			this.props.file,
 			{
-				containerClass: "nexus-graph-zoom-preview-property",
-				keyClass: "nexus-graph-zoom-preview-property-key",
-				valueClass: "nexus-graph-zoom-preview-property-value",
-				linkClass: "nexus-graph-zoom-preview-property-link",
-				textClass: "nexus-graph-zoom-preview-property-text",
-				emptyClass: "nexus-graph-zoom-preview-property-empty",
-				separatorClass: "nexus-graph-zoom-preview-property-separator",
+				containerClass: "fusion-graph-zoom-preview-property",
+				keyClass: "fusion-graph-zoom-preview-property-key",
+				valueClass: "fusion-graph-zoom-preview-property-value",
+				linkClass: "fusion-graph-zoom-preview-property-link",
+				textClass: "fusion-graph-zoom-preview-property-text",
+				emptyClass: "fusion-graph-zoom-preview-property-empty",
+				separatorClass: "fusion-graph-zoom-preview-property-separator",
 			},
 			() => this.props.onExit()
 		);
 		this.previewOverlay = this.containerEl.createEl("div", {
-			cls: "nexus-graph-zoom-preview",
+			cls: "fusion-graph-zoom-preview",
 		});
 		// Apply custom heights from settings using CSS variables
 		this.previewOverlay.setCssProps({
@@ -84,13 +84,13 @@ export class GraphZoomPreview {
 	private async render(): Promise<void> {
 		// Controls container (flexbox with header and toggles)
 		this.controlsContainer = this.previewOverlay.createEl("div", {
-			cls: "nexus-graph-zoom-preview-controls",
+			cls: "fusion-graph-zoom-preview-controls",
 		});
 
 		// Clickable header (left side)
 		const headerEl = this.controlsContainer.createEl("h2", {
 			text: this.props.file.basename,
-			cls: "nexus-graph-zoom-preview-title clickable",
+			cls: "fusion-graph-zoom-preview-title clickable",
 		});
 
 		headerEl.onclick = () => {
@@ -100,21 +100,21 @@ export class GraphZoomPreview {
 
 		// Toggles container (right side)
 		const togglesContainer = this.controlsContainer.createEl("div", {
-			cls: "nexus-graph-zoom-preview-toggles",
+			cls: "fusion-graph-zoom-preview-toggles",
 		});
 
 		// Hide Frontmatter toggle
 		const hideFmContainer = togglesContainer.createEl("div", {
-			cls: "nexus-graph-toggle-container",
+			cls: "fusion-graph-toggle-container",
 		});
 
 		this.hideFrontmatterCheckbox = hideFmContainer.createEl("input", { type: "checkbox" });
-		this.hideFrontmatterCheckbox.addClass("nexus-graph-toggle-checkbox");
+		this.hideFrontmatterCheckbox.addClass("fusion-graph-toggle-checkbox");
 		this.hideFrontmatterCheckbox.checked = this.props.initialHideFrontmatter ?? false;
 
 		hideFmContainer.createEl("label", {
 			text: "Hide Frontmatter",
-			cls: "nexus-graph-toggle-label",
+			cls: "fusion-graph-toggle-label",
 		});
 
 		this.hideFrontmatterCheckbox.addEventListener("change", () => {
@@ -132,16 +132,16 @@ export class GraphZoomPreview {
 
 		// Hide Content toggle
 		const hideContentContainer = togglesContainer.createEl("div", {
-			cls: "nexus-graph-toggle-container",
+			cls: "fusion-graph-toggle-container",
 		});
 
 		this.hideContentCheckbox = hideContentContainer.createEl("input", { type: "checkbox" });
-		this.hideContentCheckbox.addClass("nexus-graph-toggle-checkbox");
+		this.hideContentCheckbox.addClass("fusion-graph-toggle-checkbox");
 		this.hideContentCheckbox.checked = this.props.initialHideContent ?? false;
 
 		hideContentContainer.createEl("label", {
 			text: "Hide Content",
-			cls: "nexus-graph-toggle-label",
+			cls: "fusion-graph-toggle-label",
 		});
 
 		this.hideContentCheckbox.addEventListener("change", () => {
@@ -159,16 +159,16 @@ export class GraphZoomPreview {
 
 		// Exit Zoom Mode toggle
 		const exitZoomContainer = togglesContainer.createEl("div", {
-			cls: "nexus-graph-toggle-container",
+			cls: "fusion-graph-toggle-container",
 		});
 
 		this.exitZoomCheckbox = exitZoomContainer.createEl("input", { type: "checkbox" });
-		this.exitZoomCheckbox.addClass("nexus-graph-toggle-checkbox");
+		this.exitZoomCheckbox.addClass("fusion-graph-toggle-checkbox");
 		this.exitZoomCheckbox.checked = false;
 
 		exitZoomContainer.createEl("label", {
 			text: "Exit Zoom Mode",
-			cls: "nexus-graph-toggle-label",
+			cls: "fusion-graph-toggle-label",
 		});
 
 		this.exitZoomCheckbox.addEventListener("change", () => {
@@ -187,7 +187,7 @@ export class GraphZoomPreview {
 		});
 
 		this.bodyContainer = this.previewOverlay.createEl("div", {
-			cls: "nexus-graph-zoom-preview-body",
+			cls: "fusion-graph-zoom-preview-body",
 		});
 
 		// Frontmatter section
@@ -196,12 +196,12 @@ export class GraphZoomPreview {
 		const { position, ...frontmatter } = cache?.frontmatter ?? {};
 
 		this.frontmatterSection = this.bodyContainer.createEl("div", {
-			cls: "nexus-graph-zoom-preview-frontmatter",
+			cls: "fusion-graph-zoom-preview-frontmatter",
 		});
 
 		// Apply initial visibility state
 		if (this.props.initialHideFrontmatter) {
-			this.frontmatterSection.addClass("nexus-hidden");
+			this.frontmatterSection.addClass("fusion-hidden");
 		}
 
 		if (Object.keys(frontmatter).length > 0) {
@@ -213,18 +213,18 @@ export class GraphZoomPreview {
 		} else {
 			this.frontmatterSection.createEl("p", {
 				text: "No frontmatter properties found.",
-				cls: "nexus-graph-zoom-preview-empty",
+				cls: "fusion-graph-zoom-preview-empty",
 			});
 		}
 
 		// Content section (scrollable)
 		this.contentSection = this.bodyContainer.createEl("div", {
-			cls: "nexus-graph-zoom-preview-content",
+			cls: "fusion-graph-zoom-preview-content",
 		});
 
 		// Apply initial visibility state
 		if (this.props.initialHideContent) {
-			this.contentSection.addClass("nexus-hidden");
+			this.contentSection.addClass("fusion-hidden");
 		}
 
 		const content = await this.app.vault.read(this.props.file);
@@ -233,7 +233,7 @@ export class GraphZoomPreview {
 
 		// Render markdown content
 		const contentTextEl = this.contentSection.createEl("div", {
-			cls: "nexus-graph-zoom-preview-content-text",
+			cls: "fusion-graph-zoom-preview-content-text",
 		});
 
 		if (contentWithoutFrontmatter) {
@@ -247,7 +247,7 @@ export class GraphZoomPreview {
 		} else {
 			contentTextEl.createEl("p", {
 				text: "(No content)",
-				cls: "nexus-graph-zoom-preview-empty",
+				cls: "fusion-graph-zoom-preview-empty",
 			});
 		}
 
@@ -258,7 +258,7 @@ export class GraphZoomPreview {
 		if (!this.frontmatterSection) return;
 
 		const isHidden = this.hideFrontmatterCheckbox?.checked ?? false;
-		this.frontmatterSection.toggleClass("nexus-hidden", isHidden);
+		this.frontmatterSection.toggleClass("fusion-hidden", isHidden);
 
 		this.updateBodyVisibility();
 
@@ -273,7 +273,7 @@ export class GraphZoomPreview {
 		if (!this.contentSection) return;
 
 		const isHidden = this.hideContentCheckbox?.checked ?? false;
-		this.contentSection.toggleClass("nexus-hidden", isHidden);
+		this.contentSection.toggleClass("fusion-hidden", isHidden);
 
 		this.updateBodyVisibility();
 
@@ -286,7 +286,7 @@ export class GraphZoomPreview {
 	private setSectionHidden(section: HTMLElement | null, checkbox: HTMLInputElement | null, hidden: boolean): void {
 		if (!section || !checkbox) return;
 		checkbox.checked = hidden;
-		section.toggleClass("nexus-hidden", hidden);
+		section.toggleClass("fusion-hidden", hidden);
 	}
 
 	private updateBodyVisibility(): void {
@@ -294,7 +294,7 @@ export class GraphZoomPreview {
 
 		const bothHidden = (this.hideFrontmatterCheckbox?.checked ?? false) && (this.hideContentCheckbox?.checked ?? false);
 
-		this.bodyContainer.toggleClass("nexus-hidden", bothHidden);
+		this.bodyContainer.toggleClass("fusion-hidden", bothHidden);
 	}
 
 	public setHideFrontmatter(hidden: boolean): void {
