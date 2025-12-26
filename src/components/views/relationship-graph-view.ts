@@ -307,7 +307,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 	}
 
 	private setupResizeObserver(): void {
-		if (!this.graphContainerEl) return;
+		if (!this.graphContainerEl || !this.graphContainerEl.isConnected) return;
 
 		this.resizeObserver = new ResizeObserver(() => {
 			// Clear previous timer
@@ -325,7 +325,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 	}
 
 	private handleResize(): void {
-		if (!this.cy) return;
+		if (!this.cy || !this.graphContainerEl?.isConnected) return;
 
 		const skipFitOnce = this.zoomManager.shouldSuppressNextResizeFit();
 
@@ -561,6 +561,10 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 	private updateGraph(): void {
 		if (!this.currentFile || this.isUpdating) return;
 
+		if (!this.graphContainerEl?.isConnected || !document.body.contains(this.graphContainerEl)) {
+			return;
+		}
+
 		this.isUpdating = true;
 
 		try {
@@ -591,7 +595,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 			this.initializeCytoscape();
 			this.renderGraph(nodes, edges);
 			// Ensure viewport aligns with container right after initial render
-			if (this.cy) {
+			if (this.cy && this.graphContainerEl?.isConnected && document.body.contains(this.graphContainerEl)) {
 				this.cy.resize();
 				this.cy.fit();
 				this.cy.center();
@@ -637,172 +641,188 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 
 	private initializeCytoscape(): void {
 		// Ensure container is valid and attached to DOM
-		if (!this.graphContainerEl || !this.graphContainerEl.isConnected) {
-			console.error("Cannot initialize Cytoscape: container is not attached to DOM");
+		if (!this.graphContainerEl) {
 			return;
 		}
 
-		this.cy = cytoscape({
-			container: this.graphContainerEl,
-			minZoom: 0.3,
-			maxZoom: 3,
-			style: [
-				// Base constellation "star" nodes
-				{
-					selector: "node",
-					style: {
-						width: 16,
-						height: 16,
-						"background-color": "data(nodeColor)",
-						"border-width": 2,
-						"border-color": "#ffffff",
-						"border-opacity": 0.8,
-						shape: "ellipse",
-						label: (ele: NodeSingular) => this.formatNodeLabelWithDates(ele),
-						"font-size": 11,
-						color: "#d4e4ff",
-						"text-margin-y": -18,
-						"text-outline-color": "#000",
-						"text-outline-width": 2.5,
-						"text-halign": "center",
-						"text-valign": "top",
-						"text-wrap": "wrap",
-						"text-max-width": "140px",
-						"text-justification": "center",
-						"line-height": 1.4,
-						"overlay-color": "#7ad1ff",
-						"overlay-opacity": 0.15,
-						"overlay-padding": 12,
-						"transition-property": "overlay-opacity, overlay-padding, width, height, background-color",
-						"transition-duration": 300,
-						"transition-timing-function": "ease-out",
-					},
-				},
-				// Node type differentiation (when enabled)
-				// Goals: Hexagon shape with prominent borders
-				{
-					selector: "node[fileType = 'goal']",
-					style: {
-						shape: this.plugin.settingsStore.settings$.value.differentiateNodesByType ? "hexagon" : "ellipse",
-						"border-width": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? 3 : 2,
-						"border-opacity": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? 1 : 0.8,
-					},
-				},
-				// Tasks: Circle with distinctive border (stays circular but more defined)
-				{
-					selector: "node[fileType = 'task']",
-					style: {
-						shape: "ellipse", // Always circular
-						"border-width": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? 2 : 2,
-						"border-style": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? "double" : "solid",
-					},
-				},
-				// Source node (central star) - larger and brighter
-				{
-					selector: "node[?isSource]",
-					style: {
-						width: 24,
-						height: 24,
-						"border-color": "#fff",
-						"border-width": 3,
-						"font-weight": "bold",
-						"font-size": 13,
-						color: "#ffeaa7",
-						"text-max-width": "160px",
-						"overlay-opacity": 0.35,
-						"overlay-padding": 20,
-					},
-				},
-				// Root/parent nodes - medium importance
-				{
-					selector: "node[level = 0]",
-					style: {
-						width: 20,
-						height: 20,
-						"overlay-padding": 16,
-					},
-				},
-				// Focused node in zoom mode - same size as source node but keep text style
-				// This comes after level-based styles to ensure it takes priority
-				{
-					selector: "node.focused",
-					style: {
-						width: 24,
-						height: 24,
-						"border-color": "#fff",
-						"border-width": 3,
-						"overlay-opacity": 0.35,
-						"overlay-padding": 20,
-					},
-				},
-				// Glow effect for special nodes
-				{
-					selector: "node.glow",
-					style: {
-						"overlay-opacity": 0.28,
-					},
-				},
-				// Dimmed nodes (during hover)
-				{
-					selector: "node.dim",
-					style: {
-						opacity: 0.25,
-					},
-				},
-				// Edge glow underlay (wide, translucent)
-				{
-					selector: "edge",
-					style: {
-						width: 4,
-						"line-color": "rgba(120, 180, 255, 0.12)",
-						"curve-style": "unbundled-bezier",
-						"control-point-distances": [30, -30],
-						"control-point-weights": [0.3, 0.7],
-						"target-arrow-shape": "none",
-						opacity: 0.8,
-					},
-				},
-				// Edge core line (thin, bright)
-				{
-					selector: "edge.core",
-					style: {
-						width: 1.5,
-						"line-color": "#a7c8ff",
-						opacity: 0.9,
-					},
-				},
-				// Highlighted path
-				{
-					selector: "edge.highlighted",
-					style: {
-						width: 2.5,
-						"line-color": "#ffffff",
-						opacity: 1,
-						"transition-property": "line-color, width, opacity",
-						"transition-duration": 250,
-					},
-				},
-				// Dimmed edges
-				{
-					selector: "edge.dim",
-					style: {
-						opacity: 0.15,
-					},
-				},
-			],
-			layout: {
-				name: "grid",
-			},
-		});
+		if (!this.graphContainerEl.isConnected || !document.body.contains(this.graphContainerEl)) {
+			return;
+		}
 
-		// Add all edges to core class for layered rendering
-		this.cy.edges().addClass("core");
+		const rect = this.graphContainerEl.getBoundingClientRect();
+		if (rect.width === 0 || rect.height === 0) {
+			return;
+		}
 
-		this.interactionHandler.setupInteractions();
+		try {
+			this.cy = cytoscape({
+				container: this.graphContainerEl,
+				minZoom: 0.3,
+				maxZoom: 3,
+				style: [
+					// Base constellation "star" nodes
+					{
+						selector: "node",
+						style: {
+							width: 16,
+							height: 16,
+							"background-color": "data(nodeColor)",
+							"border-width": 2,
+							"border-color": "#ffffff",
+							"border-opacity": 0.8,
+							shape: "ellipse",
+							label: (ele: NodeSingular) => this.formatNodeLabelWithDates(ele),
+							"font-size": 11,
+							color: "#d4e4ff",
+							"text-margin-y": -18,
+							"text-outline-color": "#000",
+							"text-outline-width": 2.5,
+							"text-halign": "center",
+							"text-valign": "top",
+							"text-wrap": "wrap",
+							"text-max-width": "140px",
+							"text-justification": "center",
+							"line-height": 1.4,
+							"overlay-color": "#7ad1ff",
+							"overlay-opacity": 0.15,
+							"overlay-padding": 12,
+							"transition-property": "overlay-opacity, overlay-padding, width, height, background-color",
+							"transition-duration": 300,
+							"transition-timing-function": "ease-out",
+						},
+					},
+					// Node type differentiation (when enabled)
+					// Goals: Hexagon shape with prominent borders
+					{
+						selector: "node[fileType = 'goal']",
+						style: {
+							shape: this.plugin.settingsStore.settings$.value.differentiateNodesByType ? "hexagon" : "ellipse",
+							"border-width": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? 3 : 2,
+							"border-opacity": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? 1 : 0.8,
+						},
+					},
+					// Tasks: Circle with distinctive border (stays circular but more defined)
+					{
+						selector: "node[fileType = 'task']",
+						style: {
+							shape: "ellipse", // Always circular
+							"border-width": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? 2 : 2,
+							"border-style": this.plugin.settingsStore.settings$.value.differentiateNodesByType ? "double" : "solid",
+						},
+					},
+					// Source node (central star) - larger and brighter
+					{
+						selector: "node[?isSource]",
+						style: {
+							width: 24,
+							height: 24,
+							"border-color": "#fff",
+							"border-width": 3,
+							"font-weight": "bold",
+							"font-size": 13,
+							color: "#ffeaa7",
+							"text-max-width": "160px",
+							"overlay-opacity": 0.35,
+							"overlay-padding": 20,
+						},
+					},
+					// Root/parent nodes - medium importance
+					{
+						selector: "node[level = 0]",
+						style: {
+							width: 20,
+							height: 20,
+							"overlay-padding": 16,
+						},
+					},
+					// Focused node in zoom mode - same size as source node but keep text style
+					// This comes after level-based styles to ensure it takes priority
+					{
+						selector: "node.focused",
+						style: {
+							width: 24,
+							height: 24,
+							"border-color": "#fff",
+							"border-width": 3,
+							"overlay-opacity": 0.35,
+							"overlay-padding": 20,
+						},
+					},
+					// Glow effect for special nodes
+					{
+						selector: "node.glow",
+						style: {
+							"overlay-opacity": 0.28,
+						},
+					},
+					// Dimmed nodes (during hover)
+					{
+						selector: "node.dim",
+						style: {
+							opacity: 0.25,
+						},
+					},
+					// Edge glow underlay (wide, translucent)
+					{
+						selector: "edge",
+						style: {
+							width: 4,
+							"line-color": "rgba(120, 180, 255, 0.12)",
+							"curve-style": "unbundled-bezier",
+							"control-point-distances": [30, -30],
+							"control-point-weights": [0.3, 0.7],
+							"target-arrow-shape": "none",
+							opacity: 0.8,
+						},
+					},
+					// Edge core line (thin, bright)
+					{
+						selector: "edge.core",
+						style: {
+							width: 1.5,
+							"line-color": "#a7c8ff",
+							opacity: 0.9,
+						},
+					},
+					// Highlighted path
+					{
+						selector: "edge.highlighted",
+						style: {
+							width: 2.5,
+							"line-color": "#ffffff",
+							opacity: 1,
+							"transition-property": "line-color, width, opacity",
+							"transition-duration": 250,
+						},
+					},
+					// Dimmed edges
+					{
+						selector: "edge.dim",
+						style: {
+							opacity: 0.15,
+						},
+					},
+				],
+				layout: {
+					name: "grid",
+				},
+			});
+
+			// Add all edges to core class for layered rendering
+			this.cy.edges().addClass("core");
+
+			this.interactionHandler.setupInteractions();
+		} catch {
+			this.cy = null;
+		}
 	}
 
 	private renderGraph(nodes: ElementDefinition[], edges: ElementDefinition[]): void {
 		if (!this.cy) return;
+
+		if (!this.graphContainerEl?.isConnected || !document.body.contains(this.graphContainerEl)) {
+			return;
+		}
 
 		this.cy.add([...nodes, ...edges]);
 
@@ -818,6 +838,10 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 	private ensureCentered(): void {
 		if (!this.cy || this.isUpdating) return;
 
+		if (!this.graphContainerEl?.isConnected || !document.body.contains(this.graphContainerEl)) {
+			return;
+		}
+
 		// Ensure Cytoscape recalculates viewport in case container size changed while hidden
 		try {
 			this.cy.resize();
@@ -828,6 +852,11 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 		// Defer to next frame to allow any DOM/layout changes to settle
 		requestAnimationFrame(() => {
 			if (!this.cy) return;
+
+			if (!this.graphContainerEl?.isConnected || !document.body.contains(this.graphContainerEl)) {
+				return;
+			}
+
 			const focusedNodeId = this.zoomManager.getFocusedNodeId();
 			if (this.zoomManager.isInZoomMode() && focusedNodeId) {
 				const node = this.cy.nodes().filter((n) => n.id() === focusedNodeId);
