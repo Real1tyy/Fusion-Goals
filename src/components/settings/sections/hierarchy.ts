@@ -47,6 +47,19 @@ export class HierarchySection implements SettingsSection {
 			placeholder: "Goal",
 		});
 
+		new Setting(containerEl).setName("Task Creation").setHeading();
+
+		containerEl
+			.createDiv("setting-item-description")
+			.setText("Configure template for creating new tasks from goals. Leave empty to create tasks without a template.");
+
+		this.uiBuilder.addText(containerEl, {
+			key: "taskTemplatePath",
+			name: "Task template path",
+			desc: "Path to template file for new tasks (e.g., Templates/Task.md). Requires Templater plugin.",
+			placeholder: "Templates/Task.md",
+		});
+
 		this.renderInheritanceSection(containerEl);
 		this.renderIndexingSection(containerEl);
 	}

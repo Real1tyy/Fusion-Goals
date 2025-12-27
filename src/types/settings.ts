@@ -38,6 +38,9 @@ export const FusionGoalsSettingsSchema = z.object({
 	// Property names for hierarchical linking
 	taskGoalProp: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_TASK_GOAL_PROP),
 
+	// Template settings
+	taskTemplatePath: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_TASK_TEMPLATE_PATH),
+
 	// UI settings
 	showRibbonIcon: z.boolean().optional().default(true),
 	showStartupOverview: z.boolean().optional().default(SETTINGS_DEFAULTS.DEFAULT_SHOW_STARTUP_OVERVIEW),

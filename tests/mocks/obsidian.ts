@@ -66,6 +66,21 @@ export class Setting {
 	}
 }
 
+export class Modal {
+	app: any;
+	containerEl: HTMLElement;
+
+	constructor(app: any) {
+		this.app = app;
+		this.containerEl = document.createElement("div");
+	}
+
+	open(): void {}
+	close(): void {}
+	onOpen(): void {}
+	onClose(): void {}
+}
+
 export class TFile {
 	path: string;
 	basename: string;

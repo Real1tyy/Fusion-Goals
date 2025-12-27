@@ -1,4 +1,4 @@
-import { generateUniqueFilePath } from "@real1ty-obsidian-plugins/utils";
+import { generateUniqueFilePath, TemplaterService } from "@real1ty-obsidian-plugins/utils";
 import { MarkdownView, Notice, Plugin, type TFile, type WorkspaceLeaf } from "obsidian";
 import { FusionGoalsSettingsTab } from "./components";
 import { DeadlineOverviewModal } from "./components/deadline-overview-modal";
@@ -244,13 +244,11 @@ export default class FusionGoalsPlugin extends Plugin {
 			const settings = this.settingsStore.settings$.value;
 			const tasksDir = settings.tasksDirectory;
 
-			// Ensure tasks directory exists
 			if (!tasksDir) {
 				new Notice("❌ Tasks directory not configured");
 				return;
 			}
 
-			// Get goal frontmatter and inheritable properties
 			const goalCache = this.app.metadataCache.getFileCache(goalFile);
 			const goalFrontmatter = goalCache?.frontmatter;
 
@@ -259,24 +257,27 @@ export default class FusionGoalsPlugin extends Plugin {
 				return;
 			}
 
-			// Get inheritable properties
 			const inheritedProps = getInheritableProperties(goalFrontmatter, settings);
 
 			// Generate file name: "Goal Name - "
 			const goalName = goalFile.basename;
 			const fileName = `${goalName} - `;
 
-			// Generate unique file path
-			const uniquePath = generateUniqueFilePath(this.app, tasksDir, fileName);
+			const frontmatter: Record<string, unknown> = {
+				[settings.taskGoalProp]: `[[${goalFile.basename}]]`,
+				...inheritedProps,
+			};
 
-			const newFile = await this.app.vault.create(uniquePath, "");
+			const templaterService = new TemplaterService(this.app);
+			const useTemplater = !!(settings.taskTemplatePath && settings.taskTemplatePath.trim() !== "");
 
-			await this.app.fileManager.processFrontMatter(newFile, (fm) => {
-				fm[settings.taskGoalProp] = `[[${goalFile.basename}]]`;
-
-				for (const [key, value] of Object.entries(inheritedProps)) {
-					fm[key] = value;
-				}
+			const newFile = await templaterService.createFile({
+				title: fileName,
+				targetDirectory: tasksDir,
+				filename: generateUniqueFilePath(this.app, tasksDir, fileName).split("/").pop()?.replace(".md", "") || fileName,
+				frontmatter,
+				templatePath: settings.taskTemplatePath,
+				useTemplater,
 			});
 
 			// Open the file

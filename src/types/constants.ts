@@ -10,6 +10,9 @@ export const SETTINGS_DEFAULTS = {
 	// Property names for hierarchical linking
 	DEFAULT_TASK_GOAL_PROP: "Goal",
 
+	// Template settings
+	DEFAULT_TASK_TEMPLATE_PATH: "",
+
 	DEFAULT_HIDE_EMPTY_PROPERTIES: true,
 	DEFAULT_HIDE_UNDERSCORE_PROPERTIES: true,
 
