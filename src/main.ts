@@ -1,9 +1,11 @@
-import { Notice, Plugin } from "obsidian";
+import { generateUniqueFilePath } from "@real1ty-obsidian-plugins/utils";
+import { MarkdownView, Notice, Plugin, type TFile, type WorkspaceLeaf } from "obsidian";
 import { FusionGoalsSettingsTab } from "./components";
 import { DeadlineOverviewModal } from "./components/deadline-overview-modal";
 import { FusionViewSwitcher, VIEW_TYPE_FUSION_SWITCHER } from "./components/views/fusion-view-switcher";
 import { Indexer } from "./core/indexer";
 import { SettingsStore } from "./core/settings-store";
+import { getInheritableProperties } from "./utils/inheritance";
 
 /**
  * Fusion Goals Plugin
@@ -42,6 +44,23 @@ export default class FusionGoalsPlugin extends Plugin {
 			id: "show-startup-overview",
 			name: "Show Deadlines Overview",
 			callback: () => this.showStartupOverview(),
+		});
+
+		this.addCommand({
+			id: "create-task-from-goal",
+			name: "Create Task from Goal",
+			checkCallback: (checking: boolean) => {
+				const activeFile = this.app.workspace.getActiveFile();
+				if (!activeFile) return false;
+
+				const fileType = this.indexer?.getFileType(activeFile.path);
+				if (fileType !== "goal") return false;
+
+				if (!checking) {
+					this.createTaskFromGoal(activeFile);
+				}
+				return true;
+			},
 		});
 
 		// Graph manipulation commands
@@ -217,6 +236,84 @@ export default class FusionGoalsPlugin extends Plugin {
 					(method as (arg: number) => void).call(viewSwitcher, arg);
 				}
 			}
+		}
+	}
+
+	private async createTaskFromGoal(goalFile: TFile): Promise<void> {
+		try {
+			const settings = this.settingsStore.settings$.value;
+			const tasksDir = settings.tasksDirectory;
+
+			// Ensure tasks directory exists
+			if (!tasksDir) {
+				new Notice("❌ Tasks directory not configured");
+				return;
+			}
+
+			// Get goal frontmatter and inheritable properties
+			const goalCache = this.app.metadataCache.getFileCache(goalFile);
+			const goalFrontmatter = goalCache?.frontmatter;
+
+			if (!goalFrontmatter) {
+				new Notice("❌ Goal file has no frontmatter");
+				return;
+			}
+
+			// Get inheritable properties
+			const inheritedProps = getInheritableProperties(goalFrontmatter, settings);
+
+			// Generate file name: "Goal Name - "
+			const goalName = goalFile.basename;
+			const fileName = `${goalName} - `;
+
+			// Generate unique file path
+			const uniquePath = generateUniqueFilePath(this.app, tasksDir, fileName);
+
+			const newFile = await this.app.vault.create(uniquePath, "");
+
+			await this.app.fileManager.processFrontMatter(newFile, (fm) => {
+				fm[settings.taskGoalProp] = `[[${goalFile.basename}]]`;
+
+				for (const [key, value] of Object.entries(inheritedProps)) {
+					fm[key] = value;
+				}
+			});
+
+			// Open the file
+			const leaf = this.app.workspace.getLeaf("tab");
+			await leaf.openFile(newFile);
+
+			// Focus the inline title at the end
+			await this.focusInlineTitleAtEnd(leaf);
+
+			new Notice(`✅ Created task: ${newFile.basename}`);
+		} catch (error) {
+			console.error("Error creating task from goal:", error);
+			new Notice(`❌ Error creating task: ${error}`);
+		}
+	}
+
+	private async focusInlineTitleAtEnd(leaf: WorkspaceLeaf): Promise<void> {
+		// Wait for the view to fully render
+		await new Promise((resolve) => setTimeout(resolve, 30));
+
+		const view = leaf.view;
+		if (!(view instanceof MarkdownView)) return;
+
+		const inlineTitle = view.containerEl.querySelector(".inline-title") as HTMLElement;
+		if (!inlineTitle || inlineTitle.contentEditable !== "true") return;
+
+		inlineTitle.focus();
+
+		const range = document.createRange();
+		const selection = window.getSelection();
+
+		if (selection) {
+			range.selectNodeContents(inlineTitle);
+			// Position cursor at the end (after the dash and space)
+			range.collapse(false);
+			selection.removeAllRanges();
+			selection.addRange(range);
 		}
 	}
 }
