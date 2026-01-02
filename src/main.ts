@@ -263,12 +263,12 @@ export default class FusionGoalsPlugin extends Plugin {
 			const goalName = goalFile.basename;
 			const fileName = `${goalName} - `;
 
-			// Create Goal property with full path and alias: [[Goals/Goal Name|Goal Name]]
+			// Create Goal property as array with full path and alias: [[Goals/Goal Name|Goal Name]]
 			const goalPath = goalFile.path.replace(/\.md$/, "");
 			const goalLink = `[[${goalPath}|${goalName}]]`;
 
 			const frontmatter: Record<string, unknown> = {
-				[settings.taskGoalProp]: goalLink,
+				[settings.taskGoalProp]: [goalLink],
 				...inheritedProps,
 			};
 
