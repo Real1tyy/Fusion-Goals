@@ -1,8 +1,7 @@
 export const PLUGIN_ID = "fusion-goals";
 
-export const SETTINGS_VERSION = 1;
-
 export const SETTINGS_DEFAULTS = {
+	DEFAULT_VERSION: "1.0.0",
 	// Hierarchical directories
 	DEFAULT_GOALS_DIRECTORY: "Goals",
 	DEFAULT_TASKS_DIRECTORY: "Tasks",

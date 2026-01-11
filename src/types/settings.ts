@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SETTINGS_DEFAULTS, SETTINGS_VERSION } from "./constants";
+import { SETTINGS_DEFAULTS } from "./constants";
 
 export type Frontmatter = Record<string, unknown>;
 
@@ -29,7 +29,7 @@ export const PathExcludedPropertiesSchema = z.object({
 export type PathExcludedProperties = z.infer<typeof PathExcludedPropertiesSchema>;
 
 export const FusionGoalsSettingsSchema = z.object({
-	version: z.number().int().positive().optional().default(SETTINGS_VERSION),
+	version: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_VERSION),
 
 	// Hierarchical directory structure (required - must be defined)
 	goalsDirectory: z.string().optional().default(SETTINGS_DEFAULTS.DEFAULT_GOALS_DIRECTORY),

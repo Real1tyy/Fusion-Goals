@@ -6,6 +6,7 @@ import { FusionViewSwitcher, VIEW_TYPE_FUSION_SWITCHER } from "./components/view
 import { Indexer } from "./core/indexer";
 import { SettingsStore } from "./core/settings-store";
 import { getInheritableProperties } from "./utils/inheritance";
+import { SETTINGS_DEFAULTS } from "./types/constants";
 
 /**
  * Fusion Goals Plugin
@@ -172,6 +173,8 @@ export default class FusionGoalsPlugin extends Plugin {
 		if (this.settingsStore.settings$.value.showStartupOverview) {
 			this.showStartupOverview();
 		}
+
+		await this.checkForUpdates();
 	}
 
 	private showStartupOverview(): void {
@@ -319,6 +322,23 @@ export default class FusionGoalsPlugin extends Plugin {
 			range.collapse(false);
 			selection.removeAllRanges();
 			selection.addRange(range);
+		}
+	}
+
+	private async checkForUpdates(): Promise<void> {
+		const currentVersion = this.manifest.version;
+		const lastSeenVersion = this.settingsStore.settings$.value.version;
+
+		if (lastSeenVersion !== currentVersion) {
+			// Update version in settings
+			await this.settingsStore.updateSettings((settings) => ({
+				...settings,
+				version: currentVersion,
+			}));
+
+			if (lastSeenVersion !== SETTINGS_DEFAULTS.DEFAULT_VERSION) {
+				new Notice(`Fusion Goals updated to v${currentVersion}. Check the changelog for new features!`, 5000);
+			}
 		}
 	}
 }
