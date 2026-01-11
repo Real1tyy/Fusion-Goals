@@ -10,7 +10,7 @@ import { RulesSection } from "./sections/rules";
 import { UserInterfaceSettingsSection } from "./sections/user-interface";
 import type { SettingsSection } from "./types";
 
-const SPONSOR_URL = "https://github.com/sponsors/Real1tyy";
+const SPONSOR_URL = "https://matejvavroproductivity.com/support/";
 
 export class FusionGoalsSettingsTab extends PluginSettingTab {
 	plugin: FusionGoalsPlugin;
@@ -59,7 +59,7 @@ export class FusionGoalsSettingsTab extends PluginSettingTab {
 
 		const footer = containerEl.createDiv({ cls: "setting-item settings-footer" });
 		footer.createEl("a", {
-			text: "Support Fusion Goals Development",
+			text: "Support",
 			href: SPONSOR_URL,
 			cls: "settings-support-link",
 			attr: { target: "_blank", rel: "noopener" },

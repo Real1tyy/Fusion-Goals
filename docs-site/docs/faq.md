@@ -236,7 +236,7 @@ Use [GitHub Discussions](https://github.com/Real1tyy/Nexus-Properties/discussion
 ### How can I support the project?
 
 - ⭐ **Star on GitHub**: [Nexus Properties Repository](https://github.com/Real1tyy/Nexus-Properties)
-- 💰 **Sponsor**: [GitHub Sponsors](https://github.com/sponsors/Real1tyy)
+- 💰 **Support**: [Support My Work](https://matejvavroproductivity.com/support/)
 - 🐛 **Report bugs**: Help improve quality
 - 📖 **Improve docs**: Submit documentation PRs
 - 💬 **Help others**: Answer questions in Discussions

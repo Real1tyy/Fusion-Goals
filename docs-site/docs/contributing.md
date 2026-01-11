@@ -394,7 +394,7 @@ Contributors will be recognized in:
 
 Support the project's development:
 
-- **GitHub Sponsors**: [Sponsor Real1ty](https://github.com/sponsors/Real1tyy)
+- **Support**: [Support My Work](https://matejvavroproductivity.com/support/)
 - **Buy Me a Coffee**: [Support on Ko-fi](https://ko-fi.com/real1ty)
 
 ## Questions?

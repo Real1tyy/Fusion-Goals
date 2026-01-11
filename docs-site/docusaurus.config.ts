@@ -148,8 +148,8 @@ const config: Config = {
           title: 'Support',
           items: [
             {
-              label: 'Sponsor on GitHub',
-              href: 'https://github.com/sponsors/Real1tyy',
+              label: 'Support',
+              href: 'https://matejvavroproductivity.com/support/',
             },
             {
               label: 'Buy Me a Coffee',
