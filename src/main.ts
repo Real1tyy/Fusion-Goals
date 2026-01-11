@@ -5,8 +5,8 @@ import { DeadlineOverviewModal } from "./components/deadline-overview-modal";
 import { FusionViewSwitcher, VIEW_TYPE_FUSION_SWITCHER } from "./components/views/fusion-view-switcher";
 import { Indexer } from "./core/indexer";
 import { SettingsStore } from "./core/settings-store";
-import { getInheritableProperties } from "./utils/inheritance";
 import { SETTINGS_DEFAULTS } from "./types/constants";
+import { getInheritableProperties } from "./utils/inheritance";
 
 /**
  * Fusion Goals Plugin
