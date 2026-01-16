@@ -12,8 +12,8 @@ importers:
   .:
     dependencies:
       '@real1ty-obsidian-plugins/utils':
-        specifier: ^2.24.0
-        version: 2.24.0(@codemirror/state@6.5.0)(@codemirror/view@6.38.1)
+        specifier: ^2.34.0
+        version: 2.34.0(@codemirror/state@6.5.0)(@codemirror/view@6.38.1)
       cytoscape:
         specifier: ^3.33.1
         version: 3.33.1
@@ -34,8 +34,8 @@ importers:
         specifier: ^2.3.4
         version: 2.3.4
       '@types/node':
-        specifier: ^24.10.7
-        version: 24.10.7
+        specifier: ^24.10.9
+        version: 24.10.9
       builtin-modules:
         specifier: 5.0.0
         version: 5.0.0
@@ -59,12 +59,12 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/node@24.10.7)(jsdom@27.4.0)(yaml@2.8.2)
+        version: 3.2.4(@types/node@24.10.9)(jsdom@27.4.0)(yaml@2.8.2)
 
 packages:
 
-  '@acemir/cssom@0.9.30':
-    resolution: {integrity: sha512-9CnlMCI0LmCIq0olalQqdWrJHPzm0/tw3gzOA9zJSgvFX7Xau3D24mAGa4BtwxwY69nsuJW6kQqqCzf/mEcQgg==}
+  '@acemir/cssom@0.9.31':
+    resolution: {integrity: sha512-ZnR3GSaH+/vJ0YlHau21FjfLYjMpYVIzTD8M8vIEQvIGxeOXyXdzCI140rrCY862p/C/BbzWsjc1dgnM9mkoTA==}
 
   '@asamuzakjp/css-color@4.1.1':
     resolution: {integrity: sha512-B0Hv6G3gWGMn0xKJ0txEi/jM5iFpT3MfDxmhZFb4W047GvytCf1DHQ1D69W3zHI4yWe2aTZAA0JnbMZ7Xc8DuQ==}
@@ -493,8 +493,8 @@ packages:
   '@marijn/find-cluster-break@1.0.2':
     resolution: {integrity: sha512-l0h88YhZFyKdXIFNfSWpyjStDjGHwZ/U7iobcK1cQQD8sejsONdQtTVU+1wVN1PBw40PiiHB1vA5S7VTfQiP9g==}
 
-  '@real1ty-obsidian-plugins/utils@2.24.0':
-    resolution: {integrity: sha512-gVyKOniJBjOmnlk6/juwM67uv79oRGR9do265wc81z2UY5qzu0TpLfHtp2bC9DF8s71u5WhjaIj/h8mf60H3kw==}
+  '@real1ty-obsidian-plugins/utils@2.34.0':
+    resolution: {integrity: sha512-3c/fNhwKKrgBHS3ZAnbhVlO7wsCpwFETigsEzUcBJoXGlGKWANUQ2v8928Eyt9iX2eXFGmisjmIplqaNVJPnuQ==}
 
   '@rollup/rollup-android-arm-eabi@4.55.1':
     resolution: {integrity: sha512-9R0DM/ykwfGIlNu6+2U09ga0WXeZ9MRC2Ter8jnz8415VbuIykVuc6bhdrbORFZANDmTDvq26mJrEVTl8TdnDg==}
@@ -636,8 +636,8 @@ packages:
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
-  '@types/node@24.10.7':
-    resolution: {integrity: sha512-+054pVMzVTmRQV8BhpGv3UyfZ2Llgl8rdpDTon+cUH9+na0ncBVXj3wTUKh14+Kiz18ziM3b4ikpP5/Pc0rQEQ==}
+  '@types/node@24.10.9':
+    resolution: {integrity: sha512-ne4A0IpG3+2ETuREInjPNhUGis1SFjv1d5asp8MzEAGtOZeTeHVDOYqOgqfhvseqg/iXty2hjBf1zAOb7RNiNw==}
 
   '@types/tern@0.23.9':
     resolution: {integrity: sha512-ypzHFE/wBzh+BlH6rrBgS5I/Z7RD21pGhZ2rltb/+ZrVM1awdZwjx7hE5XfuYgHWk9uvV5HLZN3SloevCAp3Bw==}
@@ -1132,7 +1132,7 @@ packages:
 
 snapshots:
 
-  '@acemir/cssom@0.9.30': {}
+  '@acemir/cssom@0.9.31': {}
 
   '@asamuzakjp/css-color@4.1.1':
     dependencies:
@@ -1382,7 +1382,7 @@ snapshots:
 
   '@marijn/find-cluster-break@1.0.2': {}
 
-  '@real1ty-obsidian-plugins/utils@2.24.0(@codemirror/state@6.5.0)(@codemirror/view@6.38.1)':
+  '@real1ty-obsidian-plugins/utils@2.34.0(@codemirror/state@6.5.0)(@codemirror/view@6.38.1)':
     dependencies:
       colord: 2.9.3
       gray-matter: 4.0.3
@@ -1488,7 +1488,7 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
-  '@types/node@24.10.7':
+  '@types/node@24.10.9':
     dependencies:
       undici-types: 7.16.0
 
@@ -1504,13 +1504,13 @@ snapshots:
       chai: 5.3.3
       tinyrainbow: 2.0.0
 
-  '@vitest/mocker@3.2.4(vite@7.3.1(@types/node@24.10.7)(yaml@2.8.2))':
+  '@vitest/mocker@3.2.4(vite@7.3.1(@types/node@24.10.9)(yaml@2.8.2))':
     dependencies:
       '@vitest/spy': 3.2.4
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.1(@types/node@24.10.7)(yaml@2.8.2)
+      vite: 7.3.1(@types/node@24.10.9)(yaml@2.8.2)
 
   '@vitest/pretty-format@3.2.4':
     dependencies:
@@ -1734,7 +1734,7 @@ snapshots:
 
   jsdom@27.4.0:
     dependencies:
-      '@acemir/cssom': 0.9.30
+      '@acemir/cssom': 0.9.31
       '@asamuzakjp/dom-selector': 6.7.6
       '@exodus/bytes': 1.8.0
       cssstyle: 5.3.7
@@ -1912,13 +1912,13 @@ snapshots:
 
   undici-types@7.16.0: {}
 
-  vite-node@3.2.4(@types/node@24.10.7)(yaml@2.8.2):
+  vite-node@3.2.4(@types/node@24.10.9)(yaml@2.8.2):
     dependencies:
       cac: 6.7.14
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 7.3.1(@types/node@24.10.7)(yaml@2.8.2)
+      vite: 7.3.1(@types/node@24.10.9)(yaml@2.8.2)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -1933,7 +1933,7 @@ snapshots:
       - tsx
       - yaml
 
-  vite@7.3.1(@types/node@24.10.7)(yaml@2.8.2):
+  vite@7.3.1(@types/node@24.10.9)(yaml@2.8.2):
     dependencies:
       esbuild: 0.27.2
       fdir: 6.5.0(picomatch@4.0.3)
@@ -1942,15 +1942,15 @@ snapshots:
       rollup: 4.55.1
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 24.10.7
+      '@types/node': 24.10.9
       fsevents: 2.3.3
       yaml: 2.8.2
 
-  vitest@3.2.4(@types/node@24.10.7)(jsdom@27.4.0)(yaml@2.8.2):
+  vitest@3.2.4(@types/node@24.10.9)(jsdom@27.4.0)(yaml@2.8.2):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.4
-      '@vitest/mocker': 3.2.4(vite@7.3.1(@types/node@24.10.7)(yaml@2.8.2))
+      '@vitest/mocker': 3.2.4(vite@7.3.1(@types/node@24.10.9)(yaml@2.8.2))
       '@vitest/pretty-format': 3.2.4
       '@vitest/runner': 3.2.4
       '@vitest/snapshot': 3.2.4
@@ -1968,11 +1968,11 @@ snapshots:
       tinyglobby: 0.2.15
       tinypool: 1.1.1
       tinyrainbow: 2.0.0
-      vite: 7.3.1(@types/node@24.10.7)(yaml@2.8.2)
-      vite-node: 3.2.4(@types/node@24.10.7)(yaml@2.8.2)
+      vite: 7.3.1(@types/node@24.10.9)(yaml@2.8.2)
+      vite-node: 3.2.4(@types/node@24.10.9)(yaml@2.8.2)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 24.10.7
+      '@types/node': 24.10.9
       jsdom: 27.4.0
     transitivePeerDependencies:
       - jiti

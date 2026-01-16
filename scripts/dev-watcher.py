@@ -14,8 +14,14 @@ import argparse
 import subprocess
 from pathlib import Path
 from typing import Dict
+from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+
+def log_with_timestamp(message: str):
+    """Print message with timestamp."""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] {message}")
 
 class PluginDevWatcher(FileSystemEventHandler):
     def __init__(self, project_root: Path, obsidian_vault_path: Path):
@@ -135,7 +141,17 @@ class PluginDevWatcher(FileSystemEventHandler):
                     return False
             else:
                 print("❌ Build failed")
-                print(f"Error: {result.stderr}")
+                print(f"   Return code: {result.returncode}")
+                if result.stdout:
+                    print("   STDOUT:")
+                    for line in result.stdout.strip().split('\n'):
+                        print(f"   {line}")
+                if result.stderr:
+                    print("   STDERR:")
+                    for line in result.stderr.strip().split('\n'):
+                        print(f"   {line}")
+                if not result.stdout and not result.stderr:
+                    print("   (No output captured)")
                 return False
         except subprocess.TimeoutExpired:
             print("⏰ Build timeout - build took longer than 1 minute")
@@ -233,7 +249,17 @@ class PluginDevWatcher(FileSystemEventHandler):
                 self._copy_plugin_files()
             else:
                 print("❌ Build failed")
-                print(f"Error: {result.stderr}")
+                print(f"   Return code: {result.returncode}")
+                if result.stdout:
+                    print("   STDOUT:")
+                    for line in result.stdout.strip().split('\n'):
+                        print(f"   {line}")
+                if result.stderr:
+                    print("   STDERR:")
+                    for line in result.stderr.strip().split('\n'):
+                        print(f"   {line}")
+                if not result.stdout and not result.stderr:
+                    print("   (No output captured)")
         except subprocess.TimeoutExpired:
             print("⏰ Build timeout")
         except Exception as e:
@@ -301,6 +327,7 @@ def main():
     )
 
     args = parser.parse_args()
+    start_time = datetime.now()
 
     # Get Obsidian vault path
     obsidian_vault_path = args.vault_path or os.getenv("OBSIDIAN_VAULT_PATH")
@@ -312,7 +339,7 @@ def main():
     obsidian_vault_path = Path(obsidian_vault_path)
 
     if args.mode == "build":
-        print("🎯 Starting one-time build and copy...")
+        log_with_timestamp("🚀 Starting one-time build and copy")
         print(f"   Project root: {project_root}")
         print(f"   Obsidian vault: {obsidian_vault_path}")
 
@@ -322,7 +349,9 @@ def main():
 
             # Run one-time build and copy
             if watcher.build_and_copy_once():
-                print("✅ Build and copy completed successfully!")
+                end_time = datetime.now()
+                duration = (end_time - start_time).total_seconds()
+                log_with_timestamp(f"✅ Build and copy completed successfully in {duration:.2f} seconds")
                 sys.exit(0)
             else:
                 print("❌ Build and copy failed!")
@@ -332,7 +361,7 @@ def main():
             sys.exit(1)
 
     else:  # watch mode
-        print("🎯 Starting development mode...")
+        log_with_timestamp("🚀 Starting development mode watcher")
         print(f"   Project root: {project_root}")
         print(f"   Obsidian vault: {obsidian_vault_path}")
 

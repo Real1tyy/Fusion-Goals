@@ -1,11 +1,16 @@
-import { generateUniqueFilePath, TemplaterService } from "@real1ty-obsidian-plugins/utils";
+import {
+	generateUniqueFilePath,
+	TemplaterService,
+	WhatsNewModal,
+	type WhatsNewModalConfig,
+} from "@real1ty-obsidian-plugins/utils";
 import { MarkdownView, Notice, Plugin, type TFile, type WorkspaceLeaf } from "obsidian";
+import CHANGELOG_CONTENT from "../../docs-site/docs/changelog.md";
 import { FusionGoalsSettingsTab } from "./components";
 import { DeadlineOverviewModal } from "./components/deadline-overview-modal";
 import { FusionViewSwitcher, VIEW_TYPE_FUSION_SWITCHER } from "./components/views/fusion-view-switcher";
 import { Indexer } from "./core/indexer";
 import { SettingsStore } from "./core/settings-store";
-import { SETTINGS_DEFAULTS } from "./types/constants";
 import { getInheritableProperties } from "./utils/inheritance";
 
 /**
@@ -327,18 +332,26 @@ export default class FusionGoalsPlugin extends Plugin {
 
 	private async checkForUpdates(): Promise<void> {
 		const currentVersion = this.manifest.version;
-		const lastSeenVersion = this.settingsStore.settings$.value.version;
+		const lastSeenVersion = this.settingsStore.currentSettings.version;
 
 		if (lastSeenVersion !== currentVersion) {
-			// Update version in settings
+			const config: WhatsNewModalConfig = {
+				cssPrefix: "fusion-goals",
+				pluginName: "Fusion Goals",
+				changelogContent: CHANGELOG_CONTENT,
+				links: {
+					github: "https://github.com/Real1tyy/Fusion-Goals",
+					support: "https://matejvavroproductivity.com/support/",
+					changelog: "https://real1tyy.github.io/Fusion-Goals/changelog",
+					documentation: "https://real1tyy.github.io/Fusion-Goals/",
+				},
+			};
+
+			new WhatsNewModal(this.app, this, config, lastSeenVersion, currentVersion).open();
 			await this.settingsStore.updateSettings((settings) => ({
 				...settings,
 				version: currentVersion,
 			}));
-
-			if (lastSeenVersion !== SETTINGS_DEFAULTS.DEFAULT_VERSION) {
-				new Notice(`Fusion Goals updated to v${currentVersion}. Check the changelog for new features!`, 5000);
-			}
 		}
 	}
 }
