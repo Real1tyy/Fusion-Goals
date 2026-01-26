@@ -1,4 +1,4 @@
-import type { SettingsUIBuilder } from "@real1ty-obsidian-plugins/utils";
+import type { SettingsUIBuilder } from "@real1ty-obsidian-plugins";
 import { Setting } from "obsidian";
 import type FusionGoalsPlugin from "../../../main";
 import type { BasesAdditionalView, FusionGoalsSettings, FusionGoalsSettingsSchema } from "../../../types/settings";
@@ -176,7 +176,9 @@ export class BasesViewSettingsSection implements SettingsSection {
 		infoBox.createEl("strong", { text: "Column Order:" });
 		const orderList = infoBox.createEl("ol");
 		orderList.createEl("li", { text: "file.name (always first)" });
-		orderList.createEl("li", { text: "Properties specified above (in the order listed)" });
+		orderList.createEl("li", {
+			text: "Properties specified above (in the order listed)",
+		});
 	}
 
 	private renderAdditionalViews(container: HTMLElement): void {
@@ -235,7 +237,9 @@ export class BasesViewSettingsSection implements SettingsSection {
 	private renderAdditionalViewItem(view: BasesAdditionalView, index: number): void {
 		if (!this.additionalViewsContainer) return;
 
-		const itemEl = this.additionalViewsContainer.createDiv({ cls: "fusion-rule-item" });
+		const itemEl = this.additionalViewsContainer.createDiv({
+			cls: "fusion-rule-item",
+		});
 
 		const headerEl = itemEl.createDiv({ cls: "fusion-rule-header" });
 		headerEl.createEl("strong", { text: view.name || "Unnamed View" });

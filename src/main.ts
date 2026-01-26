@@ -3,7 +3,7 @@ import {
 	TemplaterService,
 	WhatsNewModal,
 	type WhatsNewModalConfig,
-} from "@real1ty-obsidian-plugins/utils";
+} from "@real1ty-obsidian-plugins";
 import { MarkdownView, Notice, Plugin, type TFile, type WorkspaceLeaf } from "obsidian";
 import CHANGELOG_CONTENT from "../../docs-site/docs/changelog.md";
 import { FusionGoalsSettingsTab } from "./components";
@@ -206,7 +206,10 @@ export default class FusionGoalsPlugin extends Plugin {
 			// View doesn't exist, create it in the left sidebar
 			const leaf = workspace.getLeftLeaf(false);
 			if (leaf) {
-				await leaf.setViewState({ type: VIEW_TYPE_FUSION_SWITCHER, active: true });
+				await leaf.setViewState({
+					type: VIEW_TYPE_FUSION_SWITCHER,
+					active: true,
+				});
 				workspace.revealLeaf(leaf);
 			}
 		}

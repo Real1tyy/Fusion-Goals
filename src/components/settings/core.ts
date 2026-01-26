@@ -1,4 +1,4 @@
-import { SettingsUIBuilder } from "@real1ty-obsidian-plugins/utils";
+import { SettingsUIBuilder } from "@real1ty-obsidian-plugins";
 import { type App, PluginSettingTab } from "obsidian";
 import type FusionGoalsPlugin from "src/main";
 import type { FusionGoalsSettingsSchema } from "../../types/settings";
@@ -53,11 +53,15 @@ export class FusionGoalsSettingsTab extends PluginSettingTab {
 			});
 		}
 
-		this.sectionContainer = containerEl.createDiv({ cls: "fusion-settings-section-container" });
+		this.sectionContainer = containerEl.createDiv({
+			cls: "fusion-settings-section-container",
+		});
 
 		this.renderSelectedSection();
 
-		const footer = containerEl.createDiv({ cls: "setting-item settings-footer" });
+		const footer = containerEl.createDiv({
+			cls: "setting-item settings-footer",
+		});
 		footer.createEl("a", {
 			text: "Support",
 			href: SPONSOR_URL,

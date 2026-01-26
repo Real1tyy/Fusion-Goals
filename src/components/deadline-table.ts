@@ -42,7 +42,9 @@ export class DeadlineTable {
 			return;
 		}
 
-		const tableEl = this.container.createEl("table", { cls: "startup-overview-table" });
+		const tableEl = this.container.createEl("table", {
+			cls: "startup-overview-table",
+		});
 
 		this.renderTableHeader(tableEl);
 		this.renderTableBody(tableEl, items);

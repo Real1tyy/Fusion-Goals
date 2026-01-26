@@ -14,7 +14,9 @@ export class GraphHeader {
 		private containerEl: HTMLElement,
 		private props: GraphHeaderProps
 	) {
-		this.headerEl = this.containerEl.createEl("div", { cls: "fusion-graph-view-header" });
+		this.headerEl = this.containerEl.createEl("div", {
+			cls: "fusion-graph-view-header",
+		});
 		this.render();
 	}
 
@@ -37,11 +39,17 @@ export class GraphHeader {
 		});
 
 		// Controls container
-		const controlsContainer = this.headerEl.createEl("div", { cls: "fusion-graph-controls-container" });
+		const controlsContainer = this.headerEl.createEl("div", {
+			cls: "fusion-graph-controls-container",
+		});
 
 		// Start from current file checkbox
-		this.startFromCurrentContainer = controlsContainer.createEl("div", { cls: "fusion-graph-toggle-container" });
-		this.toggleCheckbox = this.startFromCurrentContainer.createEl("input", { type: "checkbox" });
+		this.startFromCurrentContainer = controlsContainer.createEl("div", {
+			cls: "fusion-graph-toggle-container",
+		});
+		this.toggleCheckbox = this.startFromCurrentContainer.createEl("input", {
+			type: "checkbox",
+		});
 		this.toggleCheckbox.addClass("fusion-graph-toggle-checkbox");
 		this.toggleCheckbox.checked = this.props.startFromCurrent;
 

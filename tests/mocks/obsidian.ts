@@ -81,6 +81,38 @@ export class Modal {
 	onClose(): void {}
 }
 
+export class ItemView {
+	app: any;
+	leaf: any;
+	containerEl: HTMLElement;
+
+	constructor(leaf: any) {
+		this.leaf = leaf;
+		this.app = leaf?.app;
+		this.containerEl = document.createElement("div");
+	}
+
+	getViewType(): string {
+		return "mock-view";
+	}
+
+	getDisplayText(): string {
+		return "Mock View";
+	}
+
+	getIcon(): string {
+		return "mock-icon";
+	}
+
+	getState(): any {
+		return {};
+	}
+
+	setState(_state: any): Promise<void> {
+		return Promise.resolve();
+	}
+}
+
 export class TFile {
 	path: string;
 	basename: string;

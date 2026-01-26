@@ -1,4 +1,4 @@
-import { buildPropertyMapping, InputFilterManager, sanitizeExpression } from "@real1ty-obsidian-plugins/utils";
+import { buildPropertyMapping, InputFilterManager, sanitizeExpression } from "@real1ty-obsidian-plugins";
 
 export class GraphFilter extends InputFilterManager<Record<string, any>> {
 	private compiledFunc: ((...args: any[]) => boolean) | null = null;

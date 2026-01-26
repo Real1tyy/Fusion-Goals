@@ -1,4 +1,4 @@
-import { filterPropertiesForDisplay } from "@real1ty-obsidian-plugins/utils";
+import { filterPropertiesForDisplay } from "@real1ty-obsidian-plugins";
 import { type App, Modal, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { SettingsStore } from "../core/settings-store";
@@ -124,7 +124,10 @@ export class NodePreviewModal extends Modal {
 			const dateItem = dateSection.createDiv("node-preview-date-item");
 			dateItem.addClass(`node-preview-date-${type}`);
 
-			dateItem.createSpan({ text: `${label}: `, cls: "node-preview-date-label" });
+			dateItem.createSpan({
+				text: `${label}: `,
+				cls: "node-preview-date-label",
+			});
 			dateItem.createSpan({ text: value, cls: "node-preview-date-value" });
 		}
 	}

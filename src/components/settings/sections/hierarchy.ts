@@ -1,4 +1,4 @@
-import type { SettingsUIBuilder } from "@real1ty-obsidian-plugins/utils";
+import type { SettingsUIBuilder } from "@real1ty-obsidian-plugins";
 import { Notice, Setting } from "obsidian";
 import type FusionGoalsPlugin from "src/main";
 import type { FusionGoalsSettingsSchema } from "src/types/settings";

@@ -153,7 +153,10 @@ export class GraphInteractionHandler {
 				const modelPos = evt.position;
 				if (!modelPos) return;
 
-				const viewportCenter = { x: this.cy.width() / 2, y: this.cy.height() / 2 };
+				const viewportCenter = {
+					x: this.cy.width() / 2,
+					y: this.cy.height() / 2,
+				};
 				const targetPan = {
 					x: viewportCenter.x - modelPos.x * targetZoom,
 					y: viewportCenter.y - modelPos.y * targetZoom,
@@ -163,7 +166,10 @@ export class GraphInteractionHandler {
 				this.cy.animate({ zoom: targetZoom, pan: targetPan }, { duration: 160, easing: "ease-out" });
 			} else {
 				this.lastBackgroundTapTime = now;
-				this.lastBackgroundTapRenderedPos = { x: renderedPos.x, y: renderedPos.y };
+				this.lastBackgroundTapRenderedPos = {
+					x: renderedPos.x,
+					y: renderedPos.y,
+				};
 			}
 		});
 	}

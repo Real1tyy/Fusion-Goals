@@ -331,7 +331,10 @@ export class Indexer {
 		};
 	}
 
-	private calculateDateValues(frontmatter: Frontmatter): { daysSince?: string; daysRemaining?: string } {
+	private calculateDateValues(frontmatter: Frontmatter): {
+		daysSince?: string;
+		daysRemaining?: string;
+	} {
 		const { startDateProperty, endDateProperty } = this.settings;
 		const result: { daysSince?: string; daysRemaining?: string } = {};
 

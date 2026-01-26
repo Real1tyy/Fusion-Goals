@@ -1,4 +1,4 @@
-import { parseWikiLinkWithDisplay } from "@real1ty-obsidian-plugins/utils";
+import { parseWikiLinkWithDisplay } from "@real1ty-obsidian-plugins";
 
 /**
  * Parse wiki links from a frontmatter property value.

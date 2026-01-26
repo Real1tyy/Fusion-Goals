@@ -5,7 +5,7 @@ import {
 	type FileContext,
 	FilterEvaluator,
 	getFileContext,
-} from "@real1ty-obsidian-plugins/utils";
+} from "@real1ty-obsidian-plugins";
 import type { ElementDefinition } from "cytoscape";
 import type { App } from "obsidian";
 import type { FusionGoalsSettings } from "../types/settings";
@@ -169,7 +169,9 @@ export class GraphBuilder {
 			const childNodes = children.map((ctx) =>
 				this.createNodeElement(ctx.wikiLink, targetLevel, allowSourceHighlight && ctx.path === sourcePath)
 			);
-			const childEdges = children.map((ctx) => ({ data: { source: parentPath, target: ctx.path } }));
+			const childEdges = children.map((ctx) => ({
+				data: { source: parentPath, target: ctx.path },
+			}));
 
 			nodes.push(...childNodes);
 			edges.push(...childEdges);

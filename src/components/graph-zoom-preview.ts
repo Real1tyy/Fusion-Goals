@@ -1,4 +1,4 @@
-import { filterPropertiesForDisplay } from "@real1ty-obsidian-plugins/utils";
+import { filterPropertiesForDisplay } from "@real1ty-obsidian-plugins";
 import { type App, Component, MarkdownRenderer, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { SettingsStore } from "../core/settings-store";
@@ -108,7 +108,9 @@ export class GraphZoomPreview {
 			cls: "fusion-graph-toggle-container",
 		});
 
-		this.hideFrontmatterCheckbox = hideFmContainer.createEl("input", { type: "checkbox" });
+		this.hideFrontmatterCheckbox = hideFmContainer.createEl("input", {
+			type: "checkbox",
+		});
 		this.hideFrontmatterCheckbox.addClass("fusion-graph-toggle-checkbox");
 		this.hideFrontmatterCheckbox.checked = this.props.initialHideFrontmatter ?? false;
 
@@ -135,7 +137,9 @@ export class GraphZoomPreview {
 			cls: "fusion-graph-toggle-container",
 		});
 
-		this.hideContentCheckbox = hideContentContainer.createEl("input", { type: "checkbox" });
+		this.hideContentCheckbox = hideContentContainer.createEl("input", {
+			type: "checkbox",
+		});
 		this.hideContentCheckbox.addClass("fusion-graph-toggle-checkbox");
 		this.hideContentCheckbox.checked = this.props.initialHideContent ?? false;
 
@@ -162,7 +166,9 @@ export class GraphZoomPreview {
 			cls: "fusion-graph-toggle-container",
 		});
 
-		this.exitZoomCheckbox = exitZoomContainer.createEl("input", { type: "checkbox" });
+		this.exitZoomCheckbox = exitZoomContainer.createEl("input", {
+			type: "checkbox",
+		});
 		this.exitZoomCheckbox.addClass("fusion-graph-toggle-checkbox");
 		this.exitZoomCheckbox.checked = false;
 
@@ -192,7 +198,6 @@ export class GraphZoomPreview {
 
 		// Frontmatter section
 		const cache = this.app.metadataCache.getFileCache(this.props.file);
-		// Using rest operator to exclude position from frontmatter
 		const { position: _position, ...frontmatter } = cache?.frontmatter ?? {};
 
 		this.frontmatterSection = this.bodyContainer.createEl("div", {

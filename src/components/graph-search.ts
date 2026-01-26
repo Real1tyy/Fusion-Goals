@@ -1,4 +1,4 @@
-import { InputFilterManager } from "@real1ty-obsidian-plugins/utils";
+import { InputFilterManager } from "@real1ty-obsidian-plugins";
 
 export class GraphSearch extends InputFilterManager<string> {
 	constructor(parentEl: HTMLElement, onSearchChange: () => void, initiallyVisible: boolean, onHide?: () => void) {

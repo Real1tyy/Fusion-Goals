@@ -4,7 +4,7 @@ import {
 	formatValue,
 	getFileContext,
 	parseInlineWikiLinks,
-} from "@real1ty-obsidian-plugins/utils";
+} from "@real1ty-obsidian-plugins";
 import type { App } from "obsidian";
 import type { Subscription } from "rxjs";
 import { extractDateInfo } from "src/utils/date";
@@ -205,7 +205,10 @@ export class PropertyTooltip {
 			// Render each item
 			for (let i = 0; i < stringValues.length; i++) {
 				if (i > 0) {
-					container.createSpan({ text: ", ", cls: "fusion-property-separator" });
+					container.createSpan({
+						text: ", ",
+						cls: "fusion-property-separator",
+					});
 				}
 				this.renderStringValue(container, stringValues[i]);
 			}
@@ -265,8 +268,14 @@ export class PropertyTooltip {
 
 		for (const { label, value } of dateParts) {
 			const dateItem = dateContainer.createDiv("fusion-property-tooltip-date-item");
-			dateItem.createSpan({ text: `${label}: `, cls: "fusion-property-tooltip-date-label" });
-			dateItem.createSpan({ text: value, cls: "fusion-property-tooltip-date-value" });
+			dateItem.createSpan({
+				text: `${label}: `,
+				cls: "fusion-property-tooltip-date-label",
+			});
+			dateItem.createSpan({
+				text: value,
+				cls: "fusion-property-tooltip-date-value",
+			});
 		}
 
 		return true;

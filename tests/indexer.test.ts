@@ -170,10 +170,14 @@ describe("Indexer", () => {
 
 			vi.mocked(mockMetadataCache.getFileCache).mockImplementation((file) => {
 				if (file.path === "Tasks/Task 1.md") {
-					return { frontmatter: { Goal: "[[Goals/Goal 1]]" } } as CachedMetadata;
+					return {
+						frontmatter: { Goal: "[[Goals/Goal 1]]" },
+					} as CachedMetadata;
 				}
 				if (file.path === "Tasks/Task 2.md") {
-					return { frontmatter: { Goal: "[[Goals/Goal 2]]" } } as CachedMetadata;
+					return {
+						frontmatter: { Goal: "[[Goals/Goal 2]]" },
+					} as CachedMetadata;
 				}
 				return null;
 			});

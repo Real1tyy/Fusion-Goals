@@ -1,4 +1,4 @@
-import { buildPropertyMapping, sanitizeExpression } from "@real1ty-obsidian-plugins/utils";
+import { buildPropertyMapping, sanitizeExpression } from "@real1ty-obsidian-plugins";
 import { type App, Modal, TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { Indexer } from "src/core/indexer";
@@ -222,20 +222,28 @@ export class DeadlineOverviewModal extends Modal {
 		if (this.isInitialRender) {
 			contentEl.empty();
 
-			const headerRow = contentEl.createEl("div", { cls: "startup-overview-header-row" });
+			const headerRow = contentEl.createEl("div", {
+				cls: "startup-overview-header-row",
+			});
 
 			// Left toggle
-			const leftToggle = headerRow.createEl("div", { cls: "startup-overview-header-left" });
+			const leftToggle = headerRow.createEl("div", {
+				cls: "startup-overview-header-left",
+			});
 			this.createToggle(leftToggle, "Past events", this.showPastEvents, (checked) => {
 				this.showPastEvents = checked;
 			});
 
 			// Center title
-			const headerCenter = headerRow.createEl("div", { cls: "startup-overview-header-center" });
+			const headerCenter = headerRow.createEl("div", {
+				cls: "startup-overview-header-center",
+			});
 			headerCenter.createEl("h2", { text: "Deadlines Overview" });
 
 			// Right toggle
-			const rightToggle = headerRow.createEl("div", { cls: "startup-overview-header-right" });
+			const rightToggle = headerRow.createEl("div", {
+				cls: "startup-overview-header-right",
+			});
 			this.createToggle(rightToggle, "Future events", this.showFutureEvents, (checked) => {
 				this.showFutureEvents = checked;
 			});
@@ -246,7 +254,9 @@ export class DeadlineOverviewModal extends Modal {
 
 			contentEl.createEl("div", { cls: "deadline-overview-sort-container" });
 			contentEl.createEl("div", { cls: "deadline-overview-table-container" });
-			contentEl.createEl("div", { cls: "deadline-overview-pagination-container" });
+			contentEl.createEl("div", {
+				cls: "deadline-overview-pagination-container",
+			});
 
 			this.isInitialRender = false;
 		}
@@ -263,7 +273,9 @@ export class DeadlineOverviewModal extends Modal {
 		if (!container) return;
 
 		container.empty();
-		const tabsContainer = container.createEl("div", { cls: "startup-overview-tabs" });
+		const tabsContainer = container.createEl("div", {
+			cls: "startup-overview-tabs",
+		});
 
 		for (const [fileType, config] of Object.entries(FILE_TYPE_CONFIG) as Array<
 			[FileType, (typeof FILE_TYPE_CONFIG)[FileType]]
@@ -275,7 +287,10 @@ export class DeadlineOverviewModal extends Modal {
 			tabEl.createEl("span", { text: config.tabLabel });
 
 			const count = this.getFilteredCountForType(fileType);
-			tabEl.createEl("span", { text: `(${count})`, cls: "startup-overview-tab-count" });
+			tabEl.createEl("span", {
+				text: `(${count})`,
+				cls: "startup-overview-tab-count",
+			});
 
 			tabEl.addEventListener("click", () => {
 				this.currentTab = fileType;
@@ -295,7 +310,9 @@ export class DeadlineOverviewModal extends Modal {
 		checked: boolean,
 		onChange: (checked: boolean) => void
 	): void {
-		const label = container.createEl("label", { cls: "deadline-overview-toggle-label" });
+		const label = container.createEl("label", {
+			cls: "deadline-overview-toggle-label",
+		});
 
 		const checkbox = label.createEl("input", {
 			type: "checkbox",
@@ -309,14 +326,21 @@ export class DeadlineOverviewModal extends Modal {
 			this.renderContent();
 		});
 
-		label.createEl("span", { text: labelText, cls: "deadline-overview-toggle-text" });
+		label.createEl("span", {
+			text: labelText,
+			cls: "deadline-overview-toggle-text",
+		});
 	}
 
 	private renderSearchAndFilter(container: HTMLElement): void {
 		if (!this.searchFilterContainer) {
-			this.searchFilterContainer = container.createEl("div", { cls: "deadline-overview-filters" });
+			this.searchFilterContainer = container.createEl("div", {
+				cls: "deadline-overview-filters",
+			});
 
-			const searchContainer = this.searchFilterContainer.createEl("div", { cls: "deadline-overview-search" });
+			const searchContainer = this.searchFilterContainer.createEl("div", {
+				cls: "deadline-overview-search",
+			});
 			this.graphSearch = new GraphSearch(
 				searchContainer,
 				() => {
@@ -326,7 +350,9 @@ export class DeadlineOverviewModal extends Modal {
 				true
 			);
 
-			const filterInputContainer = this.searchFilterContainer.createEl("div", { cls: "deadline-overview-filter" });
+			const filterInputContainer = this.searchFilterContainer.createEl("div", {
+				cls: "deadline-overview-filter",
+			});
 			this.graphFilter = new GraphFilter(
 				filterInputContainer,
 				() => {
@@ -359,11 +385,18 @@ export class DeadlineOverviewModal extends Modal {
 		if (!container) return;
 
 		container.empty();
-		const sortContainer = container.createEl("div", { cls: "startup-overview-sort" });
+		const sortContainer = container.createEl("div", {
+			cls: "startup-overview-sort",
+		});
 
 		// Sort mode selector
-		const sortModeContainer = sortContainer.createEl("div", { cls: "startup-overview-sort-mode" });
-		sortModeContainer.createEl("span", { text: "Sort by:", cls: "startup-overview-sort-label" });
+		const sortModeContainer = sortContainer.createEl("div", {
+			cls: "startup-overview-sort-mode",
+		});
+		sortModeContainer.createEl("span", {
+			text: "Sort by:",
+			cls: "startup-overview-sort-label",
+		});
 
 		const sortModes: Array<{ mode: SortMode; label: string }> = [
 			{ mode: "days-remaining", label: "Days Remaining" },
@@ -388,8 +421,12 @@ export class DeadlineOverviewModal extends Modal {
 			cls: "startup-overview-sort-order",
 			title: this.sortOrder === "asc" ? "Ascending" : "Descending",
 		});
-		sortOrderButton.createEl("span", { text: this.sortOrder === "asc" ? "↑" : "↓" });
-		sortOrderButton.createEl("span", { text: this.sortOrder === "asc" ? "Ascending" : "Descending" });
+		sortOrderButton.createEl("span", {
+			text: this.sortOrder === "asc" ? "↑" : "↓",
+		});
+		sortOrderButton.createEl("span", {
+			text: this.sortOrder === "asc" ? "Ascending" : "Descending",
+		});
 
 		sortOrderButton.addEventListener("click", () => {
 			this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
@@ -445,16 +482,22 @@ export class DeadlineOverviewModal extends Modal {
 		const startItem = totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1;
 		const endItem = (this.currentPage - 1) * this.itemsPerPage + currentItems;
 
-		const paginationContainer = container.createEl("div", { cls: "startup-overview-pagination" });
+		const paginationContainer = container.createEl("div", {
+			cls: "startup-overview-pagination",
+		});
 
 		// Total count info
-		const countInfo = paginationContainer.createEl("div", { cls: "startup-overview-pagination-count" });
+		const countInfo = paginationContainer.createEl("div", {
+			cls: "startup-overview-pagination-count",
+		});
 		countInfo.setText(`Showing ${startItem}-${endItem} of ${totalItems} items`);
 
 		if (totalPages <= 1) return;
 
 		// Navigation buttons container
-		const navContainer = paginationContainer.createEl("div", { cls: "startup-overview-pagination-nav" });
+		const navContainer = paginationContainer.createEl("div", {
+			cls: "startup-overview-pagination-nav",
+		});
 
 		// First page button
 		const firstButton = navContainer.createEl("button", {
@@ -485,7 +528,9 @@ export class DeadlineOverviewModal extends Modal {
 		});
 
 		// Page input and info
-		const pageInputContainer = navContainer.createEl("div", { cls: "startup-overview-page-input-container" });
+		const pageInputContainer = navContainer.createEl("div", {
+			cls: "startup-overview-page-input-container",
+		});
 		pageInputContainer.createEl("span", { text: "Page" });
 
 		const pageInput = pageInputContainer.createEl("input", {
