@@ -13,6 +13,7 @@ An Obsidian plugin for hierarchical goal management with interactive graph visua
 ## Settings
 
 Configure directories for each level of your hierarchy:
+
 - **Goals Directory** - Folder containing your goal files
 - **Projects Directory** - Folder containing your project files
 - **Tasks Directory** - Folder containing your task files

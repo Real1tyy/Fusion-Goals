@@ -1014,7 +1014,7 @@
 
 /* When frontmatter is hidden, content should only take needed space */
 .fusion-graph-zoom-preview-body:has(.fusion-graph-zoom-preview-frontmatter.fusion-hidden)
-.fusion-graph-zoom-preview-content {
+	.fusion-graph-zoom-preview-content {
 	flex: 0 1 auto;
 }
 
