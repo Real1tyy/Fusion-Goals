@@ -30,12 +30,14 @@ The view mode dropdown is located in the graph header. Use it to switch between 
 Shows the complete hierarchy starting from the root (topmost parent) down through all descendants.
 
 **What's shown**:
+
 - The source file (or its root parent)
 - All parent nodes up to the root
 - All child nodes recursively
 - Sibling nodes (if auto-link siblings is enabled)
 
 **Example use cases**:
+
 - Project management with tasks and subtasks
 - Book outlines with chapters and sections
 - Academic hierarchies (topics → subtopics → concepts)
@@ -63,11 +65,13 @@ Enable "Start from Current" to begin the hierarchy at the currently open file in
 Shows only the source file and its directly related notes (one hop away).
 
 **What's shown**:
+
 - The source file
 - All notes marked as "Related" in the source file's frontmatter
 - All notes that mark the source file as "Related"
 
 **Example use cases**:
+
 - Finding related concepts
 - Seeing cross-references
 - Discovering similar notes
@@ -91,12 +95,14 @@ Note A ← Source → Note C
 Shows the source file and ALL related notes recursively, up to the configured max depth.
 
 **What's shown**:
+
 - The source file
 - All directly related notes
 - All notes related to those notes
 - Continues recursively up to [max depth](../configuration#all-related-recursion-depth)
 
 **Example constellation**:
+
 ```
 Note A ↔ Note B ↔ Note C
          ↓
@@ -106,11 +112,13 @@ Note A ↔ Note B ↔ Note C
 ```
 
 If you view `Note A` with max depth 3+:
+
 - **Depth 1**: Note A (source), Note B (direct)
 - **Depth 2**: Note C, Note D (related to B)
 - **Depth 3**: Note E, Note F (related to D)
 
 **Example use cases**:
+
 - Discovering hidden connections
 - Exploring knowledge clusters
 - Finding indirect relationships
@@ -130,10 +138,12 @@ Large constellations can impact performance. If the graph becomes slow, reduce t
 When enabled, the graph shows relationships starting from the currently open file rather than traversing to the root.
 
 **Hierarchical mode**:
+
 - Without: Shows from topmost parent down
 - With: Shows from current file down (subtree only)
 
 **Example**:
+
 ```
 Full hierarchy:
     Root
@@ -146,10 +156,12 @@ Full hierarchy:
 ```
 
 **Start from Current OFF** (default):
+
 - Shows: Root, Parent, Current File, Sibling, Child 1, Child 2
 - Also shows: Uncle (descendant of root)
 
 **Start from Current ON**:
+
 - Shows: Current File, Child 1, Child 2
 - Hides: Root, Parent, Sibling, Uncle
 
@@ -168,6 +180,7 @@ Shows the name of the currently focused file. Click to open the file in a new ta
 ### View Mode Dropdown
 
 **Options**:
+
 - Hierarchical
 - Related
 - All Related
@@ -179,6 +192,7 @@ Changes how the graph interprets and displays relationships.
 Only visible in "Hierarchical" mode. When checked, adds all related notes (and their constellations) to the hierarchy view.
 
 **Example**:
+
 ```
 Project (parent-child hierarchy)
 ├── Task 1
@@ -189,6 +203,7 @@ Task 1 Related To:
 ```
 
 With "Include All Related" checked, the graph shows:
+
 - The hierarchy (Project, Task 1, Task 2)
 - The related constellation (Note A, Note B, Note C)
 
@@ -209,6 +224,7 @@ When checked, starts the graph from the current file instead of the root parent.
 ### Constellation Layout
 
 Used for Related and All Related modes:
+
 - Groups of connected notes
 - Organic, network-style layout
 - Automatic clustering
@@ -234,11 +250,13 @@ The source node (the file you're currently viewing) is always highlighted in the
 ### Click Behavior
 
 **Single click**: Enter [Zoom Mode](zoom-mode)
+
 - Preview panel appears
 - Node is focused
 - Can navigate between nodes
 
 **In Zoom Mode click**: Switch focus to clicked node
+
 - Updates preview panel
 - Moves focus highlight
 - Maintains zoom mode
@@ -248,6 +266,7 @@ The source node (the file you're currently viewing) is always highlighted in the
 ### Right-Click
 
 Opens [Context Menu](context-menus) with actions:
+
 - Open file
 - Open in new tab
 - Add relationships
@@ -271,15 +290,15 @@ After 1 second, shows [Property Tooltip](tooltips) with frontmatter
 
 ## Comparing View Modes
 
-| Feature | Hierarchical | Related | All Related |
-|---------|-------------|---------|-------------|
-| **Shows parent-child** | ✅ Yes, full tree | ❌ No | ⚠️ If in constellation |
-| **Shows related** | ⚠️ Optional | ✅ Direct only | ✅ Recursive |
-| **Recursion depth** | Unlimited | 1 hop | Configurable (1-20) |
-| **Best for** | Hierarchies | Immediate connections | Full networks |
-| **Layout** | Tree | Radial | Constellation |
-| **Performance** | Fast | Fast | Can be slow |
-| **Start from current** | ✅ Supported | ✅ Supported | ✅ Supported |
+| Feature                | Hierarchical      | Related               | All Related            |
+| ---------------------- | ----------------- | --------------------- | ---------------------- |
+| **Shows parent-child** | ✅ Yes, full tree | ❌ No                 | ⚠️ If in constellation |
+| **Shows related**      | ⚠️ Optional       | ✅ Direct only        | ✅ Recursive           |
+| **Recursion depth**    | Unlimited         | 1 hop                 | Configurable (1-20)    |
+| **Best for**           | Hierarchies       | Immediate connections | Full networks          |
+| **Layout**             | Tree              | Radial                | Constellation          |
+| **Performance**        | Fast              | Fast                  | Can be slow            |
+| **Start from current** | ✅ Supported      | ✅ Supported          | ✅ Supported           |
 
 ## Common Use Cases
 

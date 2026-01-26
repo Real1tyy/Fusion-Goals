@@ -26,6 +26,7 @@ Automatically synchronize parent-child and related relationships across your vau
 Visualize your knowledge network with multiple viewing modes and layouts.
 
 **View Modes:**
+
 - **Hierarchical** - Parent-child tree structures
 - **Related** - Direct related connections
 - **All Related** - Entire constellations of related notes
@@ -79,6 +80,7 @@ Deep-dive into any node with inline preview.
 Right-click any node or edge for quick actions.
 
 **Node Context Menu:**
+
 - Open file
 - Open in new tab
 - Add parent/child/related relationships
@@ -87,6 +89,7 @@ Right-click any node or edge for quick actions.
 - Copy node path
 
 **Edge Context Menu:**
+
 - Remove relationship
 - Navigate to connected nodes
 - View relationship details
@@ -132,6 +135,7 @@ Create parent, child, or related nodes instantly from commands.
 - **Create Related Node** - Creates a related node with bidirectional link
 
 All new nodes:
+
 - Inherit frontmatter properties (except excluded)
 - Get unique Zettel IDs automatically
 - Establish bidirectional relationships
@@ -146,12 +150,14 @@ All new nodes:
 Automatic organization of nodes for optimal visualization.
 
 **Constellation-Based:**
+
 - Groups of related notes form constellations
 - Automatic spacing and collision detection
 - Hierarchical arrangement for parent-child
 - Radial arrangement for related networks
 
 **Layout Modes:**
+
 - **Dagre** - Tree layout for hierarchies
 - **Constellation** - Grouped layout for related networks
 - Automatic switching based on view mode
@@ -185,6 +191,7 @@ Control which properties are copied when creating new nodes.
 ### Command Palette Integration
 
 All major features accessible via command palette:
+
 - Show/hide graph view
 - Toggle search, filter, presets
 - Enlarge graph
@@ -194,6 +201,7 @@ All major features accessible via command palette:
 ### Hotkey Support
 
 Assign custom hotkeys to any command:
+
 - Show relationship graph
 - Toggle features
 - Navigate graph
@@ -204,12 +212,12 @@ Assign custom hotkeys to any command:
 
 ## View Modes Comparison
 
-| Mode | Purpose | Best For |
-|------|---------|----------|
-| **Hierarchical** | Show parent-child trees | Project hierarchies, outlines |
-| **Related** | Show direct related links | Exploring connections |
-| **All Related** | Show entire constellations | Discovering indirect connections |
-| **Start from Current** | Focus on current file | Limiting scope to one node |
+| Mode                   | Purpose                    | Best For                         |
+| ---------------------- | -------------------------- | -------------------------------- |
+| **Hierarchical**       | Show parent-child trees    | Project hierarchies, outlines    |
+| **Related**            | Show direct related links  | Exploring connections            |
+| **All Related**        | Show entire constellations | Discovering indirect connections |
+| **Start from Current** | Focus on current file      | Limiting scope to one node       |
 
 ---
 
@@ -243,23 +251,23 @@ Assign custom hotkeys to any command:
 
 ## Feature Matrix
 
-| Feature | Free | Description |
-|---------|------|-------------|
-| Bidirectional Sync | ✅ | Automatic relationship synchronization |
-| Graph Visualization | ✅ | Interactive relationship graph |
-| Multiple View Modes | ✅ | Hierarchical, Related, All Related |
-| Color Rules | ✅ | Unlimited conditional node colors |
-| Filtering | ✅ | Expression-based filtering |
-| Filter Presets | ✅ | Named filter shortcuts |
-| Zoom Mode | ✅ | Inline node preview |
-| Context Menus | ✅ | Right-click actions |
-| Tooltips | ✅ | Property previews on hover |
-| Search | ✅ | Real-time node search |
-| Node Creation | ✅ | Quick parent/child/related creation |
-| Layout Optimization | ✅ | Automatic constellation layout |
-| Property Exclusion | ✅ | Control property inheritance |
-| Directory Scanning | ✅ | Selective vault indexing |
-| Hotkey Support | ✅ | Custom keyboard shortcuts |
+| Feature             | Free | Description                            |
+| ------------------- | ---- | -------------------------------------- |
+| Bidirectional Sync  | ✅   | Automatic relationship synchronization |
+| Graph Visualization | ✅   | Interactive relationship graph         |
+| Multiple View Modes | ✅   | Hierarchical, Related, All Related     |
+| Color Rules         | ✅   | Unlimited conditional node colors      |
+| Filtering           | ✅   | Expression-based filtering             |
+| Filter Presets      | ✅   | Named filter shortcuts                 |
+| Zoom Mode           | ✅   | Inline node preview                    |
+| Context Menus       | ✅   | Right-click actions                    |
+| Tooltips            | ✅   | Property previews on hover             |
+| Search              | ✅   | Real-time node search                  |
+| Node Creation       | ✅   | Quick parent/child/related creation    |
+| Layout Optimization | ✅   | Automatic constellation layout         |
+| Property Exclusion  | ✅   | Control property inheritance           |
+| Directory Scanning  | ✅   | Selective vault indexing               |
+| Hotkey Support      | ✅   | Custom keyboard shortcuts              |
 
 :::info Open Source
 All features are free and open source under the MIT license!

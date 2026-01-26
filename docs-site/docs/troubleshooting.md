@@ -13,6 +13,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Can't toggle the plugin on in Community Plugins
 
 **Solutions**:
+
 1. **Check Obsidian version**: Must be 1.6.0 or higher
    - Help → About → Check version number
    - Update Obsidian if needed
@@ -34,6 +35,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Can't find Nexus Properties commands in command palette
 
 **Solutions**:
+
 1. **Check plugin is enabled**:
    - Settings → Community plugins
    - Nexus Properties should be toggled ON
@@ -51,6 +53,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: No fork icon in left sidebar
 
 **Solutions**:
+
 1. **Check setting enabled**:
    - Settings → Nexus Properties → User Interface
    - "Show ribbon icon" must be ON
@@ -68,6 +71,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Empty graph or only source node visible
 
 **Solutions**:
+
 1. **Check directory scanning**:
    - Settings → Nexus Properties → Directory scanning
    - Ensure current file's folder is scanned
@@ -91,6 +95,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Unexpected nodes appear or expected nodes missing
 
 **Solutions**:
+
 1. **Check view mode**:
    - Hierarchical shows parent-child tree
    - Related shows direct related only
@@ -116,6 +121,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Nodes on top of each other or layout looks broken
 
 **Solutions**:
+
 1. **Refresh layout**:
    - Switch view mode and back
    - Resize graph window
@@ -136,6 +142,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Lag when interacting with graph, slow animations
 
 **Solutions**:
+
 1. **Reduce recursion depth**:
    - Settings → All Related Max Depth (lower to 5-7)
    - Settings → Hierarchy Traversal Depth (lower to 10-15)
@@ -160,6 +167,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Adding relationship in one file doesn't update the other
 
 **Solutions**:
+
 1. **Check property names**:
    - Settings → Nexus Properties → Direct relationship properties
    - Verify you're using correct property names (default: `Parent`, `Child`, `Related`)
@@ -186,6 +194,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Relationships pointing to non-existent files
 
 **Solutions**:
+
 1. **Check target file exists**:
    - Verify file wasn't deleted or renamed
    - Search vault for the file
@@ -205,6 +214,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: A is parent of B, B is parent of A
 
 **Solutions**:
+
 - Plugin should prevent this automatically
 - If it occurs:
   1. Manually break one relationship
@@ -216,6 +226,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Siblings automatically marked as related, cluttering the graph
 
 **Solutions**:
+
 1. **Disable auto-link siblings**:
    - Settings → Direct relationship properties
    - Uncheck "Auto-link siblings"
@@ -230,6 +241,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Nodes not changing color despite rule
 
 **Solutions**:
+
 1. **Check expression syntax**:
    - Must be valid JavaScript
    - Property names case-sensitive
@@ -255,6 +267,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Color rules not creating variety
 
 **Solutions**:
+
 1. **Check properties vary**:
    - Nodes need different property values
    - If all nodes have `status: active`, all match same rule
@@ -272,6 +285,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Nodes still visible despite filter
 
 **Solutions**:
+
 1. **Check expression syntax**:
    - Must be valid JavaScript
    - Same rules as color expressions
@@ -292,6 +306,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: All nodes hidden (except source)
 
 **Solutions**:
+
 1. **Filter too restrictive**:
    - No nodes match the criteria
    - Broaden filter expression
@@ -311,6 +326,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Clicking node doesn't enter zoom mode
 
 **Solutions**:
+
 1. **Check clicking correct area**:
    - Click the node itself, not empty space
    - Not the node label
@@ -328,6 +344,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Zoom mode active but no preview
 
 **Solutions**:
+
 1. **Check preview height**:
    - Settings → Zoom Preview Height
    - Must be > 120px
@@ -345,6 +362,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Blank preview despite content in file
 
 **Solutions**:
+
 1. **Check markdown syntax**:
    - Invalid markdown might not render
    - Open file directly to verify
@@ -364,6 +382,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: "Create Child/Parent/Related Node" commands unavailable
 
 **Solutions**:
+
 1. **Check viewing a file**:
    - Commands only work when viewing a note
    - Not when in graph view alone
@@ -379,6 +398,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: New node missing properties from source
 
 **Solutions**:
+
 1. **Check excluded properties**:
    - Settings → Excluded properties
    - Property might be in default exclusion list
@@ -395,6 +415,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: New node not linked to source
 
 **Solutions**:
+
 1. **Check both files**:
    - Open both files
    - Verify frontmatter in each
@@ -410,6 +431,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: "File already exists" error
 
 **Solution**:
+
 - Plugin auto-increments numbers (`untitled-1`, `untitled-2`, etc.)
 - If this fails, manually create with unique name
 - Report as bug if auto-increment not working
@@ -421,6 +443,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Typing in search doesn't highlight nodes
 
 **Solutions**:
+
 1. **Check search bar visible**:
    - Command: "Toggle Graph Search"
    - Or enable default visibility in settings
@@ -440,6 +463,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: All nodes dimmed, none highlighted
 
 **Solution**:
+
 - No nodes match search
 - Check spelling
 - Try partial match (first few letters)
@@ -452,6 +476,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Long wait when opening Obsidian or enabling plugin
 
 **Solutions**:
+
 1. **Large vault indexing**:
    - Initial index can take time
    - Progress logged to console (`Ctrl/Cmd+Shift+I`)
@@ -470,6 +495,7 @@ Common issues and their solutions. If you don't find your issue here, check the 
 **Symptoms**: Obsidian becomes sluggish or crashes
 
 **Solutions**:
+
 1. **Reduce node count**:
    - Use filtering aggressively
    - Limit recursion depth
@@ -503,21 +529,25 @@ Many issues show errors in the developer console:
 ### Common Error Messages
 
 **"File not found"**:
+
 - Orphaned relationship
 - File was deleted or renamed
 - Run full rescan to clean up
 
 **"Invalid expression"**:
+
 - Color rule or filter expression has syntax error
 - Check expression in settings
 - Fix JavaScript syntax
 
 **"Circular relationship detected"**:
+
 - System prevented circular link
 - Choose different parent/child
 - Should be automatic prevention
 
 **"Property not found"**:
+
 - Expected property doesn't exist in file
 - Check frontmatter
 - Add property or adjust expression
@@ -527,6 +557,7 @@ Many issues show errors in the developer console:
 ### Before Asking for Help
 
 Collect information:
+
 1. **Obsidian version**: Help → About
 2. **Plugin version**: Settings → Community plugins → Nexus Properties
 3. **Error messages**: From console (`Ctrl/Cmd+Shift+I`)
@@ -554,6 +585,7 @@ Collect information:
 ## Still Having Issues?
 
 If you can't find a solution:
+
 1. [Search existing issues](https://github.com/Real1tyy/Nexus-Properties/issues)
 2. [Open a new issue](https://github.com/Real1tyy/Nexus-Properties/issues/new)
 3. Provide detailed information

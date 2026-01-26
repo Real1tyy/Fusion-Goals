@@ -56,6 +56,7 @@ By default, a file can have one parent. If you need multiple, you can manually a
 ### Why isn't my file showing in the graph?
 
 Check:
+
 1. File is in an [indexed directory](configuration#directory-scanning)
 2. File has relationships (`Parent`, `Child`, or `Related`)
 3. Filters aren't hiding it
@@ -71,6 +72,7 @@ Check:
 ### Can I customize the graph layout?
 
 Layout is automatic, but you can:
+
 - Manually drag nodes (positions not saved)
 - Adjust view mode for different layouts
 - Use filtering to focus on subsets
@@ -105,6 +107,7 @@ Only files in [configured directories](configuration#directory-scanning) are ind
 ### My color rule isn't working. Why?
 
 Check:
+
 1. [Expression syntax](features/color-rules#expression-syntax) is valid JavaScript
 2. Property names match exactly (case-sensitive)
 3. Rule is [enabled](features/color-rules#enablingdisabling-rules)
@@ -116,9 +119,9 @@ Check:
 Yes! Create color rules based on a `type` property:
 
 ```javascript
-type === 'project'  // Blue
-type === 'task'     // Green
-type === 'note'     // Purple
+type === "project"; // Blue
+type === "task"; // Green
+type === "note"; // Purple
 ```
 
 [Learn more about color rules →](features/color-rules)
@@ -144,6 +147,7 @@ Not currently. Future versions may support template folders or configurable loca
 ### Why is my property not being copied to new nodes?
 
 Check [Excluded Properties](features/excluded-properties):
+
 1. Property might be in [default exclusions](configuration#default-excluded-properties)
 2. Property might be in [path-based exclusion rule](features/excluded-properties#path-based-exclusion-rules)
 
@@ -205,6 +209,7 @@ This resets ALL settings including color rules, filters, and exclusions. Export/
 ### Can I export/import settings?
 
 Not directly through the UI. Advanced users can:
+
 1. Copy `data.json` file between vaults
 2. Manually edit JSON (at your own risk)
 
@@ -228,6 +233,7 @@ Not directly through the UI. Advanced users can:
 ### Is there a community forum?
 
 Use [GitHub Discussions](https://github.com/Real1tyy/Nexus-Properties/discussions) for:
+
 - Questions
 - Feature requests
 - Use case sharing
@@ -263,6 +269,7 @@ Canvas notes are regular files. If they're in indexed directories with relations
 ### Can I script relationship creation?
 
 Yes, for advanced users:
+
 1. Modify frontmatter programmatically
 2. Plugin will detect changes
 3. Bidirectional sync happens automatically
@@ -272,6 +279,7 @@ Use `app.fileManager.processFrontMatter()` API.
 ### How does it handle file conflicts?
 
 If two users edit relationships simultaneously (e.g., in synced vaults):
+
 - Last write wins
 - May cause temporary inconsistency
 - Run [full rescan](configuration#indexing) to fix
@@ -281,6 +289,7 @@ If two users edit relationships simultaneously (e.g., in synced vaults):
 ### Can I migrate from another system?
 
 If your previous system used frontmatter properties:
+
 1. Rename properties to match Nexus Properties names
 2. Run [full rescan](configuration#indexing)
 3. Relationships will be synced
@@ -288,6 +297,7 @@ If your previous system used frontmatter properties:
 ### Will it work with my existing notes?
 
 Yes! The plugin:
+
 - Doesn't modify notes without relationships
 - Only manages specified properties
 - Won't break existing structure
@@ -295,6 +305,7 @@ Yes! The plugin:
 ### Can I uninstall without breaking my vault?
 
 Yes! Relationships are stored as frontmatter. If you uninstall:
+
 - Frontmatter remains
 - Relationships still readable by humans
 - You can reinstall later
@@ -303,6 +314,7 @@ Yes! Relationships are stored as frontmatter. If you uninstall:
 ### What happens to my relationships if I uninstall?
 
 They remain in frontmatter. You can:
+
 - Keep them for future use
 - Remove manually if desired
 - Use other tools that read frontmatter

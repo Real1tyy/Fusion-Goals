@@ -113,17 +113,20 @@ pnpm build
 ### Development Workflow
 
 **Hot reload development**:
+
 ```bash
 # Watch for changes and rebuild automatically
 pnpm dev
 ```
 
 This creates:
+
 - `main.js` - Plugin code
 - `styles.css` - Styles
 - `manifest.json` - Plugin manifest
 
 **Link to Obsidian vault**:
+
 ```bash
 # Create symlink to your test vault
 # Windows (as Administrator):
@@ -230,17 +233,18 @@ src/
 - **Use descriptive test names**
 
 Example:
+
 ```typescript
 describe("GraphBuilder", () => {
-  describe("buildHierarchy", () => {
-    it("should include all children recursively", () => {
-      // Test implementation
-    });
+	describe("buildHierarchy", () => {
+		it("should include all children recursively", () => {
+			// Test implementation
+		});
 
-    it("should handle circular relationships", () => {
-      // Test implementation
-    });
-  });
+		it("should handle circular relationships", () => {
+			// Test implementation
+		});
+	});
 });
 ```
 
@@ -264,12 +268,14 @@ describe("GraphBuilder", () => {
 ### PR Guidelines
 
 **Good PR title examples**:
+
 - `fix: Circular relationship detection in parent-child links`
 - `feat: Add keyboard navigation to graph`
 - `docs: Add examples for color rule expressions`
 - `refactor: Extract graph layout logic to separate class`
 
 **PR description should include**:
+
 - **What** changed
 - **Why** it changed
 - **How** to test it
@@ -280,21 +286,26 @@ describe("GraphBuilder", () => {
 
 ```markdown
 ## Description
+
 Brief description of the changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Testing
+
 How to test the changes
 
 ## Screenshots (if applicable)
+
 Add screenshots for visual changes
 
 ## Checklist
+
 - [ ] Code follows style guidelines
 - [ ] Tests added/updated
 - [ ] Documentation updated
@@ -357,6 +368,7 @@ Fixes #45
 ### Our Pledge
 
 We pledge to make participation in our community a harassment-free experience for everyone, regardless of:
+
 - Age, body size, disability
 - Ethnicity, gender identity
 - Level of experience
@@ -367,6 +379,7 @@ We pledge to make participation in our community a harassment-free experience fo
 ### Our Standards
 
 **Positive behavior**:
+
 - Using welcoming and inclusive language
 - Being respectful of differing viewpoints
 - Gracefully accepting constructive criticism
@@ -374,6 +387,7 @@ We pledge to make participation in our community a harassment-free experience fo
 - Showing empathy towards others
 
 **Unacceptable behavior**:
+
 - Trolling, insulting/derogatory comments
 - Public or private harassment
 - Publishing others' private information
@@ -386,6 +400,7 @@ Instances of unacceptable behavior may be reported to the project maintainers. A
 ## Recognition
 
 Contributors will be recognized in:
+
 - **README.md** contributors section
 - **Release notes** for significant contributions
 - **Documentation** for doc contributors

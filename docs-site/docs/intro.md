@@ -27,6 +27,7 @@ Set relationships in one direction, and Nexus Properties automatically updates t
 ### 📊 Interactive Relationship Graph
 
 Visualize your knowledge network with multiple view modes:
+
 - **Hierarchical** - See parent-child trees
 - **Related** - View direct related connections
 - **All Related** - Explore entire constellations of related notes

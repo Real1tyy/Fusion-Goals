@@ -24,24 +24,28 @@ Properties that are **always excluded** from copying, regardless of file locatio
 ### Default List
 
 **Default exclusions**:
+
 - `Parent`
 - `Child`
 - `Related`
 - `_ZettelID`
 
 **Why these are excluded**:
+
 - **Relationship properties**: Would create incorrect links if copied
 - **Zettel ID**: Each note needs a unique identifier
 
 ### Customizing Defaults
 
 **To modify**:
+
 1. Settings → Nexus Properties → Excluded properties
 2. Find "Default excluded properties"
 3. Add/remove properties (comma-separated)
 4. Click outside or press Enter to save
 
 **Example additions**:
+
 ```
 Parent, Child, Related, _ZettelID, date, created, modified, file-path
 ```
@@ -57,6 +61,7 @@ Exclude **additional properties** for files in specific directories. These are a
 ### How Path Matching Works
 
 Rules use **startsWith** matching:
+
 - File path must start with the rule's path
 - Path is case-sensitive
 - Trailing slashes don't matter
@@ -64,6 +69,7 @@ Rules use **startsWith** matching:
 **Example rule path**: `Projects/Work`
 
 **Matches**:
+
 - `Projects/Work/Project A.md` ✅
 - `Projects/Work/Tasks/Task 1.md` ✅
 - `Projects/WorkRelated/Note.md` ❌ (doesn't match exactly)
@@ -72,6 +78,7 @@ Rules use **startsWith** matching:
 ### Creating Path Rules
 
 **To create a rule**:
+
 1. Settings → Nexus Properties → Excluded properties
 2. Scroll to "Path-based exclusion rules"
 3. Click "Add Rule"
@@ -84,22 +91,26 @@ Rules use **startsWith** matching:
 Each path-based rule has:
 
 **Path** (Required)
+
 - Directory path to match
 - Case-sensitive
 - Uses startsWith matching
 - Example: `Daily Notes/2024/`
 
 **Excluded Properties** (Required)
+
 - Comma-separated property names
 - Added to default exclusions
 - Example: `date, weekday, journal-entry`
 
 **Enabled** (Toggle)
+
 - Turn rule on/off
 - Disabled rules are skipped
 - Useful for temporary changes
 
 **Order** (↑/↓ buttons)
+
 - Rules evaluated top to bottom
 - First matching rule is used
 - Reorder with up/down buttons
@@ -122,6 +133,7 @@ When creating a new node:
 **Only the first matching rule is used:**
 
 **Example rules** (top to bottom):
+
 1. Path: `Projects/Work` → Exclude: `status, progress`
 2. Path: `Projects/` → Exclude: `deadline, budget`
 
@@ -144,6 +156,7 @@ Place more specific paths above more general paths to ensure specific rules take
 **Scenario**: Don't copy date-specific properties from daily notes
 
 **Rule**:
+
 - **Path**: `Daily Notes/`
 - **Excluded**: `date, weekday, journal-entry, mood, weather`
 
@@ -154,6 +167,7 @@ Place more specific paths above more general paths to ensure specific rules take
 **Scenario**: Don't copy project status when creating child tasks
 
 **Rule**:
+
 - **Path**: `Projects/`
 - **Excluded**: `status, progress, deadline, budget, phase`
 
@@ -164,6 +178,7 @@ Place more specific paths above more general paths to ensure specific rules take
 **Scenario**: Don't copy template metadata to instances
 
 **Rule**:
+
 - **Path**: `Templates/`
 - **Excluded**: `template-version, template-author, template-date, is-template`
 
@@ -174,6 +189,7 @@ Place more specific paths above more general paths to ensure specific rules take
 **Scenario**: Don't copy meeting-specific properties
 
 **Rule**:
+
 - **Path**: `Meetings/`
 - **Excluded**: `meeting-date, attendees, agenda, minutes`
 
@@ -184,6 +200,7 @@ Place more specific paths above more general paths to ensure specific rules take
 **Scenario**: Don't copy archived/completed status
 
 **Rule**:
+
 - **Path**: `Archive/`
 - **Excluded**: `archived-date, archived-by, original-path, archived`
 
@@ -201,6 +218,7 @@ Toggle rules on/off without deleting:
 4. Checked = enabled (rule evaluated)
 
 **Use cases**:
+
 - Temporarily test without a rule
 - Switch between rule sets
 - Debug exclusion issues
@@ -210,12 +228,14 @@ Toggle rules on/off without deleting:
 Change rule priority with ↑/↓ buttons:
 
 **Before** (too general first):
+
 1. `Projects/` → Exclude status
 2. `Projects/Work/` → Exclude deadline
 
 **Problem**: Rule 1 always matches for Work projects, rule 2 never runs
 
 **After** (specific first):
+
 1. `Projects/Work/` → Exclude deadline
 2. `Projects/` → Exclude status
 
@@ -268,6 +288,7 @@ Path rules only add exclusions, they cannot remove defaults. If you need to incl
 **Scenario**: Projects have status, tasks should not inherit it
 
 **Solution**:
+
 - Create tasks from projects
 - Exclude status in Projects/ path
 - Tasks get project metadata minus status
@@ -279,6 +300,7 @@ Path rules only add exclusions, they cannot remove defaults. If you need to incl
 **Scenario**: Daily notes have dates, derived notes should not
 
 **Solution**:
+
 - Create notes from daily notes
 - Exclude date properties in Daily Notes/ path
 - Derived notes are timeless
@@ -290,6 +312,7 @@ Path rules only add exclusions, they cannot remove defaults. If you need to incl
 **Scenario**: Templates have metadata, instances should not
 
 **Solution**:
+
 - Create instances from templates
 - Exclude template-specific properties
 - Instances only get content-relevant properties
@@ -301,6 +324,7 @@ Path rules only add exclusions, they cannot remove defaults. If you need to incl
 **Scenario**: Private folders have sensitive metadata
 
 **Solution**:
+
 - Don't copy private metadata to shared notes
 - Exclude sensitive properties in Private/ path
 - New notes are shareable
@@ -312,60 +336,72 @@ Path rules only add exclusions, they cannot remove defaults. If you need to incl
 ### Property Still Being Copied
 
 **Check default exclusions**:
+
 - Property might not be in default list
 - Add it to defaults if should always exclude
 
 **Check path-based rules**:
+
 - Rule path might not match file path
 - Check exact path spelling
 - Verify rule is enabled
 
 **Check rule order**:
+
 - A more general rule might match first
 - Reorder with ↑/↓ buttons
 - Put specific rules above general ones
 
 **Check file location**:
+
 - File must be in path that matches rule
 - Verify file path starts with rule path
 
 ### Property Not Being Copied (Should Be)
 
 **Check default exclusions**:
+
 - Property might be in default list
 - Remove from defaults if should copy
 
 **Check path-based rules**:
+
 - File might be in a path with exclusion rule
 - Disable rule or move file
 
 **Check property exists**:
+
 - Verify property in source frontmatter
 - Check spelling matches exactly
 
 ### Rule Not Matching Files
 
 **Check path spelling**:
+
 - Paths are case-sensitive
 - `Projects/` ≠ `projects/`
 - Check for typos
 
 **Check path format**:
+
 - Use folder structure: `Folder/Subfolder`
 - Not file paths: `Folder/Subfolder/file.md` ❌
 
 **Check startsWith behavior**:
+
 - File path must start with rule path
 - Partial matches don't work
 
 ### Multiple Rules Conflicting
 
 **Only first match is used**:
+
 - Rules evaluated top to bottom
 - First matching rule wins
 - Subsequent rules ignored
 
 **Solution**:
+
 - Reorder rules for correct priority
 - More specific paths should be first
 - Test with a few files

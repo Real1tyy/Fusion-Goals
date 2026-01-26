@@ -118,6 +118,7 @@ Maximum number of levels to traverse in hierarchy mode. Controls how deep the pa
 Comma-separated list of property names to display inside graph nodes. Properties are shown in a compact format below the node title.
 
 **Examples**:
+
 - `status, priority` - Show task status and priority
 - `type, tags` - Show note type and tags
 - `date, author` - Show metadata
@@ -193,6 +194,7 @@ Configure the visual appearance of nodes in the graph.
 **Default**: `#e9f2ff` (light blue)
 
 Default color for nodes when no color rules match. Can be any valid CSS color:
+
 - Hex: `#3b82f6`
 - HSL: `hsl(200, 70%, 50%)`
 - Named: `steelblue`
@@ -202,6 +204,7 @@ Default color for nodes when no color rules match. Can be any valid CSS color:
 Define conditional colors based on frontmatter properties. Rules are evaluated in order - the first matching rule determines the node color.
 
 Each rule has:
+
 - **Expression** - JavaScript expression that returns true/false
 - **Color** - CSS color to apply when expression matches
 - **Enabled** - Toggle to enable/disable the rule
@@ -209,11 +212,11 @@ Each rule has:
 
 **Example Rules**:
 
-| Expression | Color | Description |
-|------------|-------|-------------|
-| `Status === 'Active'` | `#22c55e` (green) | Active nodes |
-| `type === 'project'` | `#3b82f6` (blue) | Project nodes |
-| `Priority === 'High'` | `#ef4444` (red) | High priority |
+| Expression                                          | Color              | Description    |
+| --------------------------------------------------- | ------------------ | -------------- |
+| `Status === 'Active'`                               | `#22c55e` (green)  | Active nodes   |
+| `type === 'project'`                                | `#3b82f6` (blue)   | Project nodes  |
+| `Priority === 'High'`                               | `#ef4444` (red)    | High priority  |
 | `Array.isArray(tags) && tags.includes('important')` | `#f59e0b` (orange) | Important tags |
 
 [Learn more about Color Rules →](features/color-rules)
@@ -233,9 +236,9 @@ Access frontmatter properties directly by name. The source node is always shown.
 **Example Expressions**:
 
 ```javascript
-Status === 'Active'
-type === 'project'
-Array.isArray(tags) && tags.includes('important')
+Status === "Active";
+type === "project";
+Array.isArray(tags) && tags.includes("important");
 ```
 
 Changes apply on blur or `Ctrl/Cmd+Enter`.
@@ -247,6 +250,7 @@ Changes apply on blur or `Ctrl/Cmd+Enter`.
 Create named filter presets for quick access in the graph. Use the command "Toggle Graph Filter (Preset Selector)" to show a dropdown with your presets.
 
 Each preset has:
+
 - **Name** - Display name (e.g., "Active Tasks", "Projects")
 - **Expression** - Filter expression to apply
 
@@ -261,12 +265,14 @@ Selecting a preset fills the filter expression input.
 Manually scan all files in your vault and assign relationship properties based on your configured settings.
 
 This process will:
+
 1. Scan all files in configured directories
 2. Update their frontmatter with bidirectional relationships
 3. Compute recursive relationships
 4. Clean up orphaned relationships
 
 **When to use**:
+
 - After changing property names
 - After enabling the plugin for the first time
 - When relationships seem out of sync
@@ -291,10 +297,10 @@ Configure which directories to scan for files with relationships.
 
 **Examples**:
 
-| Configuration | What Gets Scanned |
-|---------------|-------------------|
-| `["*"]` | Entire vault |
-| `["Projects"]` | Only `Projects/` and subdirectories |
+| Configuration                | What Gets Scanned                   |
+| ---------------------------- | ----------------------------------- |
+| `["*"]`                      | Entire vault                        |
+| `["Projects"]`               | Only `Projects/` and subdirectories |
 | `["Projects", "Notes/Work"]` | Both directories and subdirectories |
 
 ### Adding Directories
@@ -328,6 +334,7 @@ When you set a relationship in one direction, the plugin automatically updates t
 Property name for parent reference (bidirectional with children).
 
 **Example**:
+
 ```yaml
 # child-note.md
 Parent: "[[parent-note]]"
@@ -340,6 +347,7 @@ Parent: "[[parent-note]]"
 Property name for children references (bidirectional with parent).
 
 **Example**:
+
 ```yaml
 # parent-note.md
 Child:
@@ -354,6 +362,7 @@ Child:
 Property name for related files (bidirectional - automatically syncs between linked files).
 
 **Example**:
+
 ```yaml
 # note-1.md
 Related:
@@ -409,6 +418,7 @@ Configure which frontmatter properties should NOT be copied when creating new no
 Comma-separated list of properties to ALWAYS exclude from copying. These are excluded regardless of any path-based rules.
 
 **Common exclusions**:
+
 - Relationship properties: `Parent`, `Child`, `Related`
 - System properties: `_ZettelID`, `_CreatedDate`
 - File-specific: `date`, `created`, `modified`
@@ -418,6 +428,7 @@ Comma-separated list of properties to ALWAYS exclude from copying. These are exc
 Define rules to exclude ADDITIONAL properties for files in specific directories. The default excluded properties are always excluded. Rules are evaluated in order - the first matching path's properties are ADDED to the default exclusion list.
 
 Each rule has:
+
 - **Path** - Directory path (uses `startsWith` matching)
 - **Excluded Properties** - Comma-separated properties to exclude
 - **Enabled** - Toggle to enable/disable the rule
@@ -425,11 +436,11 @@ Each rule has:
 
 **Example Rules**:
 
-| Path | Excluded Properties | Description |
-|------|---------------------|-------------|
-| `Projects/` | `status, progress` | Don't copy status/progress for projects |
-| `Daily Notes/2024/` | `date, weekday` | Don't copy date fields from daily notes |
-| `Templates/` | `template-version` | Don't copy template metadata |
+| Path                | Excluded Properties | Description                             |
+| ------------------- | ------------------- | --------------------------------------- |
+| `Projects/`         | `status, progress`  | Don't copy status/progress for projects |
+| `Daily Notes/2024/` | `date, weekday`     | Don't copy date fields from daily notes |
+| `Templates/`        | `template-version`  | Don't copy template metadata            |
 
 :::warning Path Matching
 Path matching uses `startsWith` - a file matches if its path starts with the rule's path. Default excluded properties are ALWAYS excluded. Path rules ADD additional properties to exclude.
@@ -445,17 +456,18 @@ You can assign custom hotkeys to any Nexus Properties command in Obsidian's Hotk
 
 ### Recommended Hotkeys
 
-| Command | Suggested Hotkey | Description |
-|---------|------------------|-------------|
-| Show Relationship Graph | `Ctrl+Shift+G` | Open/toggle graph view |
-| Toggle Graph Search | `Ctrl+K` | Show/hide search bar |
-| Toggle Graph Filter | `Ctrl+F` | Show/hide filter input |
-| Enlarge Graph | `Ctrl+Shift+E` | Enlarge/restore graph |
-| Create Child Node | `Ctrl+Shift+C` | Create child of current file |
-| Create Parent Node | `Ctrl+Shift+P` | Create parent of current file |
-| Create Related Node | `Ctrl+Shift+R` | Create related to current file |
+| Command                 | Suggested Hotkey | Description                    |
+| ----------------------- | ---------------- | ------------------------------ |
+| Show Relationship Graph | `Ctrl+Shift+G`   | Open/toggle graph view         |
+| Toggle Graph Search     | `Ctrl+K`         | Show/hide search bar           |
+| Toggle Graph Filter     | `Ctrl+F`         | Show/hide filter input         |
+| Enlarge Graph           | `Ctrl+Shift+E`   | Enlarge/restore graph          |
+| Create Child Node       | `Ctrl+Shift+C`   | Create child of current file   |
+| Create Parent Node      | `Ctrl+Shift+P`   | Create parent of current file  |
+| Create Related Node     | `Ctrl+Shift+R`   | Create related to current file |
 
 To set hotkeys:
+
 1. Open Settings → Hotkeys
 2. Search for "Nexus Properties"
 3. Click the `+` icon next to a command

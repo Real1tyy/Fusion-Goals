@@ -46,12 +46,14 @@ Both expressions must be true for a node to be shown.
 ### Applying Filters
 
 Filters are applied automatically when you:
+
 - **Blur** the input (click outside)
 - **Press** `Ctrl/Cmd+Enter`
 
 ### Clearing Filters
 
 To clear all filters:
+
 1. Delete all text from the filter input
 2. Press `Ctrl/Cmd+Enter` or click outside
 3. All nodes are shown again
@@ -71,54 +73,61 @@ Inside expressions, access frontmatter properties directly by name:
 // ---
 
 // You can write:
-status === 'active'
-priority === 'high'
-tags.includes('project')
+status === "active";
+priority === "high";
+tags.includes("project");
 ```
 
 ### Expression Syntax
 
 **Equality**:
+
 ```javascript
-status === 'active'
-type === 'project'
-priority !== 'low'
+status === "active";
+type === "project";
+priority !== "low";
 ```
 
 **Comparison**:
+
 ```javascript
-progress > 50
-count <= 10
-age >= 18
+progress > 50;
+count <= 10;
+age >= 18;
 ```
 
 **Logical AND**:
+
 ```javascript
-status === 'active' && priority === 'high'
+status === "active" && priority === "high";
 ```
 
 **Logical OR** (within one expression):
+
 ```javascript
-status === 'active' || status === 'pending'
+status === "active" || status === "pending";
 ```
 
 **Array checks**:
+
 ```javascript
-Array.isArray(tags) && tags.includes('important')
-Array.isArray(tags) && tags.length > 0
+Array.isArray(tags) && tags.includes("important");
+Array.isArray(tags) && tags.length > 0;
 ```
 
 **String methods**:
+
 ```javascript
-title.includes('Project')
-title.startsWith('DRAFT')
-title.toLowerCase() === 'important'
+title.includes("Project");
+title.startsWith("DRAFT");
+title.toLowerCase() === "important";
 ```
 
 **Property existence**:
+
 ```javascript
-typeof status !== 'undefined'
-status !== null
+typeof status !== "undefined";
+status !== null;
 ```
 
 ## Example Filters
@@ -126,7 +135,7 @@ status !== null
 ### Show Active Items
 
 ```javascript
-status === 'active'
+status === "active";
 ```
 
 **Result**: Only nodes with `status: active`
@@ -134,8 +143,8 @@ status === 'active'
 ### Show High Priority Projects
 
 ```javascript
-type === 'project'
-priority === 'high'
+type === "project";
+priority === "high";
 ```
 
 **Result**: Only nodes that are BOTH projects AND high priority
@@ -143,7 +152,7 @@ priority === 'high'
 ### Show Tagged Notes
 
 ```javascript
-Array.isArray(tags) && tags.includes('work')
+Array.isArray(tags) && tags.includes("work");
 ```
 
 **Result**: Only notes tagged with "work"
@@ -151,7 +160,7 @@ Array.isArray(tags) && tags.includes('work')
 ### Show In-Progress or Review
 
 ```javascript
-status === 'in-progress' || status === 'review'
+status === "in-progress" || status === "review";
 ```
 
 **Result**: Notes in either status
@@ -159,7 +168,7 @@ status === 'in-progress' || status === 'review'
 ### Show Notes with Attachments
 
 ```javascript
-Array.isArray(attachments) && attachments.length > 0
+Array.isArray(attachments) && attachments.length > 0;
 ```
 
 **Result**: Notes that have attachments
@@ -167,8 +176,8 @@ Array.isArray(attachments) && attachments.length > 0
 ### Show Incomplete High-Priority
 
 ```javascript
-status !== 'complete'
-priority === 'high'
+status !== "complete";
+priority === "high";
 ```
 
 **Result**: High-priority items not yet completed
@@ -176,7 +185,7 @@ priority === 'high'
 ### Show Recent Notes (with date property)
 
 ```javascript
-typeof date !== 'undefined' && new Date(date) > new Date('2024-01-01')
+typeof date !== "undefined" && new Date(date) > new Date("2024-01-01");
 ```
 
 **Result**: Notes with dates after Jan 1, 2024
@@ -203,25 +212,28 @@ Save frequently-used filters as named presets for quick access.
 
 ### Preset Examples
 
-| Name | Expression | Description |
-|------|------------|-------------|
-| Active Tasks | `status === 'active'` | Show only active items |
-| High Priority | `priority === 'high'` | Show high-priority notes |
-| Projects Only | `type === 'project'` | Show only project notes |
-| Work Notes | `Array.isArray(tags) && tags.includes('work')` | Work-related notes |
-| Incomplete | `status !== 'complete'` | Not yet completed |
-| Urgent | `priority === 'urgent'` \| `status === 'urgent'` | Urgent items |
+| Name          | Expression                                       | Description              |
+| ------------- | ------------------------------------------------ | ------------------------ |
+| Active Tasks  | `status === 'active'`                            | Show only active items   |
+| High Priority | `priority === 'high'`                            | Show high-priority notes |
+| Projects Only | `type === 'project'`                             | Show only project notes  |
+| Work Notes    | `Array.isArray(tags) && tags.includes('work')`   | Work-related notes       |
+| Incomplete    | `status !== 'complete'`                          | Not yet completed        |
+| Urgent        | `priority === 'urgent'` \| `status === 'urgent'` | Urgent items             |
 
 ### Managing Presets
 
 **Edit preset**:
+
 - Change name or expression in settings
 - Press Enter or click outside to save
 
 **Delete preset**:
+
 - Click the **×** button next to the preset
 
 **Reorder presets**:
+
 - Presets appear in the order defined in settings
 - No explicit reordering (yet)
 
@@ -232,23 +244,24 @@ Use multiple expressions (one per line) to create AND conditions.
 ### Example: Active High-Priority Projects
 
 ```javascript
-type === 'project'
-status === 'active'
-priority === 'high'
+type === "project";
+status === "active";
+priority === "high";
 ```
 
 **Result**: Nodes must match ALL three conditions
 
 **Equivalent to**:
+
 ```javascript
-type === 'project' && status === 'active' && priority === 'high'
+type === "project" && status === "active" && priority === "high";
 ```
 
 ### Example: Tagged Work Notes
 
 ```javascript
-Array.isArray(tags) && tags.includes('work')
-status !== 'archived'
+Array.isArray(tags) && tags.includes("work");
+status !== "archived";
 ```
 
 **Result**: Work-tagged notes that aren't archived
@@ -260,6 +273,7 @@ status !== 'archived'
 The source node (currently viewed file) is **always shown**, even if it doesn't match the filter.
 
 **Why?**
+
 - Maintain context
 - Show the file you're working with
 - Always see the starting point
@@ -267,6 +281,7 @@ The source node (currently viewed file) is **always shown**, even if it doesn't 
 ### Connected Edges
 
 When a node is hidden by filters:
+
 - **Edges to/from that node** are also hidden
 - **Remaining nodes** stay connected
 - **Graph re-layouts** to accommodate visible nodes
@@ -274,6 +289,7 @@ When a node is hidden by filters:
 ### Empty Results
 
 If no nodes match the filter (except source):
+
 - Only the source node is shown
 - No edges are shown
 - Clear filters or adjust expressions to see more nodes
@@ -289,6 +305,7 @@ Use both together for powerful visualization:
 3. **Result**: Colored visualization of filtered subset
 
 **Example**:
+
 - Color rule: `type === 'project'` → Blue
 - Filter: `status === 'active'`
 - Result: Only active notes shown, projects are blue
@@ -314,9 +331,10 @@ Use together for precise navigation:
 ### Project Management Dashboard
 
 **Show only active high-priority items**:
+
 ```javascript
-status === 'active'
-priority === 'high'
+status === "active";
+priority === "high";
 ```
 
 **Result**: Focus dashboard for critical tasks
@@ -324,8 +342,9 @@ priority === 'high'
 ### Knowledge Review
 
 **Show notes needing review**:
+
 ```javascript
-typeof lastReviewed === 'undefined' || new Date(lastReviewed) < new Date('2024-01-01')
+typeof lastReviewed === "undefined" || new Date(lastReviewed) < new Date("2024-01-01");
 ```
 
 **Result**: Notes not reviewed recently
@@ -333,8 +352,9 @@ typeof lastReviewed === 'undefined' || new Date(lastReviewed) < new Date('2024-0
 ### Archival Cleanup
 
 **Show archived or old notes**:
+
 ```javascript
-status === 'archived' || typeof lastModified !== 'undefined' && new Date(lastModified) < new Date('2023-01-01')
+status === "archived" || (typeof lastModified !== "undefined" && new Date(lastModified) < new Date("2023-01-01"));
 ```
 
 **Result**: Candidates for archiving
@@ -342,8 +362,9 @@ status === 'archived' || typeof lastModified !== 'undefined' && new Date(lastMod
 ### Content Audit
 
 **Show notes missing metadata**:
+
 ```javascript
-typeof status === 'undefined' || typeof type === 'undefined'
+typeof status === "undefined" || typeof type === "undefined";
 ```
 
 **Result**: Notes that need metadata added
@@ -351,8 +372,9 @@ typeof status === 'undefined' || typeof type === 'undefined'
 ### Topic Exploration
 
 **Show notes about a specific topic**:
+
 ```javascript
-Array.isArray(tags) && (tags.includes('machine-learning') || tags.includes('ai'))
+Array.isArray(tags) && (tags.includes("machine-learning") || tags.includes("ai"));
 ```
 
 **Result**: All ML/AI related notes
@@ -362,17 +384,20 @@ Array.isArray(tags) && (tags.includes('machine-learning') || tags.includes('ai')
 ### Filter Not Working
 
 **Check expression syntax**:
+
 - Valid JavaScript required
 - Property names case-sensitive
 - Strings need quotes
 - Use `===` not `=`
 
 **Check property names**:
+
 - Match exactly what's in frontmatter
 - Check for typos
 - Use [tooltips](tooltips) to verify property names
 
 **Check console for errors**:
+
 - Open developer console (`Ctrl/Cmd+Shift+I`)
 - Look for evaluation errors
 - Invalid expressions are logged
@@ -380,11 +405,13 @@ Array.isArray(tags) && (tags.includes('machine-learning') || tags.includes('ai')
 ### No Nodes Shown
 
 **Too restrictive**:
+
 - Expressions might not match any nodes
 - Try each expression separately
 - Broaden criteria
 
 **Property doesn't exist**:
+
 - Nodes might not have the property
 - Check frontmatter of a few nodes
 - Add existence check: `typeof prop !== 'undefined' && prop === 'value'`
@@ -394,17 +421,20 @@ Array.isArray(tags) && (tags.includes('machine-learning') || tags.includes('ai')
 This is intentional! Source node is always shown for context.
 
 **To match filter behavior**:
+
 - Navigate to a file that matches the filter
 - Or adjust filter to include source node
 
 ### Filter Applied But Nodes Still Show
 
 **Check expression logic**:
+
 - Maybe expression is too broad
 - Use AND (`&&`) to narrow down
 - Add multiple expressions (one per line)
 
 **Check for property variations**:
+
 - Status might be "Active" vs "active" (case matters)
 - Extra spaces in values
 - Different property names
@@ -420,15 +450,17 @@ This is intentional! Source node is always shown for context.
 ### Optimization
 
 **Fast**:
+
 ```javascript
-status === 'active'
-type === 'project'
+status === "active";
+type === "project";
 ```
 
 **Slower** (but still fine):
+
 ```javascript
-Array.isArray(tags) && tags.some(t => t.startsWith('prefix'))
-title.toLowerCase().includes('search term')
+Array.isArray(tags) && tags.some((t) => t.startsWith("prefix"));
+title.toLowerCase().includes("search term");
 ```
 
 ## Tips & Best Practices

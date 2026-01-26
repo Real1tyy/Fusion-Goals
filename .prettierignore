@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+main.js
+build/
+coverage/
+.cache/
+htmlcov/
+
+# Type definitions
+**/*.d.ts
+
+# Documentation site
+docs-site/
+
+# Obsidian
+.obsidian/
+
+# ESLint cache
+.eslintcache
+
+# CSS
+styles.css
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json

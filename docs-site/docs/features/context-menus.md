@@ -17,6 +17,7 @@ Right-click any node in the graph to open the node context menu.
 **Action**: Opens the file in the current tab
 
 **When to use**:
+
 - Quick access to edit the note
 - Jump to the file from graph
 - Replace current tab content
@@ -26,6 +27,7 @@ Right-click any node in the graph to open the node context menu.
 **Action**: Opens the file in a new tab
 
 **When to use**:
+
 - Keep current tab open
 - Compare multiple notes side-by-side
 - Reference while working on another file
@@ -37,12 +39,14 @@ Right-click any node in the graph to open the node context menu.
 **Action**: Opens relationship adder to select a parent for this node
 
 **What happens**:
+
 1. Relationship adder mode activates
 2. Status bar shows "Select parent for [node name]"
 3. Click another node to make it the parent
 4. Bidirectional relationship is created automatically
 
 **Requirements**:
+
 - Target parent must be a valid file
 - No circular relationships (node can't be its own ancestor)
 
@@ -53,12 +57,14 @@ Right-click any node in the graph to open the node context menu.
 **Action**: Opens relationship adder to select a child for this node
 
 **What happens**:
+
 1. Relationship adder mode activates
 2. Status bar shows "Select child for [node name]"
 3. Click another node to make it a child
 4. Bidirectional relationship is created automatically
 
 **Requirements**:
+
 - Target child must be a valid file
 - No circular relationships (node can't be its own descendant)
 
@@ -67,12 +73,14 @@ Right-click any node in the graph to open the node context menu.
 **Action**: Opens relationship adder to select a related node
 
 **What happens**:
+
 1. Relationship adder mode activates
 2. Status bar shows "Select related for [node name]"
 3. Click another node to mark as related
 4. Bidirectional relationship is created automatically
 
 **Requirements**:
+
 - Target must be a valid file
 - Doesn't create relationship if already related
 
@@ -81,12 +89,14 @@ Right-click any node in the graph to open the node context menu.
 **Action**: Opens a modal to edit the node's frontmatter properties
 
 **Features**:
+
 - Edit all frontmatter properties
 - Add new properties
 - Remove existing properties
 - Save changes directly to file
 
 **When to use**:
+
 - Quick property updates
 - Add missing metadata
 - Fix incorrect values
@@ -101,11 +111,13 @@ This feature may be available in a future update. Currently, open the file to ed
 **Action**: Opens a read-only preview modal of the note
 
 **Shows**:
+
 - Frontmatter section
 - Note content (markdown rendered)
 - Scrollable for long content
 
 **When to use**:
+
 - Quick reference without opening file
 - Preview before opening
 - Check content without disrupting workflow
@@ -119,6 +131,7 @@ This feature may be available in a future update. Currently, open the file to ed
 **Format**: `folder/subfolder/filename.md`
 
 **When to use**:
+
 - Share file location
 - Create links in other apps
 - Reference in scripts or automation
@@ -137,12 +150,14 @@ Right-click any edge (line between nodes) to open the edge context menu.
 **Action**: Removes the relationship between the two connected nodes
 
 **What happens**:
+
 1. Relationship is removed from both nodes' frontmatter
 2. Edge disappears from graph
 3. Nodes remain (not deleted)
 4. Bidirectional sync maintains consistency
 
 **Use cases**:
+
 - Clean up incorrect relationships
 - Remove outdated connections
 - Restructure hierarchies
@@ -155,6 +170,7 @@ Right-click any edge (line between nodes) to open the edge context menu.
 **Action**: Focuses on the source node of the edge
 
 **When to use**:
+
 - Follow relationship backward
 - Understand where connection originates
 - Navigate through network
@@ -164,6 +180,7 @@ Right-click any edge (line between nodes) to open the edge context menu.
 **Action**: Focuses on the target node of the edge
 
 **When to use**:
+
 - Follow relationship forward
 - See where connection leads
 - Explore relationships
@@ -183,6 +200,7 @@ The relationship adder is activated when you choose "Add Parent", "Add Child", o
 ### Visual Feedback
 
 While relationship adder is active:
+
 - **Status bar message** shows current mode
 - **Cursor may change** to indicate selection mode
 - **Source node** remains highlighted
@@ -190,6 +208,7 @@ While relationship adder is active:
 ### Canceling
 
 To cancel relationship selection:
+
 - **Press Escape**
 - **Right-click anywhere**
 - **Click outside graph**
@@ -200,11 +219,13 @@ To cancel relationship selection:
 The relationship adder prevents invalid relationships:
 
 **Blocked**:
+
 - Circular relationships (node → itself)
 - Parent-child loops (A parent of B, B parent of A)
 - Duplicate relationships (already exists)
 
 **Allowed**:
+
 - Multiple children for one parent
 - Multiple related connections
 - Cross-constellation relationships
@@ -306,45 +327,54 @@ Some modifier actions are planned for future releases.
 ### Context Menu Not Appearing
 
 **Check right-click**:
+
 - Ensure right mouse button (not left)
 - Try different node/edge
 - Check mouse is over node/edge
 
 **Check not in selection mode**:
+
 - If in relationship adder mode, cancel first
 - Try pressing Escape then right-clicking
 
 **Check node is valid**:
+
 - Deleted nodes may not have menu
 - Refresh graph if needed
 
 ### Action Not Working
 
 **Check file permissions**:
+
 - File must be writable
 - Check file not locked by another app
 
 **Check valid target**:
+
 - Parent/child/related must be valid files
 - No circular relationships
 - Target must exist
 
 **Check plugin enabled**:
+
 - Verify Nexus Properties is active
 - Restart Obsidian if needed
 
 ### Relationship Not Created
 
 **Check bidirectional sync**:
+
 - Both files should update
 - Check frontmatter of both files
 - Run rescan if needed
 
 **Check circular validation**:
+
 - System prevents circular relationships
 - Choose different target
 
 **Check file in indexed directory**:
+
 - Only files in scanned directories can have relationships
 - Check [directory settings](../configuration#directory-scanning)
 
@@ -361,11 +391,13 @@ Some modifier actions are planned for future releases.
 ## Accessibility
 
 **Keyboard access**:
+
 - Context menu triggered by right-click only
 - No keyboard alternative currently
 - Use commands for keyboard-only access
 
 **Screen readers**:
+
 - Menu items should be announced
 - Actions may not fully describe results
 - Use commands for better screen reader support

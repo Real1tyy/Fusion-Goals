@@ -39,6 +39,7 @@ To clear the search and show all nodes normally:
 ### Real-Time Matching
 
 Search updates **immediately as you type**:
+
 - No need to press Enter
 - Results update with each keystroke
 - Instant feedback
@@ -46,12 +47,14 @@ Search updates **immediately as you type**:
 ### Case-Insensitive
 
 Search is **not case-sensitive**:
+
 - `project` matches "Project", "PROJECT", "project"
 - `TODO` matches "todo", "Todo", "TODO"
 
 ### Partial Matching
 
 Search matches **partial strings**:
+
 - `proj` matches "**Proj**ect Overview"
 - `task` matches "Important **Task**"
 - `2024` matches "Notes **2024**"
@@ -59,10 +62,12 @@ Search matches **partial strings**:
 ### What Gets Searched
 
 Search looks at:
+
 - **File names** (without extension)
 - **File paths** (full path including folders)
 
 Search does **not** look at:
+
 - Frontmatter properties
 - Note content
 - Tags (unless in filename)
@@ -76,6 +81,7 @@ Use [filtering](filtering) to search based on frontmatter properties. Search is 
 ### Matching Nodes
 
 Nodes that match the search query:
+
 - **Normal opacity** (fully visible)
 - **Normal colors** (color rules still apply)
 - **Stand out** from non-matching nodes
@@ -83,6 +89,7 @@ Nodes that match the search query:
 ### Non-Matching Nodes
 
 Nodes that don't match:
+
 - **Reduced opacity** (dimmed to ~30%)
 - **Colors desaturated**
 - **Still visible** but clearly not matches
@@ -90,6 +97,7 @@ Nodes that don't match:
 ### Source Node
 
 The source node (currently viewed file):
+
 - **Always fully visible** even if doesn't match
 - **Never dimmed** by search
 - **Maintains context**
@@ -101,6 +109,7 @@ The source node (currently viewed file):
 **Query**: `Project`
 
 **Matches**:
+
 - "**Project** Overview.md"
 - "Main **Project**.md"
 - "**project**-notes.md"
@@ -110,6 +119,7 @@ The source node (currently viewed file):
 **Query**: `Work/`
 
 **Matches**:
+
 - "**Work**/Project A.md"
 - "**Work**/Tasks/Task 1.md"
 - "**Work**/Notes/Meeting.md"
@@ -119,6 +129,7 @@ The source node (currently viewed file):
 **Query**: `2024-01`
 
 **Matches**:
+
 - "**2024-01**-15 Meeting.md"
 - "**2024-01**-20 Report.md"
 - "Jan **2024** Overview.md"
@@ -128,6 +139,7 @@ The source node (currently viewed file):
 **Query**: `task`
 
 **Matches**:
+
 - "**Task** 1.md"
 - "Important **Task**.md"
 - "**task**-list.md"
@@ -137,6 +149,7 @@ The source node (currently viewed file):
 **Query**: `report`
 
 **Matches**:
+
 - "Quarterly **Report**.md"
 - "**Report** Template.md"
 - "meeting-**report**.md"
@@ -158,16 +171,19 @@ Use both together for precise targeting:
 Search works in all view modes:
 
 **Hierarchical Mode**:
+
 - Search within entire tree
 - Matching nodes and their relationships stay highlighted
 - Easy to locate specific branches
 
 **Related Mode**:
+
 - Search among related nodes
 - Quickly find specific connections
 - Identify relevant relationships
 
 **All Related Mode**:
+
 - Search within constellations
 - Locate nodes in large networks
 - Track down indirect connections
@@ -182,6 +198,7 @@ Search works in all view modes:
 ### Search + Zoom Mode
 
 Workflow:
+
 1. **Search** to find node
 2. **Click matching node** to enter zoom mode
 3. **Preview** the found note
@@ -260,6 +277,7 @@ Date-based search for temporal notes
 ### Incremental Refinement
 
 Start broad, then refine:
+
 1. Type `task` (many matches)
 2. Add `task 1` (fewer matches)
 3. Add `task 12` (specific match)
@@ -271,24 +289,28 @@ Start broad, then refine:
 ### No Content Search
 
 Search **does not** look at note content:
+
 - Only searches filename and path
 - To search content, use Obsidian's built-in search
 
 ### No Property Search
 
 Search **does not** look at frontmatter:
+
 - Use [filtering](filtering) for property-based search
 - Example: `status === 'active'` filter instead
 
 ### No Fuzzy Matching
 
 Search requires **substring match**:
+
 - `task` matches "**task**", "**Task**", "my**task**"
 - `tsk` does **not** match "task" (no fuzzy match)
 
 ### No Regex
 
 Search is **simple substring matching only**:
+
 - No regular expressions
 - No wildcards
 - No special patterns
@@ -304,6 +326,7 @@ Search is **simple substring matching only**:
 ### Large Graphs
 
 With 1000+ nodes:
+
 - Search still performs well
 - Dimming effect may be slow on very large graphs
 - Consider using filtering to reduce node count first
@@ -313,61 +336,73 @@ With 1000+ nodes:
 ### Search Not Working
 
 **Check search bar visible**:
+
 - Use "Toggle Graph Search" command
 - Or enable default visibility in settings
 
 **Check typing in correct field**:
+
 - Focus should be on search input
 - Click input to ensure focus
 
 **Check spelling**:
+
 - Case-insensitive but must be correct spelling
 - Try partial match (first few letters)
 
 ### No Matches Found
 
 **Check filename**:
+
 - Search only searches filename/path, not content
 - Verify the filename contains your search term
 
 **Check not filtered out**:
+
 - If filtering is active, node may be hidden
 - Clear filters to see all nodes
 
 **Check in view**:
+
 - Node must be in current view mode
 - Switch view modes if needed
 
 ### Matches Not Highlighted
 
 **Check opacity**:
+
 - Matching nodes should be full opacity
 - Non-matching should be dimmed
 - If not, may be a visual issue
 
 **Check search is active**:
+
 - Text must be in search input
 - Clear and retype if needed
 
 ### Too Many Matches
 
 **Refine search**:
+
 - Add more characters for specificity
 - Add path prefix: `folder/filename`
 - Add date or unique identifier
 
 **Use filtering**:
+
 - Combine with filters to narrow down
 - Example: Filter by type, then search by name
 
 ## Accessibility
 
 **Keyboard accessible**:
+
 - Focus search input with command/hotkey
 - Type to search
 - Tab to navigate out
 
 **Screen reader**:
+
 - Search input is labeled
 - Match count (if shown) is announced
 - Dimmed nodes may not be announced as hidden

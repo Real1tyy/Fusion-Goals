@@ -18,6 +18,7 @@ Property tooltips provide instant previews of node frontmatter when you hover ov
 ### What's Shown
 
 Tooltips display:
+
 - **Node title** (file name)
 - **All frontmatter properties** (key-value pairs)
 - **Wiki links** (clickable)
@@ -29,10 +30,12 @@ Tooltips display:
 Tooltips respect property display settings:
 
 **Hide Empty Properties**:
+
 - Enabled: Only properties with values shown
 - Disabled: All properties shown, even empty
 
 **Hide Underscore Properties**:
+
 - Enabled: Properties starting with `_` hidden
 - Disabled: All properties shown
 
@@ -43,6 +46,7 @@ Tooltips respect property display settings:
 ### Global Toggle
 
 **In Settings**:
+
 1. Settings → Nexus Properties
 2. Find "Show node tooltips"
 3. Toggle on/off
@@ -62,6 +66,7 @@ Assign a hotkey like `Ctrl+T` for quick tooltip toggling during graph exploratio
 ### When Zoom Mode Active
 
 Tooltips are **automatically disabled** in zoom mode:
+
 - Prevents tooltip/preview overlap
 - Focus on zoom preview instead
 - Re-enabled when exiting zoom mode
@@ -71,6 +76,7 @@ Tooltips are **automatically disabled** in zoom mode:
 ### Title Section
 
 Shows the file name (without extension):
+
 - **Bold text**
 - **Larger font**
 - **Separated from properties**
@@ -80,6 +86,7 @@ Shows the file name (without extension):
 Shows all frontmatter in key-value format:
 
 **Simple values**:
+
 ```
 status: active
 priority: high
@@ -87,12 +94,14 @@ type: project
 ```
 
 **Boolean values**:
+
 ```
 completed: Yes
 archived: No
 ```
 
 **Array values**:
+
 ```
 tags:
   • work
@@ -101,12 +110,14 @@ tags:
 ```
 
 **Wiki link values**:
+
 ```
 Parent: [[Project Overview]]
 Related: [[Note A]], [[Note B]]
 ```
 
 **Nested object values**:
+
 ```
 metadata:
   author: John Doe
@@ -126,6 +137,7 @@ Wiki links in tooltip content are **fully clickable**:
 5. **Tooltip updates** to show new node
 
 **Use cases**:
+
 - Quick navigation through relationships
 - Exploring parent/child links
 - Following related notes
@@ -135,6 +147,7 @@ Wiki links in tooltip content are **fully clickable**:
 ### External Links
 
 External links (URLs) in frontmatter are also clickable:
+
 - Click to open in browser
 - Tooltip remains visible
 - Graph stays in current view
@@ -150,16 +163,19 @@ Control the maximum width of tooltips:
 **Default**: 255px
 
 **Narrow (150-200px)**:
+
 - Compact display
 - Good for simple properties
 - Less screen space
 
 **Medium (250-300px)**:
+
 - Balanced (recommended)
 - Good for most use cases
 - Shows properties clearly
 
 **Wide (400-500px)**:
+
 - Spacious display
 - Good for extensive frontmatter
 - Shows long values without wrapping
@@ -167,6 +183,7 @@ Control the maximum width of tooltips:
 ### Property Display Settings
 
 **Hide Empty Properties**:
+
 ```yaml
 # ❌ Without setting (shows empty)
 status:
@@ -178,6 +195,7 @@ tags:
 ```
 
 **Hide Underscore Properties**:
+
 ```yaml
 # ❌ Without setting (shows all)
 _ZettelID: 20240115120000
@@ -199,6 +217,7 @@ Tooltips auto-position to stay visible:
 **Default**: Above and to the right of node
 
 **If near edge**:
+
 - Flips to left if near right edge
 - Flips below if near top edge
 - Always stays within viewport
@@ -208,6 +227,7 @@ Tooltips auto-position to stay visible:
 **Default**: 1 second before tooltip appears
 
 **Why?**
+
 - Prevents accidental triggers
 - Reduces visual noise
 - Only shows when intentionally hovering
@@ -217,10 +237,12 @@ Tooltips auto-position to stay visible:
 ### Tooltip Lifetime
 
 Tooltip remains visible while:
+
 - Mouse is over the node
 - Mouse is over the tooltip itself (for clicking links)
 
 Tooltip hides when:
+
 - Mouse leaves node and tooltip area
 - Another tooltip is triggered
 - Zoom mode is entered
@@ -293,6 +315,7 @@ Tooltip hides when:
 ### Tooltips + Zoom Mode
 
 **Workflow**:
+
 1. **Hover (tooltip)** for quick check
 2. **Click (zoom mode)** for detailed preview
 3. **Tooltip disabled** while in zoom mode
@@ -314,28 +337,34 @@ Tooltip hides when:
 ### Tooltip Not Appearing
 
 **Check setting enabled**:
+
 - Settings → Nexus Properties → Show node tooltips
 - Must be toggled on
 
 **Check hover duration**:
+
 - Must hover for ~1 second
 - Quick mouse movements won't trigger
 
 **Check zoom mode**:
+
 - Tooltips disabled in zoom mode
 - Exit zoom mode to re-enable
 
 **Check node has properties**:
+
 - Empty frontmatter = empty tooltip
 - Add properties to see them in tooltip
 
 ### Tooltip Too Small/Large
 
 **Adjust width**:
+
 - Settings → Nexus Properties → Tooltip width
 - Increase/decrease based on needs
 
 **Check content**:
+
 - Long property values wrap
 - Nested objects increase height
 - Arrays display as lists
@@ -343,39 +372,47 @@ Tooltip hides when:
 ### Links Not Clickable
 
 **Check link format**:
+
 - Must be valid wiki links `[[note]]`
 - Or valid URLs `https://example.com`
 
 **Check hovering tooltip**:
+
 - Must move mouse onto tooltip itself
 - Tooltip stays visible when hovering it
 
 **Check link target exists**:
+
 - Broken links may not be clickable
 - Verify target file exists
 
 ### Properties Not Showing
 
 **Check "Hide empty" setting**:
+
 - May be hiding properties with no value
 - Disable to show all properties
 
 **Check "Hide underscore" setting**:
+
 - May be hiding properties starting with `_`
 - Disable to show all properties
 
 **Check file has frontmatter**:
+
 - Files without frontmatter show empty tooltip
 - Add frontmatter to see properties
 
 ### Tooltip Appears in Wrong Position
 
 **Normal behavior**:
+
 - Tooltips auto-position to stay visible
 - May flip sides near edges
 - Ensures tooltip always visible
 
 **If truly mispositioned**:
+
 - May be a bug with specific screen sizes
 - Report with screenshot and screen dimensions
 
@@ -384,6 +421,7 @@ Tooltip hides when:
 ### Large Properties
 
 Tooltips with many properties:
+
 - May take longer to render
 - May extend beyond screen
 - Consider hiding empty/underscore properties
@@ -391,6 +429,7 @@ Tooltips with many properties:
 ### Frequent Hovering
 
 Hovering many nodes rapidly:
+
 - Each hover triggers tooltip creation
 - Normal performance impact
 - Tooltips are lightweight (no heavy rendering)
@@ -398,6 +437,7 @@ Hovering many nodes rapidly:
 ### Complex Frontmatter
 
 Deeply nested objects or large arrays:
+
 - May slow tooltip rendering slightly
 - Still performant in most cases
 - Simplify frontmatter if issues occur
@@ -415,15 +455,18 @@ Deeply nested objects or large arrays:
 ## Accessibility
 
 **Keyboard navigation**:
+
 - Tooltips require mouse hover
 - Not accessible via keyboard alone
 - Use zoom mode for keyboard-accessible preview
 
 **Screen readers**:
+
 - Tooltip content may not be announced
 - Use zoom mode for better screen reader support
 
 **Visual impairment**:
+
 - Adjust tooltip width for readability
 - Consider zoom mode for larger text
 
