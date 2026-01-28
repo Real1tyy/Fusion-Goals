@@ -1,7 +1,7 @@
 {
 	"id": "fusion-goals",
 	"name": "Fusion Goals",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"minAppVersion": "1.6.0",
 	"description": "A hierarchical goal management plugin that visualizes goals, projects, and tasks in an interactive relationship graph.",
 	"author": "Real1tyy",
