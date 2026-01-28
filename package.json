@@ -1,6 +1,6 @@
 {
 	"name": "fusion-goals",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A hierarchical goal management plugin for Obsidian that visualizes goals, projects, and tasks in an interactive relationship graph.",
 	"main": "main.js",
 	"scripts": {
