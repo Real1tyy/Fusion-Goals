@@ -8,10 +8,10 @@ import {
 } from "@real1ty-obsidian-plugins";
 import type { ElementDefinition } from "cytoscape";
 import type { App } from "obsidian";
-import type { FusionGoalsSettings } from "../types/settings";
+
+import type { FusionGoalsSettings, FusionGoalsSettingsStore } from "../types/settings";
 import { parseLinkedPathsFromProperty } from "../utils/property";
-import type { Indexer } from "./indexer";
-import type { SettingsStore } from "./settings-store";
+import type { GoalsManager } from "./goals-manager";
 
 export interface GraphData {
 	nodes: ElementDefinition[];
@@ -36,20 +36,29 @@ interface ValidFileContext extends FileContext {
 export class GraphBuilder {
 	private readonly filterEvaluator: FilterEvaluator<FusionGoalsSettings>;
 	private readonly colorEvaluator: ColorEvaluator<FusionGoalsSettings>;
-	private hierarchyMaxDepth: number;
+	private hierarchyMaxDepth!: number;
+	private titlePropertyEnabled!: boolean;
+	private titleProp!: string;
 
 	constructor(
 		private readonly app: App,
-		private readonly indexer: Indexer,
-		settingsStore: SettingsStore
+		private readonly goalsManager: GoalsManager,
+		settingsStore: FusionGoalsSettingsStore
 	) {
 		this.filterEvaluator = new FilterEvaluator(settingsStore.settings$);
 		this.colorEvaluator = new ColorEvaluator(settingsStore.settings$);
 
-		// Initialize and subscribe to depth settings
-		this.hierarchyMaxDepth = settingsStore.settings$.value.hierarchyMaxDepth;
-		settingsStore.settings$.subscribe((settings) => {
+		const updateSettings = (settings: FusionGoalsSettings) => {
 			this.hierarchyMaxDepth = settings.hierarchyMaxDepth;
+			this.titlePropertyEnabled = settings.titlePropertyEnabled;
+			this.titleProp = settings.titleProp;
+		};
+
+		const initialSettings = settingsStore.settings$.value;
+		updateSettings(initialSettings);
+
+		settingsStore.settings$.subscribe((settings) => {
+			updateSettings(settings);
 		});
 	}
 
@@ -69,17 +78,19 @@ export class GraphBuilder {
 
 	private createNodeElement(pathOrWikiLink: string, level: number, isSource: boolean): ElementDefinition {
 		const filePath = extractFilePath(pathOrWikiLink);
-		const displayName = extractDisplayName(pathOrWikiLink);
+		const { frontmatter } = getFileContext(this.app, filePath);
+
+		// Use title property if enabled and available in frontmatter
+		const titleValue = this.titlePropertyEnabled ? frontmatter?.[this.titleProp] : null;
+		const displayName = titleValue ? extractDisplayName(String(titleValue)) : extractDisplayName(pathOrWikiLink);
+
 		const estimatedWidth = Math.max(80, Math.min(displayName.length * 8, 150));
 		const estimatedHeight = 45;
 
-		const { frontmatter } = getFileContext(this.app, filePath);
 		const nodeColor = this.colorEvaluator.evaluateColor(frontmatter ?? {});
-		const fileType = this.indexer.getFileType(filePath);
+		const fileType = this.goalsManager.getFileType(filePath);
 
-		const relationships = this.indexer.getRelationships(filePath);
-		const daysSince = relationships?.daysSince || "";
-		const daysRemaining = relationships?.daysRemaining || "";
+		const { daysSince, daysRemaining } = this.goalsManager.getDateInfo(filePath);
 
 		return {
 			data: {
@@ -91,14 +102,14 @@ export class GraphBuilder {
 				height: estimatedHeight,
 				nodeColor: nodeColor,
 				fileType: fileType,
-				daysSince: daysSince,
-				daysRemaining: daysRemaining,
+				daysSince: daysSince || "",
+				daysRemaining: daysRemaining || "",
 			},
 		};
 	}
 
 	buildGraph(options: GraphBuilderOptions): GraphData {
-		const fileType = this.indexer.getFileType(options.sourcePath);
+		const fileType = this.goalsManager.getFileType(options.sourcePath);
 		let graphData: GraphData;
 
 		if (options.startFromCurrent) {
@@ -197,15 +208,11 @@ export class GraphBuilder {
 	}
 
 	private getChildrenPaths(filePath: string): string[] {
-		const fileType = this.indexer.getFileType(filePath);
+		const fileType = this.goalsManager.getFileType(filePath);
 
 		if (fileType === "goal") {
-			const goalHierarchy = this.indexer.getGoalHierarchy(filePath);
-			if (goalHierarchy) {
-				return goalHierarchy.tasks;
-			}
+			return this.goalsManager.getTasksForGoal(filePath).map((t) => t.filePath);
 		}
-		// Tasks have no children
 		return [];
 	}
 
@@ -213,10 +220,10 @@ export class GraphBuilder {
 		const { file, frontmatter } = getFileContext(this.app, filePath);
 		if (!file || !frontmatter) return null;
 
-		const fileType = this.indexer.getFileType(filePath);
+		const fileType = this.goalsManager.getFileType(filePath);
 		if (!fileType) return null;
 
-		const settings = this.indexer.getSettings();
+		const settings = this.goalsManager.getSettings();
 
 		if (fileType === "task") {
 			const paths = parseLinkedPathsFromProperty(frontmatter[settings.taskGoalProp]);

@@ -3,8 +3,9 @@ import cytoscapeDagre from "cytoscape-dagre";
 import { type App, TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 import type FusionGoalsPlugin from "src/main";
+
+import type { GoalsManager } from "../../core/goals-manager";
 import { GraphBuilder } from "../../core/graph-builder";
-import type { Indexer } from "../../core/indexer";
 import { GraphFilter } from "../graph-filter";
 import { GraphFilterPresetSelector } from "../graph-filter-preset-selector";
 import { GraphHeader } from "../graph-header";
@@ -37,7 +38,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 	private isUpdating = false;
 	private graphBuilder: GraphBuilder;
 	private settingsSubscription: Subscription | null = null;
-	private indexerSubscription: Subscription | null = null;
+	private eventsSubscription: Subscription | null = null;
 	private propertyTooltip: PropertyTooltip;
 	private graphSearch: GraphSearch | null = null;
 	private searchRowEl: HTMLElement | null = null;
@@ -49,13 +50,12 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 
 	constructor(
 		private readonly app: App,
-		private readonly indexer: Indexer,
+		private readonly goalsManager: GoalsManager,
 		private readonly plugin: FusionGoalsPlugin,
 		private readonly containerEl: HTMLElement
 	) {
 		super();
-		// Context menus and relationship adder removed - visualization only
-		this.graphBuilder = new GraphBuilder(this.app, this.indexer, this.plugin.settingsStore);
+		this.graphBuilder = new GraphBuilder(this.app, this.goalsManager, this.plugin.settingsStore);
 
 		this.zoomManager = new GraphZoomManager(this.app, {
 			getCy: () => {
@@ -193,9 +193,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 			this.onFileOpen(file);
 		});
 
-		// Subscribe to indexer events for reactive updates
-		// This handles file changes, renames, and deletions after indexer has processed them
-		this.indexerSubscription = this.indexer.events$.subscribe((event) => {
+		this.eventsSubscription = this.goalsManager.events$.subscribe((event) => {
 			if (!this.currentFile) return;
 			if (event.filePath === this.currentFile.path) {
 				this.updateGraph();
@@ -354,9 +352,9 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 			this.settingsSubscription = null;
 		}
 
-		if (this.indexerSubscription) {
-			this.indexerSubscription.unsubscribe();
-			this.indexerSubscription = null;
+		if (this.eventsSubscription) {
+			this.eventsSubscription.unsubscribe();
+			this.eventsSubscription = null;
 		}
 
 		this.cleanupEvents();
@@ -498,12 +496,12 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 			return;
 		}
 
-		if (!this.indexer) {
+		if (!this.goalsManager) {
 			this.showEmptyState("Plugin is still initializing. Please wait...");
 			return;
 		}
 
-		if (!this.indexer.getFileType(file.path)) {
+		if (!this.goalsManager.getFileType(file.path)) {
 			this.showEmptyState("This file is not in one of the hierarchical directories (Goals or Tasks).");
 			return;
 		}
@@ -583,7 +581,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 				sourcePath: this.currentFile.path,
 				startFromCurrent: this.ignoreTopmostParent,
 				searchQuery: searchQuery,
-				filterEvaluator: filterEvaluator,
+				...(filterEvaluator !== undefined ? { filterEvaluator } : {}),
 			});
 
 			this.destroyGraph();
@@ -831,6 +829,8 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 
 		this.layoutManager.applyLayout(nodes, edges, {
 			animationDuration,
+			useMultiRowLayout: settings.useMultiRowLayout,
+			maxChildrenPerRow: settings.maxChildrenPerRow,
 		});
 	}
 
@@ -920,9 +920,9 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 			const newLeaf = event.ctrlKey || event.metaKey;
 
 			if (newLeaf) {
-				this.app.workspace.getLeaf("tab").openFile(file);
+				void this.app.workspace.getLeaf("tab").openFile(file);
 			} else {
-				this.app.workspace.getLeaf(false).openFile(file);
+				void this.app.workspace.getLeaf(false).openFile(file);
 			}
 		}
 	}

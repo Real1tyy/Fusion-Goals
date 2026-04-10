@@ -1,49 +1,54 @@
 import {
+	buildUtmUrl,
 	generateUniqueFilePath,
+	SettingsStore,
 	TemplaterService,
+	VaultTable,
+	type ViewActivator,
+	waitForCacheReady,
 	WhatsNewModal,
 	type WhatsNewModalConfig,
 } from "@real1ty-obsidian-plugins";
 import { MarkdownView, Notice, Plugin, type TFile, type WorkspaceLeaf } from "obsidian";
+
 import CHANGELOG_CONTENT from "../../docs-site/docs/changelog.md";
-import { FusionGoalsSettingsTab } from "./components";
 import { DeadlineOverviewModal } from "./components/deadline-overview-modal";
-import { FusionViewSwitcher, VIEW_TYPE_FUSION_SWITCHER } from "./components/views/fusion-view-switcher";
-import { Indexer } from "./core/indexer";
-import { SettingsStore } from "./core/settings-store";
+import { MetricBlockRenderer } from "./components/metric-block-renderer";
+import { showGoalModal } from "./components/modals/goal-modal";
+import { showTaskModal } from "./components/modals/task-modal";
+import { FusionGoalsSettingsTab } from "./components/settings/settings-tab";
+import { registerFusionGoalsView } from "./components/views/fusion-goals-view";
+import { GoalsManager } from "./core/goals-manager";
+import { InheritanceManager } from "./core/inheritance-manager";
+import { metricRepository } from "./core/metric-repository";
+import { FUSION_GOALS_VIEW_TYPE } from "./types/constants";
+import type { GoalFrontmatter, TaskFrontmatter } from "./types/frontmatter";
+import { createGoalSchema, createTaskSchema } from "./types/frontmatter";
+import { METRIC_CODE_FENCE } from "./types/metric";
+import { FusionGoalsSettingsSchema, type FusionGoalsSettingsStore } from "./types/settings";
 import { getInheritableProperties } from "./utils/inheritance";
 
-/**
- * Fusion Goals Plugin
- *
- * Visualizes a hierarchical goal system with three levels:
- * - Goals (top level)
- * - Projects (linked to goals via "goal" property)
- * - Tasks (linked to projects via "project" property)
- */
 export default class FusionGoalsPlugin extends Plugin {
-	settingsStore!: SettingsStore;
-	indexer!: Indexer;
+	settingsStore!: FusionGoalsSettingsStore;
+	goalsTable!: VaultTable<GoalFrontmatter>;
+	tasksTable!: VaultTable<TaskFrontmatter>;
+	goalsManager!: GoalsManager;
+	private inheritanceManager!: InheritanceManager;
+	private activateFusionGoals!: ViewActivator;
+	private ribbonIconEl: HTMLElement | null = null;
 
-	async onload() {
-		console.log("🎯 Loading Fusion Goals plugin...");
-
-		this.settingsStore = new SettingsStore(this);
+	override async onload() {
+		this.settingsStore = new SettingsStore(this, FusionGoalsSettingsSchema);
 		await this.settingsStore.loadSettings();
 
 		this.addSettingTab(new FusionGoalsSettingsTab(this.app, this));
 
-		// Main command to show the hierarchical graph
 		this.addCommand({
-			id: "show-goals-graph",
-			name: "Show Goals Hierarchy Graph",
-			callback: () => this.toggleRelationshipGraphView(),
-		});
-
-		this.addCommand({
-			id: "toggle-view-mode",
-			name: "Toggle View Mode (Graph/Bases)",
-			callback: () => this.executeViewSwitcherMethod("toggleView"),
+			id: "open-fusion-goals",
+			name: "Open Fusion Goals",
+			callback: () => {
+				void this.activateFusionGoals?.();
+			},
 		});
 
 		this.addCommand({
@@ -53,200 +58,122 @@ export default class FusionGoalsPlugin extends Plugin {
 		});
 
 		this.addCommand({
+			id: "create-goal",
+			name: "Create Goal",
+			callback: () => {
+				if (this.goalsManager) {
+					showGoalModal(this.app, this.goalsManager, this.settingsStore);
+				}
+			},
+		});
+
+		this.addCommand({
+			id: "create-task",
+			name: "Create Task",
+			callback: () => {
+				if (this.goalsManager) {
+					showTaskModal(this.app, this.goalsManager, this.settingsStore);
+				}
+			},
+		});
+
+		this.addCommand({
 			id: "create-task-from-goal",
 			name: "Create Task from Goal",
 			checkCallback: (checking: boolean) => {
 				const activeFile = this.app.workspace.getActiveFile();
 				if (!activeFile) return false;
 
-				const fileType = this.indexer?.getFileType(activeFile.path);
+				const fileType = this.goalsManager?.getFileType(activeFile.path);
 				if (fileType !== "goal") return false;
 
 				if (!checking) {
-					this.createTaskFromGoal(activeFile);
+					void this.createTaskFromGoal(activeFile);
 				}
 				return true;
 			},
 		});
 
-		// Graph manipulation commands
-		this.addCommand({
-			id: "enlarge-graph",
-			name: "Enlarge Graph",
-			callback: () => this.executeViewSwitcherMethod("toggleEnlargement"),
-		});
-
-		this.addCommand({
-			id: "toggle-graph-search",
-			name: "Toggle Graph Search",
-			callback: () => this.executeViewSwitcherMethod("toggleSearch"),
-		});
-
-		this.addCommand({
-			id: "toggle-graph-filter",
-			name: "Toggle Graph Filter (Expression Input)",
-			callback: () => this.executeViewSwitcherMethod("toggleFilter"),
-		});
-
-		this.addCommand({
-			id: "toggle-graph-filter-preset",
-			name: "Toggle Graph Filter (Preset Selector)",
-			callback: () => this.executeViewSwitcherMethod("toggleFilterPreset"),
-		});
-
-		// Zoom preview commands
-		this.addCommand({
-			id: "toggle-focus-content",
-			name: "Toggle Focus Content (Zoom Preview)",
-			callback: () =>
-				this.executeViewSwitcherMethod("toggleHideContent", "Open the Goals Graph to toggle content visibility"),
-		});
-
-		this.addCommand({
-			id: "toggle-focus-frontmatter",
-			name: "Toggle Focus Frontmatter (Zoom Preview)",
-			callback: () =>
-				this.executeViewSwitcherMethod(
-					"toggleHideFrontmatter",
-					"Open the Goals Graph to toggle frontmatter visibility"
-				),
-		});
-
-		this.addCommand({
-			id: "bases-view-forward",
-			name: "Bases: Next View",
-			callback: () => this.executeViewSwitcherMethod("toggleBasesViewForward"),
-		});
-
-		this.addCommand({
-			id: "bases-view-backward",
-			name: "Bases: Previous View",
-			callback: () => this.executeViewSwitcherMethod("toggleBasesViewBackward"),
-		});
-
-		this.addCommand({
-			id: "bases-subview-forward",
-			name: "Bases: Next Subview",
-			callback: () => this.executeViewSwitcherMethod("toggleBasesSubviewForward"),
-		});
-
-		this.addCommand({
-			id: "bases-subview-backward",
-			name: "Bases: Previous Subview",
-			callback: () => this.executeViewSwitcherMethod("toggleBasesSubviewBackward"),
-		});
-
-		for (let i = 0; i < 10; i++) {
-			this.addCommand({
-				id: `bases-go-to-view-${i}`,
-				name: `Bases: Go to View ${i + 1}`,
-				callback: () => this.executeViewSwitcherMethodWithArg("goToBasesViewByIndex", i),
-			});
-		}
-
-		for (let i = 0; i < 10; i++) {
-			this.addCommand({
-				id: `bases-go-to-subview-${i}`,
-				name: `Bases: Go to Subview ${i + 1}`,
-				callback: () => this.executeViewSwitcherMethodWithArg("goToBasesSubviewByIndex", i),
-			});
-		}
-
-		this.initializePlugin();
+		void this.initializePlugin();
 	}
 
 	private async initializePlugin() {
-		// Wait for Obsidian's workspace layout to be ready
-		await new Promise<void>((resolve) => this.app.workspace.onLayoutReady(resolve));
+		await waitForCacheReady(this.app);
 
-		// Wait for metadata cache to be fully initialized
-		// @ts-expect-error - initialized property exists at runtime but not in type definitions
-		if (!this.app.metadataCache.initialized) {
-			await new Promise<void>((resolve) => {
-				// @ts-expect-error - initialized event exists at runtime but not in type definitions
-				this.app.metadataCache.once("initialized", resolve);
-			});
-		}
+		const settings = this.settingsStore.currentSettings;
+		const goalSchema = createGoalSchema(settings);
+		const taskSchema = createTaskSchema(settings);
 
-		this.indexer = new Indexer(this.app, this.settingsStore.settings$);
-		await this.indexer.start();
+		this.goalsTable = new VaultTable({
+			app: this.app,
+			directory: settings.goalsDirectory,
+			schema: goalSchema,
+		});
 
-		this.registerView(VIEW_TYPE_FUSION_SWITCHER, (leaf) => new FusionViewSwitcher(leaf, this.indexer, this));
+		this.tasksTable = new VaultTable({
+			app: this.app,
+			directory: settings.tasksDirectory,
+			schema: taskSchema,
+		});
 
-		console.log("✅ Fusion Goals plugin loaded successfully");
+		this.goalsManager = new GoalsManager(this.goalsTable, this.tasksTable, () => this.settingsStore.currentSettings);
 
-		if (this.settingsStore.settings$.value.showStartupOverview) {
-			this.showStartupOverview();
-		}
+		this.inheritanceManager = new InheritanceManager(
+			this.app,
+			this.goalsTable,
+			this.tasksTable,
+			this.goalsManager,
+			() => this.settingsStore.currentSettings
+		);
+
+		this.activateFusionGoals = registerFusionGoalsView(this, this.settingsStore, this.goalsManager);
+		this.updateRibbonIcon();
+
+		this.registerMarkdownCodeBlockProcessor(METRIC_CODE_FENCE, (source, el, ctx) => {
+			if (el.hasClass("fusion-metric-initialized")) return;
+			el.empty();
+			el.addClass("fusion-metric-initialized");
+			const renderer = new MetricBlockRenderer(el, this.app, source, ctx);
+			ctx.addChild(renderer);
+		});
+
+		this.registerEvent(
+			this.app.workspace.on("file-open", (file) => {
+				if (file && file.path.startsWith(this.settingsStore.currentSettings.goalsDirectory)) {
+					void metricRepository.ensureBlock(this.app, file);
+				}
+			})
+		);
+
+		await this.goalsTable.start();
+		await this.tasksTable.start();
+		this.inheritanceManager.start();
 
 		await this.checkForUpdates();
 	}
 
 	private showStartupOverview(): void {
-		const deadlineModal = new DeadlineOverviewModal(this.app, this.indexer, this.settingsStore);
+		const deadlineModal = new DeadlineOverviewModal(this.app, this.goalsManager, this.settingsStore);
 		deadlineModal.open();
 	}
 
-	async onunload() {
-		console.log("👋 Unloading Fusion Goals plugin...");
-		this.indexer?.stop();
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE_FUSION_SWITCHER);
+	override onunload(): void {
+		this.inheritanceManager?.stop();
+		this.tasksTable?.destroy();
+		this.goalsTable?.destroy();
+		this.app.workspace.detachLeavesOfType(FUSION_GOALS_VIEW_TYPE);
 	}
 
-	private async toggleRelationshipGraphView(): Promise<void> {
-		const { workspace } = this.app;
-
-		const existingLeaves = workspace.getLeavesOfType(VIEW_TYPE_FUSION_SWITCHER);
-
-		if (existingLeaves.length > 0) {
-			// View exists, reveal/focus it
-			const firstLeaf = existingLeaves[0];
-			workspace.revealLeaf(firstLeaf);
-		} else {
-			// View doesn't exist, create it in the left sidebar
-			const leaf = workspace.getLeftLeaf(false);
-			if (leaf) {
-				await leaf.setViewState({
-					type: VIEW_TYPE_FUSION_SWITCHER,
-					active: true,
-				});
-				workspace.revealLeaf(leaf);
-			}
-		}
-	}
-
-	private executeViewSwitcherMethod(methodName: string, noticeMessage?: string): void {
-		const { workspace } = this.app;
-		const existingLeaves = workspace.getLeavesOfType(VIEW_TYPE_FUSION_SWITCHER);
-
-		if (existingLeaves.length > 0) {
-			const viewSwitcher = existingLeaves[0].view;
-			if (viewSwitcher instanceof FusionViewSwitcher) {
-				const method = viewSwitcher[methodName as keyof FusionViewSwitcher];
-				if (typeof method === "function") {
-					(method as () => void).call(viewSwitcher);
-				}
-				return;
-			}
+	updateRibbonIcon(): void {
+		if (this.ribbonIconEl) {
+			this.ribbonIconEl.remove();
+			this.ribbonIconEl = null;
 		}
 
-		if (noticeMessage) {
-			new Notice(noticeMessage);
-		}
-	}
-
-	private executeViewSwitcherMethodWithArg(methodName: string, arg: number): void {
-		const { workspace } = this.app;
-		const existingLeaves = workspace.getLeavesOfType(VIEW_TYPE_FUSION_SWITCHER);
-
-		if (existingLeaves.length > 0) {
-			const viewSwitcher = existingLeaves[0].view;
-			if (viewSwitcher instanceof FusionViewSwitcher) {
-				const method = viewSwitcher[methodName as keyof FusionViewSwitcher];
-				if (typeof method === "function") {
-					(method as (arg: number) => void).call(viewSwitcher, arg);
-				}
-			}
+		if (this.settingsStore.currentSettings.showRibbonIcon) {
+			this.ribbonIconEl = this.addRibbonIcon("target", "Fusion Goals", () => {
+				void this.activateFusionGoals?.();
+			});
 		}
 	}
 
@@ -256,7 +183,7 @@ export default class FusionGoalsPlugin extends Plugin {
 			const tasksDir = settings.tasksDirectory;
 
 			if (!tasksDir) {
-				new Notice("❌ Tasks directory not configured");
+				new Notice("Tasks directory not configured");
 				return;
 			}
 
@@ -264,17 +191,15 @@ export default class FusionGoalsPlugin extends Plugin {
 			const goalFrontmatter = goalCache?.frontmatter;
 
 			if (!goalFrontmatter) {
-				new Notice("❌ Goal file has no frontmatter");
+				new Notice("Goal file has no frontmatter");
 				return;
 			}
 
 			const inheritedProps = getInheritableProperties(goalFrontmatter, settings);
 
-			// Generate file name: "Goal Name - "
 			const goalName = goalFile.basename;
 			const fileName = `${goalName} - `;
 
-			// Create Goal property as array with full path and alias: [[Goals/Goal Name|Goal Name]]
 			const goalPath = goalFile.path.replace(/\.md$/, "");
 			const goalLink = `[[${goalPath}|${goalName}]]`;
 
@@ -286,7 +211,7 @@ export default class FusionGoalsPlugin extends Plugin {
 			const templaterService = new TemplaterService(this.app);
 			const useTemplater = !!(settings.taskTemplatePath && settings.taskTemplatePath.trim() !== "");
 
-			const newFile = await templaterService.createFile({
+			const newFile = await templaterService.createFileAtomic({
 				title: fileName,
 				targetDirectory: tasksDir,
 				filename: generateUniqueFilePath(this.app, tasksDir, fileName).split("/").pop()?.replace(".md", "") || fileName,
@@ -295,22 +220,19 @@ export default class FusionGoalsPlugin extends Plugin {
 				useTemplater,
 			});
 
-			// Open the file
 			const leaf = this.app.workspace.getLeaf("tab");
 			await leaf.openFile(newFile);
 
-			// Focus the inline title at the end
 			await this.focusInlineTitleAtEnd(leaf);
 
-			new Notice(`✅ Created task: ${newFile.basename}`);
+			new Notice(`Created task: ${newFile.basename}`);
 		} catch (error) {
 			console.error("Error creating task from goal:", error);
-			new Notice(`❌ Error creating task: ${error}`);
+			new Notice(`Error creating task: ${error}`);
 		}
 	}
 
 	private async focusInlineTitleAtEnd(leaf: WorkspaceLeaf): Promise<void> {
-		// Wait for the view to fully render
 		await new Promise((resolve) => setTimeout(resolve, 30));
 
 		const view = leaf.view;
@@ -326,7 +248,6 @@ export default class FusionGoalsPlugin extends Plugin {
 
 		if (selection) {
 			range.selectNodeContents(inlineTitle);
-			// Position cursor at the end (after the dash and space)
 			range.collapse(false);
 			selection.removeAllRanges();
 			selection.addRange(range);
@@ -343,10 +264,34 @@ export default class FusionGoalsPlugin extends Plugin {
 				pluginName: "Fusion Goals",
 				changelogContent: CHANGELOG_CONTENT,
 				links: {
-					github: "https://github.com/Real1tyy/Fusion-Goals",
-					support: "https://matejvavroproductivity.com/support/",
-					changelog: "https://real1tyy.github.io/Fusion-Goals/changelog",
-					documentation: "https://real1tyy.github.io/Fusion-Goals/",
+					github: buildUtmUrl(
+						"https://github.com/Real1tyy/Fusion-Goals",
+						"fusion-goals",
+						"plugin",
+						"whats_new",
+						"github"
+					),
+					support: buildUtmUrl(
+						"https://matejvavroproductivity.com/support/",
+						"fusion-goals",
+						"plugin",
+						"whats_new",
+						"support"
+					),
+					changelog: buildUtmUrl(
+						"https://real1tyy.github.io/Fusion-Goals/changelog",
+						"fusion-goals",
+						"plugin",
+						"whats_new",
+						"changelog"
+					),
+					documentation: buildUtmUrl(
+						"https://real1tyy.github.io/Fusion-Goals/",
+						"fusion-goals",
+						"plugin",
+						"whats_new",
+						"documentation"
+					),
 				},
 			};
 

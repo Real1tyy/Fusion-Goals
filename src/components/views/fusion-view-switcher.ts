@@ -1,6 +1,7 @@
 import { ItemView, type WorkspaceLeaf } from "obsidian";
 import type { Subscription } from "rxjs";
-import type { Indexer } from "../../core/indexer";
+
+import type { GoalsManager } from "../../core/goals-manager";
 import type FusionGoalsPlugin from "../../main";
 import { BasesView, type BasesViewState } from "./bases-view";
 import { RelationshipGraphView } from "./relationship-graph-view";
@@ -28,7 +29,7 @@ export class FusionViewSwitcher extends ItemView {
 
 	constructor(
 		leaf: WorkspaceLeaf,
-		private readonly indexer: Indexer,
+		private readonly goalsManager: GoalsManager,
 		private readonly plugin: FusionGoalsPlugin
 	) {
 		super(leaf);
@@ -38,22 +39,23 @@ export class FusionViewSwitcher extends ItemView {
 		return VIEW_TYPE_FUSION_SWITCHER;
 	}
 
-	getDisplayText(): string {
+	override getDisplayText(): string {
 		return "Fusion Goals";
 	}
 
-	getIcon(): string {
+	override getIcon(): string {
 		return this.currentMode === "graph" ? "git-fork" : "layout-grid";
 	}
 
-	getState(): ViewState {
+	override getState(): ViewState {
+		const basesState = this.basesView?.getState() ?? this.savedBasesState ?? undefined;
 		return {
 			mode: this.currentMode,
-			basesState: this.basesView?.getState() ?? this.savedBasesState ?? undefined,
+			...(basesState !== undefined ? { basesState } : {}),
 		};
 	}
 
-	async setState(state: ViewState, _result: unknown): Promise<void> {
+	override async setState(state: ViewState, _result: unknown): Promise<void> {
 		if (state?.mode) {
 			this.currentMode = state.mode;
 		}
@@ -62,7 +64,7 @@ export class FusionViewSwitcher extends ItemView {
 		}
 	}
 
-	async onOpen(): Promise<void> {
+	override async onOpen(): Promise<void> {
 		const { contentEl } = this;
 		contentEl.empty();
 		contentEl.addClass("fusion-view-switcher-content");
@@ -83,7 +85,7 @@ export class FusionViewSwitcher extends ItemView {
 		await this.renderView();
 	}
 
-	async onClose(): Promise<void> {
+	override async onClose(): Promise<void> {
 		if (this.settingsSubscription) {
 			this.settingsSubscription.unsubscribe();
 			this.settingsSubscription = null;
@@ -197,7 +199,7 @@ export class FusionViewSwitcher extends ItemView {
 			});
 
 			// Create and render graph view
-			this.graphView = new RelationshipGraphView(this.app, this.indexer, this.plugin, this.graphContainerEl);
+			this.graphView = new RelationshipGraphView(this.app, this.goalsManager, this.plugin, this.graphContainerEl);
 			await this.graphView.render();
 		} else {
 			// Clean up graph view

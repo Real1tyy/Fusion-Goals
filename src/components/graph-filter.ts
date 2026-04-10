@@ -16,11 +16,11 @@ export class GraphFilter extends InputFilterManager<Record<string, any>> {
 			cssPrefix: "fusion",
 			onFilterChange,
 			initiallyVisible,
-			onHide,
+			...(onHide !== undefined ? { onHide } : {}),
 		});
 	}
 
-	protected updateFilterValue(value: string): void {
+	protected override updateFilterValue(value: string): void {
 		super.updateFilterValue(value);
 		this.compiledFunc = null;
 		this.propertyMapping.clear();

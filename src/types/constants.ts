@@ -1,4 +1,34 @@
-export const PLUGIN_ID = "fusion-goals";
+import { z } from "zod";
+
+export const FUSION_GOALS_VIEW_TYPE = "fusion-goals-view";
+
+export const PRIORITIES = {
+	Critical: { label: "Critical" },
+	High: { label: "High" },
+	Medium: { label: "Medium" },
+	Low: { label: "Low" },
+} as const;
+
+export type PriorityCode = keyof typeof PRIORITIES;
+
+export const PRIORITY_VALUES = Object.keys(PRIORITIES) as [PriorityCode, ...PriorityCode[]];
+
+export const PrioritySchema = z.enum(PRIORITY_VALUES);
+
+export const STATUSES = {
+	"In progress": { label: "In progress" },
+	Inbox: { label: "Inbox" },
+	Planned: { label: "Planned" },
+	"Next Up": { label: "Next Up" },
+	Done: { label: "Done" },
+	Icebox: { label: "Icebox" },
+} as const;
+
+export type StatusCode = keyof typeof STATUSES;
+
+export const STATUS_VALUES = Object.keys(STATUSES) as [StatusCode, ...StatusCode[]];
+
+export const StatusSchema = z.enum(STATUS_VALUES);
 
 export const SETTINGS_DEFAULTS = {
 	DEFAULT_VERSION: "1.0.0",
@@ -8,6 +38,10 @@ export const SETTINGS_DEFAULTS = {
 
 	// Property names for hierarchical linking
 	DEFAULT_TASK_GOAL_PROP: "Goal",
+
+	// Property names for priority and progress
+	DEFAULT_PRIORITY_PROP: "Priority",
+	DEFAULT_PROGRESS_PROP: "Progress",
 
 	// Template settings
 	DEFAULT_TASK_TEMPLATE_PATH: "",
@@ -76,9 +110,16 @@ export const SETTINGS_DEFAULTS = {
 	// Frontmatter inheritance defaults
 	DEFAULT_ENABLE_FRONTMATTER_INHERITANCE: true,
 	DEFAULT_INHERITANCE_EXCLUDED_PROPERTIES: ["Goal"],
-} as const;
 
-export const SCAN_CONCURRENCY = 10;
+	// Multi-row layout defaults
+	DEFAULT_USE_MULTI_ROW_LAYOUT: false,
+	DEFAULT_MAX_CHILDREN_PER_ROW: 10,
+
+	// Title property defaults
+	DEFAULT_TITLE_PROPERTY_ENABLED: false,
+	DEFAULT_TITLE_PROP: "Task Title",
+	DEFAULT_TITLE_COLUMN_SIZE: 200,
+} as const;
 
 export type FileType = "goal" | "task";
 
@@ -98,5 +139,3 @@ export const FILE_TYPE_CONFIG = {
 		tabMode: "tasks" as const,
 	},
 } as const;
-
-export type TabMode = (typeof FILE_TYPE_CONFIG)[FileType]["tabMode"];

@@ -1,10 +1,11 @@
 import { buildPropertyMapping, sanitizeExpression } from "@real1ty-obsidian-plugins";
 import { type App, Modal, TFile } from "obsidian";
 import type { Subscription } from "rxjs";
-import type { Indexer } from "src/core/indexer";
+import type { GoalsManager } from "src/core/goals-manager";
 import { parseDaysFromString } from "src/utils/date";
-import type { SettingsStore } from "../core/settings-store";
+
 import { FILE_TYPE_CONFIG, type FileType } from "../types/constants";
+import type { FusionGoalsSettingsStore } from "../types/settings";
 import { DeadlineTable, type DeadlineTableItem } from "./deadline-table";
 import { GraphFilter } from "./graph-filter";
 import { GraphFilterPresetSelector } from "./graph-filter-preset-selector";
@@ -27,7 +28,7 @@ type SortOrder = "asc" | "desc";
 const ITEMS_PER_PAGE = 20;
 
 export class DeadlineOverviewModal extends Modal {
-	private indexer: Indexer;
+	private goalsManager: GoalsManager;
 	private settingsSubscription?: Subscription;
 	private currentTab: FileType = "goal";
 	private currentPage = 1;
@@ -47,24 +48,24 @@ export class DeadlineOverviewModal extends Modal {
 
 	constructor(
 		app: App,
-		indexer: Indexer,
-		private settingsStore: SettingsStore
+		goalsManager: GoalsManager,
+		private settingsStore: FusionGoalsSettingsStore
 	) {
 		super(app);
-		this.indexer = indexer;
+		this.goalsManager = goalsManager;
 
 		this.propertyTooltip = new PropertyTooltip(this.app, {
 			settingsStore: this.settingsStore,
 			hideDateInfo: true,
 			tooltipWidth: 500,
-			onFileOpen: async (filePath, event) => {
+			onFileOpen: (filePath, event) => {
 				const file = this.app.vault.getAbstractFileByPath(filePath);
 				if (!(file instanceof TFile)) return;
 
 				if (event.ctrlKey || event.metaKey) {
-					await this.app.workspace.getLeaf("tab").openFile(file);
+					void this.app.workspace.getLeaf("tab").openFile(file);
 				} else {
-					await this.app.workspace.getLeaf().openFile(file);
+					void this.app.workspace.getLeaf().openFile(file);
 					this.close();
 				}
 			},
@@ -76,7 +77,7 @@ export class DeadlineOverviewModal extends Modal {
 		this.renderContent();
 	}
 
-	async onOpen(): Promise<void> {
+	override async onOpen(): Promise<void> {
 		const { contentEl, modalEl } = this;
 		contentEl.addClass("startup-overview-modal");
 
@@ -95,40 +96,36 @@ export class DeadlineOverviewModal extends Modal {
 	private async loadData(): Promise<void> {
 		const goals: TableItem[] = [];
 		const tasks: TableItem[] = [];
+		const settings = this.settingsStore.settings$.value;
 
-		for (const [filePath, relationships] of this.indexer.getRelationshipsCache()) {
-			const file = this.app.vault.getAbstractFileByPath(filePath);
-			if (!(file instanceof TFile)) continue;
+		const processRow = (row: { filePath: string; file: TFile; data: Record<string, unknown> }, fileType: FileType) => {
+			const frontmatter = this.app.metadataCache.getFileCache(row.file)?.frontmatter ?? {};
 
-			const settings = this.settingsStore.settings$.value;
 			if (settings.filterExpressions.length > 0) {
-				const passesFilters = this.evaluateGlobalFilters(relationships.frontmatter, settings.filterExpressions);
-				if (!passesFilters) {
-					continue;
-				}
+				if (!this.evaluateGlobalFilters(frontmatter, settings.filterExpressions)) return;
 			}
 
-			const daysRemaining = relationships.daysRemaining ? parseDaysFromString(relationships.daysRemaining) : null;
-			const daysIncoming = relationships.daysSince ? parseDaysFromString(relationships.daysSince) : null;
+			const { daysSince, daysRemaining } = this.goalsManager.getDateInfo(row.filePath);
 
 			const item: TableItem = {
-				file,
-				title: file.basename,
-				filePath,
-				fileType: relationships.type,
-				daysRemaining,
-				daysIncoming,
-				frontmatter: relationships.frontmatter,
+				file: row.file,
+				title: row.file.basename,
+				filePath: row.filePath,
+				fileType,
+				daysRemaining: daysRemaining ? parseDaysFromString(daysRemaining) : null,
+				daysIncoming: daysSince ? parseDaysFromString(daysSince) : null,
+				frontmatter,
 			};
 
-			switch (relationships.type) {
-				case "goal":
-					goals.push(item);
-					break;
-				case "task":
-					tasks.push(item);
-					break;
-			}
+			if (fileType === "goal") goals.push(item);
+			else tasks.push(item);
+		};
+
+		for (const goal of this.goalsManager.getAllGoals()) {
+			processRow(goal as { filePath: string; file: TFile; data: Record<string, unknown> }, "goal");
+		}
+		for (const task of this.goalsManager.getAllTasks()) {
+			processRow(task as { filePath: string; file: TFile; data: Record<string, unknown> }, "task");
 		}
 
 		this.allItems.set("goal", goals);
@@ -594,7 +591,7 @@ export class DeadlineOverviewModal extends Modal {
 		});
 	}
 
-	onClose(): void {
+	override onClose(): void {
 		const { contentEl } = this;
 		contentEl.empty();
 		this.settingsSubscription?.unsubscribe();

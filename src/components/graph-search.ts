@@ -8,7 +8,7 @@ export class GraphSearch extends InputFilterManager<string> {
 			cssPrefix: "fusion",
 			onFilterChange: onSearchChange,
 			initiallyVisible,
-			onHide,
+			...(onHide !== undefined ? { onHide } : {}),
 		});
 	}
 

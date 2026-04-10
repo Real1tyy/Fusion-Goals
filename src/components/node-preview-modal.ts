@@ -1,8 +1,8 @@
 import { filterPropertiesForDisplay } from "@real1ty-obsidian-plugins";
 import { type App, Modal, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
-import type { SettingsStore } from "../core/settings-store";
-import type { FusionGoalsSettings } from "../types/settings";
+
+import type { FusionGoalsSettings, FusionGoalsSettingsStore } from "../types/settings";
 import { extractDateInfo } from "../utils/date";
 import { PropertyRenderer } from "./property-renderer";
 
@@ -16,7 +16,7 @@ export class NodePreviewModal extends Modal {
 	constructor(
 		app: App,
 		file: TFile,
-		private settingsStore: SettingsStore
+		private settingsStore: FusionGoalsSettingsStore
 	) {
 		super(app);
 		this.file = file;
@@ -37,7 +37,7 @@ export class NodePreviewModal extends Modal {
 		);
 	}
 
-	async onOpen(): Promise<void> {
+	override async onOpen(): Promise<void> {
 		const { contentEl } = this;
 		contentEl.addClass("node-preview-modal");
 
@@ -55,7 +55,8 @@ export class NodePreviewModal extends Modal {
 			const cache = this.app.metadataCache.getFileCache(this.file);
 			if (cache?.frontmatter) {
 				// Copy all frontmatter except Obsidian's internal properties
-				const { position: _position, ...userFrontmatter } = cache.frontmatter;
+				// biome-ignore lint/correctness/noUnusedVariables: Using rest operator to exclude position
+				const { position, ...userFrontmatter } = cache.frontmatter;
 				this.frontmatter = userFrontmatter;
 			}
 		} catch (error) {
@@ -74,7 +75,7 @@ export class NodePreviewModal extends Modal {
 		// Make title clickable to open file
 		titleEl.addClass("clickable");
 		titleEl.onclick = () => {
-			this.app.workspace.openLinkText(this.file.path, "", false);
+			void this.app.workspace.openLinkText(this.file.path, "", false);
 			this.close();
 		};
 
@@ -132,7 +133,7 @@ export class NodePreviewModal extends Modal {
 		}
 	}
 
-	onClose(): void {
+	override onClose(): void {
 		const { contentEl } = this;
 		contentEl.empty();
 

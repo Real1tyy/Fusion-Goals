@@ -1,5 +1,6 @@
 import { type App, TFile as TFileType } from "obsidian";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { Frontmatter, FusionGoalsSettings } from "../src/types/settings";
 import {
 	applyInheritanceRemovals,
@@ -11,7 +12,7 @@ import {
 
 // Mock Obsidian imports
 vi.mock("obsidian", async () => {
-	const actual = await vi.importActual<typeof import("./mocks/obsidian")>("./mocks/obsidian");
+	const actual = await vi.importActual<Record<string, unknown>>("./mocks/obsidian");
 	return actual;
 });
 
@@ -79,7 +80,7 @@ describe("getInheritableProperties", () => {
 
 			const result = getInheritableProperties(frontmatter, defaultSettings);
 
-			expect(result.Category).toBe("[[Categories/Work/Tech|Tech]]");
+			expect(result["Category"]).toBe("[[Categories/Work/Tech|Tech]]");
 		});
 
 		it("should not modify non-wiki-link strings", () => {
@@ -104,7 +105,7 @@ describe("getInheritableProperties", () => {
 			const result = getInheritableProperties(frontmatter, defaultSettings);
 
 			// Links without paths (no /) should stay as is
-			expect(result.Tags).toEqual(["[[SimpleTag]]", "[[AnotherTag]]"]);
+			expect(result["Tags"]).toEqual(["[[SimpleTag]]", "[[AnotherTag]]"]);
 		});
 	});
 
@@ -285,15 +286,15 @@ describe("mergeProperties", () => {
 	it("should merge array properties using union", () => {
 		const result = mergeProperties([{ Tags: ["tag-a", "tag-b"] }, { Tags: ["tag-c", "tag-d"] }]);
 
-		expect(result.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
-		expect((result.Tags as string[]).length).toBe(4);
+		expect(result["Tags"]).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
+		expect((result["Tags"] as string[]).length).toBe(4);
 	});
 
 	it("should deduplicate array properties during merge", () => {
 		const result = mergeProperties([{ Tags: ["tag-a", "tag-b", "tag-c"] }, { Tags: ["tag-b", "tag-d", "tag-a"] }]);
 
-		expect(result.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
-		expect((result.Tags as string[]).length).toBe(4);
+		expect(result["Tags"]).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
+		expect((result["Tags"] as string[]).length).toBe(4);
 	});
 
 	it("should override non-array properties (last value wins)", () => {
@@ -350,7 +351,7 @@ describe("mergeProperties", () => {
 			Category: "Work",
 			Owner: "Alice",
 		});
-		expect((result.Tags as string[]).length).toBe(4); // Deduplicated
+		expect((result["Tags"] as string[]).length).toBe(4); // Deduplicated
 	});
 });
 
@@ -546,11 +547,11 @@ describe("applyInheritanceUpdates", () => {
 		processFrontMatterSpy.mock.calls[0][1](testFm);
 
 		// Tags should be merged with deduplication
-		expect(testFm.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
-		expect(testFm.Tags).toHaveLength(4); // No duplicates
+		expect(testFm["Tags"]).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
+		expect(testFm["Tags"]).toHaveLength(4); // No duplicates
 
 		// Simple value should be replaced
-		expect(testFm.SimpleValue).toBe("new-value");
+		expect(testFm["SimpleValue"]).toBe("new-value");
 	});
 
 	it("should handle incoming array properties with duplicates", async () => {
@@ -573,8 +574,8 @@ describe("applyInheritanceUpdates", () => {
 		processFrontMatterSpy.mock.calls[0][1](testFm);
 
 		// Union operation with Set automatically deduplicates
-		expect(testFm.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
-		expect(testFm.Tags).toHaveLength(4);
+		expect(testFm["Tags"]).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
+		expect(testFm["Tags"]).toHaveLength(4);
 	});
 
 	it("should merge multiple inherited array properties", async () => {
@@ -599,11 +600,11 @@ describe("applyInheritanceUpdates", () => {
 		processFrontMatterSpy.mock.calls[0][1](testFm);
 
 		// Both arrays should be merged with deduplication
-		expect(testFm.Tags).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
-		expect(testFm.Tags).toHaveLength(4);
+		expect(testFm["Tags"]).toEqual(expect.arrayContaining(["tag-a", "tag-b", "tag-c", "tag-d"]));
+		expect(testFm["Tags"]).toHaveLength(4);
 
-		expect(testFm.Categories).toEqual(expect.arrayContaining(["cat-1", "cat-2", "cat-3"]));
-		expect(testFm.Categories).toHaveLength(3);
+		expect(testFm["Categories"]).toEqual(expect.arrayContaining(["cat-1", "cat-2", "cat-3"]));
+		expect(testFm["Categories"]).toHaveLength(3);
 	});
 
 	it("should normalize existing child wiki links when applying updates", async () => {
@@ -628,7 +629,7 @@ describe("applyInheritanceUpdates", () => {
 		expect(testFm["Backlink Tags"]).toEqual(
 			expect.arrayContaining(["[[Tags/Health|Health]]", "[[Tags/Exercise|Exercise]]"])
 		);
-		expect(testFm.OtherProp).toBe("[[Tags/Wellness|Wellness]]");
+		expect(testFm["OtherProp"]).toBe("[[Tags/Wellness|Wellness]]");
 	});
 
 	it("should not duplicate when merging if child has unnormalized wiki link", async () => {
@@ -687,7 +688,7 @@ describe("detectPropertyRemovals", () => {
 
 		const removals = detectPropertyRemovals(oldFrontmatter, newFrontmatter, defaultSettings);
 
-		expect(removals.Status).toEqual(["Active"]);
+		expect(removals["Status"]).toEqual(["Active"]);
 	});
 
 	it("should detect multiple removed values from same array", () => {
@@ -701,8 +702,8 @@ describe("detectPropertyRemovals", () => {
 
 		const removals = detectPropertyRemovals(oldFrontmatter, newFrontmatter, defaultSettings);
 
-		expect(removals.Tags).toEqual(expect.arrayContaining(["tag-b", "tag-c"]));
-		expect(removals.Tags).toHaveLength(2);
+		expect(removals["Tags"]).toEqual(expect.arrayContaining(["tag-b", "tag-c"]));
+		expect(removals["Tags"]).toHaveLength(2);
 	});
 
 	it("should return empty object when no removals detected", () => {
@@ -829,7 +830,7 @@ describe("applyInheritanceRemovals", () => {
 		processFrontMatterSpy.mock.calls[0][1](testFm);
 
 		expect(testFm).not.toHaveProperty("Tags");
-		expect(testFm.OtherProp).toBe("value");
+		expect(testFm["OtherProp"]).toBe("value");
 	});
 
 	it("should remove single-value property", async () => {
@@ -851,7 +852,7 @@ describe("applyInheritanceRemovals", () => {
 		processFrontMatterSpy.mock.calls[0][1](testFm);
 
 		expect(testFm).not.toHaveProperty("Status");
-		expect(testFm.Priority).toBe("High");
+		expect(testFm["Priority"]).toBe("High");
 	});
 
 	it("should handle multiple property removals", async () => {
@@ -873,8 +874,8 @@ describe("applyInheritanceRemovals", () => {
 		};
 		processFrontMatterSpy.mock.calls[0][1](testFm);
 
-		expect(testFm.Tags).toEqual(["tag-c"]);
-		expect(testFm.Categories).toEqual(["cat-2"]);
+		expect(testFm["Tags"]).toEqual(["tag-c"]);
+		expect(testFm["Categories"]).toEqual(["cat-2"]);
 	});
 
 	it("should skip non-existent files", async () => {
@@ -942,6 +943,6 @@ describe("applyInheritanceRemovals", () => {
 			expect.arrayContaining(["[[Tags/Exercise|Exercise]]", "[[Tags/Meditation|Meditation]]"])
 		);
 		expect(testFm["Backlink Tags"]).toHaveLength(2);
-		expect(testFm.OtherProp).toBe("[[Tags/Wellness|Wellness]]");
+		expect(testFm["OtherProp"]).toBe("[[Tags/Wellness|Wellness]]");
 	});
 });
