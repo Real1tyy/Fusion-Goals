@@ -1,6 +1,17 @@
 import type { Plugin } from "obsidian";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, distinctUntilChanged, map, skip } from "rxjs";
 import type { z } from "zod";
+
+export interface WatchOptions<R = unknown> {
+	immediate?: boolean;
+	compare?: (a: R, b: R) => boolean;
+}
+
+export type SettingsWatcher<TSettings> = readonly [
+	selector: (settings: TSettings) => unknown,
+	callback: (value: never) => void,
+	options?: WatchOptions,
+];
 
 export class SettingsStore<TSchema extends z.ZodTypeAny> {
 	private plugin: Plugin;
@@ -71,7 +82,10 @@ export class SettingsStore<TSchema extends z.ZodTypeAny> {
 
 	async updateProperties(updates: Partial<z.infer<TSchema>>): Promise<void> {
 		await this.updateSettings((settings) => {
-			return Object.assign({}, settings, updates);
+			return {
+				...(structuredClone(settings) as Record<string, unknown>),
+				...(structuredClone(updates) as Record<string, unknown>),
+			} as z.infer<TSchema>;
 		});
 	}
 
@@ -82,5 +96,40 @@ export class SettingsStore<TSchema extends z.ZodTypeAny> {
 	hasCustomizations(): boolean {
 		const defaults = this.getDefaults();
 		return JSON.stringify(this.currentSettings) !== JSON.stringify(defaults);
+	}
+
+	watch<R>(
+		selector: (settings: z.infer<TSchema>) => R,
+		callback: (value: R) => void,
+		options?: WatchOptions<R>
+	): () => void;
+	watch(watchers: SettingsWatcher<z.infer<TSchema>>[]): () => void;
+	watch<R>(
+		selectorOrWatchers: ((settings: z.infer<TSchema>) => R) | SettingsWatcher<z.infer<TSchema>>[],
+		callback?: (value: R) => void,
+		options?: WatchOptions<R>
+	): () => void {
+		if (Array.isArray(selectorOrWatchers)) {
+			const teardowns = selectorOrWatchers.map(([sel, cb, opts]) =>
+				this.watchSingle(sel, cb as (value: unknown) => void, opts)
+			);
+			return () => teardowns.forEach((fn) => fn());
+		}
+		return this.watchSingle(selectorOrWatchers, callback!, options);
+	}
+
+	private watchSingle<R>(
+		selector: (settings: z.infer<TSchema>) => R,
+		callback: (value: R) => void,
+		options?: WatchOptions<R>
+	): () => void {
+		const source$ = this.settings$.pipe(map(selector), distinctUntilChanged(options?.compare));
+		const sub = (options?.immediate ? source$ : source$.pipe(skip(1))).subscribe(callback);
+		this.plugin.register(() => sub.unsubscribe());
+		return () => sub.unsubscribe();
+	}
+
+	getSecret(secretName: string): string {
+		return (this.plugin.app as any).secretStorage?.getSecret(secretName) ?? "";
 	}
 }

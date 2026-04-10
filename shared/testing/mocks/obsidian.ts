@@ -117,8 +117,16 @@ export class Setting {
 
 	setName = vi.fn().mockReturnThis();
 	setDesc = vi.fn().mockReturnThis();
+	setHeading = vi.fn().mockReturnThis();
 	addText = vi.fn().mockReturnThis();
 	addTextArea = vi.fn().mockReturnThis();
+	addToggle = vi.fn().mockReturnThis();
+	addDropdown = vi.fn().mockReturnThis();
+	addButton = vi.fn().mockReturnThis();
+	addComponent = vi.fn().mockReturnThis();
+	setClass = vi.fn().mockReturnThis();
+	setDisabled = vi.fn().mockReturnThis();
+	then = vi.fn().mockReturnThis();
 }
 
 // TFolder mock
@@ -191,15 +199,87 @@ export class Modal {
 
 	open = vi.fn();
 	close = vi.fn();
-	onOpen = vi.fn();
-	onClose = vi.fn();
+}
+
+// Menu mock
+export class Menu {
+	addItem = vi.fn().mockReturnThis();
+	addSeparator = vi.fn().mockReturnThis();
+	showAtMouseEvent = vi.fn();
+	showAtPosition = vi.fn();
+	onHide = vi.fn().mockReturnThis();
+}
+
+// SuggestModal mock
+export class SuggestModal extends Modal {
+	getSuggestions = vi.fn().mockReturnValue([]);
+	renderSuggestion = vi.fn();
+	onChooseSuggestion = vi.fn();
+}
+
+// PopoverSuggest mock
+export class PopoverSuggest {
+	constructor(_app: unknown) {}
+	getSuggestions = vi.fn().mockReturnValue([]);
+	renderSuggestion = vi.fn();
+	selectSuggestion = vi.fn();
+}
+
+// MarkdownView mock
+export class MarkdownView extends ItemView {
+	editor = { getValue: vi.fn(), setValue: vi.fn() };
+	getMode = vi.fn().mockReturnValue("source");
+}
+
+// TextComponent mock
+export class TextComponent {
+	inputEl: HTMLInputElement;
+
+	constructor(containerEl: HTMLElement) {
+		this.inputEl = document.createElement("input");
+		containerEl.appendChild(this.inputEl);
+	}
+
+	setValue(value: string): this {
+		this.inputEl.value = value;
+		return this;
+	}
+
+	setPlaceholder(placeholder: string): this {
+		this.inputEl.placeholder = placeholder;
+		return this;
+	}
+
+	onChange = vi.fn().mockReturnThis();
 }
 
 // Notice mock
 export class Notice {
-	constructor(message: string) {
-		console.log(`Notice: ${message}`);
-	}
+	constructor(_message: string, _timeout?: number) {}
+}
+
+// Platform mock
+export const Platform = {
+	isDesktopApp: true,
+	isMobileApp: false,
+	isMacOS: false,
+	isWin: false,
+	isLinux: true,
+	isIosApp: false,
+	isAndroidApp: false,
+};
+
+// API version mock
+export const apiVersion = "1.5.0";
+
+// requestUrl mock
+export const requestUrl = vi.fn();
+
+// SecretComponent mock
+export class SecretComponent {
+	constructor(_app: unknown, _el: unknown) {}
+	setValue = vi.fn().mockReturnThis();
+	onChange = vi.fn().mockReturnThis();
 }
 
 // MarkdownRenderer mock
@@ -229,6 +309,9 @@ export function debounce<T extends (...args: unknown[]) => unknown>(func: T, wai
 	}) as T;
 }
 
+// setIcon mock
+export function setIcon(_el: HTMLElement, _iconId: string): void {}
+
 // normalizePath mock - simple path normalization for tests
 export function normalizePath(path: string): string {
 	// Basic normalization: replace backslashes with forward slashes
@@ -246,11 +329,16 @@ export interface MockApp {
 	};
 	metadataCache: {
 		getFileCache: ReturnType<typeof vi.fn>;
+		on: ReturnType<typeof vi.fn>;
+		offref: ReturnType<typeof vi.fn>;
 	};
 	vault: {
 		getAbstractFileByPath: ReturnType<typeof vi.fn>;
+		getFileByPath: ReturnType<typeof vi.fn>;
 		on: ReturnType<typeof vi.fn>;
+		off: ReturnType<typeof vi.fn>;
 		read: ReturnType<typeof vi.fn>;
+		cachedRead: ReturnType<typeof vi.fn>;
 		modify: ReturnType<typeof vi.fn>;
 		create: ReturnType<typeof vi.fn>;
 		delete: ReturnType<typeof vi.fn>;
@@ -262,22 +350,35 @@ export interface MockApp {
 	workspace: {
 		getActiveFile: ReturnType<typeof vi.fn>;
 		on: ReturnType<typeof vi.fn>;
+		onLayoutReady: ReturnType<typeof vi.fn>;
 	};
 }
 
 // Helper function to create a fully mocked app
-export function createMockApp(): MockApp {
+export function createMockApp(overrides?: {
+	vault?: Partial<MockApp["vault"]>;
+	metadataCache?: Partial<MockApp["metadataCache"]>;
+	fileManager?: Partial<MockApp["fileManager"]>;
+	workspace?: Partial<MockApp["workspace"]>;
+}): MockApp {
 	return {
 		fileManager: {
 			processFrontMatter: vi.fn(),
+			...overrides?.fileManager,
 		},
 		metadataCache: {
 			getFileCache: vi.fn(),
+			on: vi.fn(),
+			offref: vi.fn(),
+			...overrides?.metadataCache,
 		},
 		vault: {
 			getAbstractFileByPath: vi.fn(),
+			getFileByPath: vi.fn(),
 			on: vi.fn(),
+			off: vi.fn(),
 			read: vi.fn(),
+			cachedRead: vi.fn(),
 			modify: vi.fn(),
 			create: vi.fn(),
 			delete: vi.fn(),
@@ -285,10 +386,13 @@ export function createMockApp(): MockApp {
 			getFiles: vi.fn().mockReturnValue([]),
 			getMarkdownFiles: vi.fn().mockReturnValue([]),
 			getFolderByPath: vi.fn(),
+			...overrides?.vault,
 		},
 		workspace: {
 			getActiveFile: vi.fn(),
 			on: vi.fn(),
+			onLayoutReady: vi.fn((cb: () => void) => cb()),
+			...overrides?.workspace,
 		},
 	};
 }

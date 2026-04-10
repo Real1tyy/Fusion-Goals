@@ -93,42 +93,32 @@ export function removeMarkdownExtension(path: string): string {
  * @param input - File path or wiki link string
  * @returns The display name to show in the UI
  */
+export function extractFileName(path: string): string {
+	if (!path) return "";
+	const lastSlash = path.lastIndexOf("/");
+	const filename = lastSlash !== -1 ? path.substring(lastSlash + 1) : path;
+	return filename.replace(/\.md$/i, "");
+}
+
 export function extractDisplayName(input: string): string {
 	if (!input) return "";
 
-	// Remove any surrounding whitespace
 	const trimmed = input.trim();
 
-	// Check if it's a wiki link format [[path|alias]] or [[path]]
 	const wikiLinkMatch = trimmed.match(/^\[\[([^\]]+)\]\]$/);
 
 	if (wikiLinkMatch) {
 		const innerContent = wikiLinkMatch[1];
-
-		// Check if there's an alias (pipe character)
 		const pipeIndex = innerContent.indexOf("|");
 
 		if (pipeIndex !== -1) {
-			// Return the alias (everything after the pipe)
 			return innerContent.substring(pipeIndex + 1).trim();
 		}
 
-		// No alias, extract filename from path
-		const path = innerContent.trim();
-
-		const lastSlashIndex = path.lastIndexOf("/");
-
-		const filename = lastSlashIndex !== -1 ? path.substring(lastSlashIndex + 1) : path;
-
-		return filename.replace(/\.md$/i, "");
+		return extractFileName(innerContent.trim());
 	}
 
-	// Not a wiki link, treat as regular path
-	const lastSlashIndex = trimmed.lastIndexOf("/");
-
-	const filename = lastSlashIndex !== -1 ? trimmed.substring(lastSlashIndex + 1) : trimmed;
-
-	return filename.replace(/\.md$/i, "");
+	return extractFileName(trimmed);
 }
 
 /**
@@ -179,24 +169,66 @@ export interface FileContext {
 	cache: CachedMetadata | null;
 }
 
+export interface FileContextOptions {
+	/**
+	 * The source file path for link resolution context.
+	 * When provided, uses Obsidian's getFirstLinkpathDest to resolve wikilinks
+	 * that may be in subfolders or use relative paths.
+	 *
+	 * @example
+	 * // Without sourcePath: looks for "parent-note.md" directly
+	 * getFileContext(app, "parent-note")
+	 *
+	 * // With sourcePath: resolves "parent-note" relative to "folder/child.md"
+	 * // This can find "folder/parent-note.md" or "parent-note.md" depending on vault structure
+	 * getFileContext(app, "parent-note", { sourcePath: "folder/child.md" })
+	 */
+	sourcePath?: string;
+}
+
 /**
  * Creates a comprehensive file context object containing all relevant file information.
  * Handles path normalization, file lookup, and metadata caching.
+ *
+ * @param app - The Obsidian App instance
+ * @param path - Path to the file or wikilink target (e.g., "parent-note" from [[parent-note]])
+ * @param options - Optional configuration for link resolution
+ * @returns FileContext with file information, or with file: null if not found
+ *
+ * @example
+ * // Direct path lookup
+ * const ctx = getFileContext(app, "folder/note.md");
+ *
+ * // Wikilink resolution with source context
+ * const ctx = getFileContext(app, "parent-note", { sourcePath: "folder/child.md" });
  */
-export function getFileContext(app: App, path: string): FileContext {
+export function getFileContext(app: App, path: string, options?: FileContextOptions): FileContext {
 	const pathWithExt = ensureMarkdownExtension(path);
+	const baseName = extractDisplayName(path);
 
-	const baseName = removeMarkdownExtension(path);
+	let file: TFile | null = null;
 
-	const file = getFileByPath(app, pathWithExt);
+	// If sourcePath is provided, use Obsidian's link resolution
+	// This handles wikilinks that may reference files in different folders
+	if (options?.sourcePath) {
+		file = app.metadataCache.getFirstLinkpathDest(path, options.sourcePath);
+	}
+
+	// Fall back to direct path lookup if link resolution didn't find the file
+	// or if no sourcePath was provided
+	if (!file) {
+		file = getFileByPath(app, pathWithExt);
+	}
 
 	const cache = file ? app.metadataCache.getFileCache(file) : null;
-
 	const frontmatter = cache?.frontmatter;
+
+	// Use the resolved file's path if available, otherwise use the computed path
+	const resolvedPathWithExt = file?.path ?? pathWithExt;
 
 	return {
 		path,
-		pathWithExt,
+		pathWithExt: resolvedPathWithExt,
 		baseName,
 		file,
 		frontmatter,
@@ -207,16 +239,23 @@ export function getFileContext(app: App, path: string): FileContext {
 /**
  * Helper function to work with file context that automatically handles file not found cases.
  * Returns null if the file doesn't exist, otherwise executes the callback with the context.
+ *
+ * @param app - The Obsidian App instance
+ * @param path - Path to the file or wikilink target
+ * @param callback - Function to execute with the file context
+ * @param options - Optional configuration for link resolution
+ * @returns Result of callback, or null if file not found
  */
 export async function withFileContext<T>(
 	app: App,
 	path: string,
-	callback: (context: FileContext) => Promise<T> | T
+	callback: (context: FileContext) => Promise<T> | T,
+	options?: FileContextOptions
 ): Promise<T | null> {
-	const context = getFileContext(app, path);
+	const context = getFileContext(app, path, options);
 
 	if (!context.file) {
-		console.warn(`File not found: ${context.pathWithExt}`);
+		// Silent return for missing files - caller can check context.file if needed
 		return null;
 	}
 
@@ -506,40 +545,26 @@ export function getParentByFolder(app: App, filePath: string): string | null {
 export function getChildrenByFolder(app: App, filePath: string): string[] {
 	const allFiles = app.vault.getMarkdownFiles();
 
-	// Case 1: Folder note - get all files in the folder
 	if (isFolderNote(filePath)) {
 		const folderPath = getFolderPath(filePath);
 
-		const children: string[] = [];
+		return allFiles
+			.filter((file) => {
+				if (file.path === filePath) return false;
 
-		allFiles.forEach((file) => {
-			// Skip the folder note itself
-			if (file.path === filePath) return;
+				const fileFolder = getFolderPath(file.path);
 
-			const fileFolder = getFolderPath(file.path);
+				if (fileFolder === folderPath) return true;
 
-			// Direct child: file is in the same folder as the folder note
-			if (fileFolder === folderPath) {
-				children.push(file.path);
-
-				return;
-			}
-
-			// Subfolder note: file is a folder note one level deeper
-			// e.g., for "tasks/tasks.md", include "tasks/subtasks/subtasks.md"
-			if (fileFolder.startsWith(`${folderPath}/`)) {
-				// Check if it's exactly one level deeper and is a folder note
-				const relativePath = fileFolder.substring(folderPath.length + 1);
-
-				const isOneLevel = !relativePath.includes("/");
-
-				if (isOneLevel && isFolderNote(file.path)) {
-					children.push(file.path);
+				// Subfolder note one level deeper (e.g., "tasks/subtasks/subtasks.md")
+				if (fileFolder.startsWith(`${folderPath}/`)) {
+					const relativePath = fileFolder.substring(folderPath.length + 1);
+					return !relativePath.includes("/") && isFolderNote(file.path);
 				}
-			}
-		});
 
-		return children;
+				return false;
+			})
+			.map((file) => file.path);
 	}
 
 	// Case 2: Regular file - check for matching subfolder with folder note
@@ -676,11 +701,55 @@ export const sanitizeFilenamePreserveSpaces = (input: string): string => {
 	);
 };
 
+/**
+ * Creates an Obsidian display link from a file path.
+ * Format: `[[path/without/ext|DisplayName]]`
+ *
+ * @example
+ * toDisplayLink("People/Alice/Alice.md") // "[[People/Alice/Alice|Alice]]"
+ * toDisplayLink("Tasks/Build MVP.md")    // "[[Tasks/Build MVP|Build MVP]]"
+ */
+export function toDisplayLink(filePath: string): string {
+	const pathWithoutExt = removeMarkdownExtension(filePath);
+	const displayName = extractFileName(filePath);
+	return `[[${pathWithoutExt}|${displayName}]]`;
+}
+
 export const getFilenameFromPath = (filePath: string): string => {
 	return filePath.split("/").pop() || "Unknown";
 };
+
+export function getParentDirectoryName(filePath: string): string {
+	const segments = filePath.split("/");
+	if (segments.length < 2) return "";
+	return segments[segments.length - 2];
+}
 
 export const isFileInConfiguredDirectory = (filePath: string, directory: string): boolean => {
 	const normalizedDir = directory.endsWith("/") ? directory.slice(0, -1) : directory;
 	return filePath.startsWith(`${normalizedDir}/`) || filePath === normalizedDir;
 };
+
+/**
+ * Checks whether a file path is a direct child of a directory,
+ * either as a plain file (depth 1) or a folder note (depth 2 where filename matches parent folder).
+ *
+ * - `nodeType: "files"` — matches `directory/file.md` (1 segment relative)
+ * - `nodeType: "folderNotes"` — matches `directory/Name/Name.md` (2 segments relative, folder note)
+ */
+export function isDirectChildOrFolderNote(
+	filePath: string,
+	directory: string,
+	nodeType: "files" | "folderNotes"
+): boolean {
+	if (!filePath.startsWith(directory + "/")) return false;
+
+	const relative = filePath.slice(directory.length + 1);
+	const segments = relative.split("/");
+
+	if (nodeType === "folderNotes") {
+		return segments.length === 2 && isFolderNote(filePath);
+	}
+
+	return segments.length === 1;
+}

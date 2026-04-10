@@ -1,11 +1,15 @@
-import { Notice, Setting } from "obsidian";
-import type { ZodArray, ZodNumber, ZodObject, ZodRawShape, z } from "zod";
+import { type App, Notice, SecretComponent, Setting } from "obsidian";
+import type { z, ZodArray, ZodNumber, ZodObject, ZodRawShape } from "zod";
+
+import { camelCaseToLabel, introspectField } from "../schema-modal/introspect";
+import type { EnumFieldDescriptor, NumberFieldDescriptor } from "../schema-modal/types";
 import type { SettingsStore } from "./settings-store";
 
 interface BaseSettingConfig {
 	key: string;
 	name: string;
 	desc: string;
+	onChanged?: () => void;
 }
 
 interface TextSettingConfig extends BaseSettingConfig {
@@ -34,6 +38,29 @@ interface ArraySettingConfig<T = string> extends BaseSettingConfig {
 	validator?: (item: T) => boolean;
 }
 
+interface ColorPickerSettingConfig extends BaseSettingConfig {
+	fallback?: string;
+}
+
+interface OptionalColorPickerSettingConfig {
+	key: string;
+	name: string;
+	descWhenSet: string;
+	descWhenEmpty: string;
+	fallback?: string;
+}
+
+export interface SchemaFieldOverrides {
+	key?: string;
+	label?: string;
+	desc?: string;
+	step?: number;
+	commitOnChange?: boolean;
+	placeholder?: string;
+	options?: Record<string, string>;
+	onChanged?: () => void;
+}
+
 interface ArrayManagerConfig extends BaseSettingConfig {
 	placeholder?: string;
 	addButtonText?: string;
@@ -53,7 +80,10 @@ interface ArrayManagerConfig extends BaseSettingConfig {
 }
 
 export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
-	constructor(private settingsStore: SettingsStore<TSchema>) {}
+	constructor(
+		private settingsStore: SettingsStore<TSchema>,
+		private app?: App
+	) {}
 
 	private get settings(): z.infer<TSchema> {
 		return this.settingsStore.currentSettings;
@@ -118,7 +148,7 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 			throw new Error(`Validation failed: ${errors}`);
 		}
 
-		await this.settingsStore.updateSettings(() => newSettings);
+		await this.settingsStore.updateSettings(() => result.data as z.infer<TSchema>);
 	}
 
 	private inferSliderBounds(key: string): { min?: number; max?: number; step?: number } {
@@ -132,19 +162,14 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 
 				// Unwrap nested schemas
 
-				while (
-					fieldSchema &&
-					typeof fieldSchema === "object" &&
-					"_def" in fieldSchema &&
-					(fieldSchema as any)._def?.innerType
-				) {
-					fieldSchema = (fieldSchema as any)._def.innerType;
+				while (fieldSchema && typeof fieldSchema === "object" && "_def" in fieldSchema && fieldSchema._def?.innerType) {
+					fieldSchema = fieldSchema._def.innerType;
 				}
 
 				if (fieldSchema && typeof fieldSchema === "object" && "shape" in fieldSchema) {
-					fieldSchema = (fieldSchema as any).shape?.[k];
+					fieldSchema = fieldSchema.shape?.[k];
 				} else if (fieldSchema && typeof fieldSchema === "object" && k in fieldSchema) {
-					fieldSchema = (fieldSchema as any)[k];
+					fieldSchema = fieldSchema[k];
 				} else {
 					return {};
 				}
@@ -154,36 +179,34 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 
 			let innerSchema: any = fieldSchema;
 
-			while (
-				innerSchema &&
-				typeof innerSchema === "object" &&
-				"_def" in innerSchema &&
-				(innerSchema as any)._def?.innerType
-			) {
-				innerSchema = (innerSchema as any)._def.innerType;
+			while (innerSchema && typeof innerSchema === "object" && "_def" in innerSchema && innerSchema._def?.innerType) {
+				innerSchema = innerSchema._def.innerType;
 			}
 
 			if (
 				innerSchema &&
 				typeof innerSchema === "object" &&
 				"_def" in innerSchema &&
-				(innerSchema as any)._def?.typeName === "ZodNumber"
+				innerSchema._def?.typeName === "ZodNumber"
 			) {
 				const checks = ((innerSchema as ZodNumber)._def as any).checks || [];
 				let min: number | undefined;
 				let max: number | undefined;
 
 				for (const check of checks) {
-					if ((check as any).kind === "min") {
-						min = (check as any).value;
+					if (check.kind === "min") {
+						min = check.value;
 					}
 
-					if ((check as any).kind === "max") {
-						max = (check as any).value;
+					if (check.kind === "max") {
+						max = check.value;
 					}
 				}
 
-				return { min, max };
+				return {
+					...(min !== undefined ? { min } : {}),
+					...(max !== undefined ? { max } : {}),
+				};
 			}
 		} catch (error) {
 			console.warn(`Failed to infer slider bounds for key ${key}:`, error);
@@ -204,19 +227,14 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 
 				// Unwrap nested schemas
 
-				while (
-					fieldSchema &&
-					typeof fieldSchema === "object" &&
-					"_def" in fieldSchema &&
-					(fieldSchema as any)._def?.innerType
-				) {
-					fieldSchema = (fieldSchema as any)._def.innerType;
+				while (fieldSchema && typeof fieldSchema === "object" && "_def" in fieldSchema && fieldSchema._def?.innerType) {
+					fieldSchema = fieldSchema._def.innerType;
 				}
 
 				if (fieldSchema && typeof fieldSchema === "object" && "shape" in fieldSchema) {
-					fieldSchema = (fieldSchema as any).shape?.[k];
+					fieldSchema = fieldSchema.shape?.[k];
 				} else if (fieldSchema && typeof fieldSchema === "object" && k in fieldSchema) {
-					fieldSchema = (fieldSchema as any)[k];
+					fieldSchema = fieldSchema[k];
 				} else {
 					return undefined;
 				}
@@ -226,28 +244,23 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 
 			let innerSchema: any = fieldSchema;
 
-			while (
-				innerSchema &&
-				typeof innerSchema === "object" &&
-				"_def" in innerSchema &&
-				(innerSchema as any)._def?.innerType
-			) {
-				innerSchema = (innerSchema as any)._def.innerType;
+			while (innerSchema && typeof innerSchema === "object" && "_def" in innerSchema && innerSchema._def?.innerType) {
+				innerSchema = innerSchema._def.innerType;
 			}
 
 			if (
 				innerSchema &&
 				typeof innerSchema === "object" &&
 				"_def" in innerSchema &&
-				(innerSchema as any)._def?.typeName === "ZodArray"
+				innerSchema._def?.typeName === "ZodArray"
 			) {
 				const elementType = ((innerSchema as ZodArray<any>)._def as any).type;
 
-				if (elementType && (elementType as any)._def?.typeName === "ZodNumber") {
+				if (elementType && elementType._def?.typeName === "ZodNumber") {
 					return "number";
 				}
 
-				if (elementType && (elementType as any)._def?.typeName === "ZodString") {
+				if (elementType && elementType._def?.typeName === "ZodString") {
 					return "string";
 				}
 			}
@@ -259,7 +272,7 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 	}
 
 	addToggle(containerEl: HTMLElement, config: BaseSettingConfig): void {
-		const { key, name, desc } = config;
+		const { key, name, desc, onChanged } = config;
 		const value = this.getNestedValue(key);
 
 		new Setting(containerEl)
@@ -268,63 +281,236 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 			.addToggle((toggle) =>
 				toggle.setValue(Boolean(value)).onChange(async (newValue) => {
 					await this.updateSetting(key, newValue);
+					onChanged?.();
 				})
 			);
 	}
 
-	addSlider(containerEl: HTMLElement, config: SliderSettingConfig): void {
-		const { key, name, desc, step = 1, commitOnChange = false } = config;
-		const value = this.getNestedValue(key);
+	addSecret(containerEl: HTMLElement, config: BaseSettingConfig): void {
+		if (!this.app)
+			throw new Error("SettingsUIBuilder: app is required for addSecret. Pass it as the second constructor argument.");
 
-		const inferredBounds = this.inferSliderBounds(key);
-		const min = config.min ?? inferredBounds.min ?? 0;
-		const max = config.max ?? inferredBounds.max ?? 100;
+		const { key, name, desc, onChanged } = config;
+		const value = this.getNestedValue(key);
+		const app = this.app;
+
+		new Setting(containerEl)
+			.setName(name)
+			.setDesc(desc)
+			.addComponent((el) =>
+				new SecretComponent(app, el).setValue(String(value ?? "")).onChange(async (newValue) => {
+					await this.updateSetting(key, newValue);
+					onChanged?.();
+				})
+			);
+	}
+
+	/**
+	 * Renders a pair of mutually exclusive toggles.
+	 * Enabling one automatically disables the other.
+	 * Requires a rerender callback to refresh UI state after toggling.
+	 */
+	addMutuallyExclusiveToggles(
+		containerEl: HTMLElement,
+		config: {
+			toggleA: BaseSettingConfig;
+			toggleB: BaseSettingConfig;
+		},
+		rerender: () => void
+	): void {
+		const { toggleA, toggleB } = config;
+
+		new Setting(containerEl)
+			.setName(toggleA.name)
+			.setDesc(toggleA.desc)
+			.addToggle((toggle) =>
+				toggle.setValue(Boolean(this.getNestedValue(toggleA.key))).onChange(async (value) => {
+					const newSettings = this.setNestedValue(toggleA.key, value);
+					if (value) {
+						const keys = toggleB.key.split(".");
+						let current: Record<string, any> = newSettings as Record<string, any>;
+						for (let i = 0; i < keys.length - 1; i++) current = current[keys[i]];
+						current[keys[keys.length - 1]] = false;
+					}
+					await this.settingsStore.updateSettings(() => newSettings);
+					rerender();
+				})
+			);
+
+		new Setting(containerEl)
+			.setName(toggleB.name)
+			.setDesc(toggleB.desc)
+			.addToggle((toggle) =>
+				toggle.setValue(Boolean(this.getNestedValue(toggleB.key))).onChange(async (value) => {
+					const newSettings = this.setNestedValue(toggleB.key, value);
+					if (value) {
+						const keys = toggleA.key.split(".");
+						let current: Record<string, any> = newSettings as Record<string, any>;
+						for (let i = 0; i < keys.length - 1; i++) current = current[keys[i]];
+						current[keys[keys.length - 1]] = false;
+					}
+					await this.settingsStore.updateSettings(() => newSettings);
+					rerender();
+				})
+			);
+	}
+
+	private resolveSliderConfig(config: SliderSettingConfig): {
+		value: number;
+		min: number;
+		max: number;
+		step: number;
+	} {
+		const inferredBounds = this.inferSliderBounds(config.key);
+		return {
+			value: Number(this.getNestedValue(config.key)),
+			min: config.min ?? inferredBounds.min ?? 0,
+			max: config.max ?? inferredBounds.max ?? 100,
+			step: config.step ?? 1,
+		};
+	}
+
+	private attachDeferredSliderCommit(sliderEl: HTMLInputElement, commit: (value: number) => Promise<unknown>): void {
+		sliderEl.addEventListener("mouseup", () => {
+			void commit(Number(sliderEl.value));
+		});
+
+		sliderEl.addEventListener("keyup", (e: KeyboardEvent) => {
+			if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(e.key)) {
+				void commit(Number(sliderEl.value));
+			}
+		});
+	}
+
+	private createNumberInput(
+		parentEl: HTMLElement,
+		bounds: { value: number; min: number; max: number; step: number },
+		commit: (value: number) => Promise<number>
+	): HTMLInputElement {
+		const inputEl = parentEl.createEl("input", {
+			type: "number",
+			cls: "settings-ui-builder-slider-input",
+			value: String(bounds.value),
+		});
+		inputEl.min = String(bounds.min);
+		inputEl.max = String(bounds.max);
+		inputEl.step = String(bounds.step);
+
+		const commitFromInput = async () => {
+			const parsed = Number(inputEl.value);
+			if (Number.isNaN(parsed)) return;
+			const clamped = await commit(parsed);
+			inputEl.value = String(clamped);
+		};
+
+		inputEl.addEventListener("blur", () => void commitFromInput());
+		inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
+			if (e.key === "Enter") {
+				e.preventDefault();
+				void commitFromInput();
+			}
+		});
+
+		return inputEl;
+	}
+
+	addSlider(containerEl: HTMLElement, config: SliderSettingConfig): void {
+		const { key, name, desc, commitOnChange = false, onChanged } = config;
+		const { value, min, max, step } = this.resolveSliderConfig(config);
 
 		new Setting(containerEl)
 			.setName(name)
 			.setDesc(desc)
 			.addSlider((slider) => {
-				slider.setLimits(min, max, step).setValue(Number(value)).setDynamicTooltip();
+				slider.setLimits(min, max, step).setValue(value).setDynamicTooltip();
 
 				if (commitOnChange) {
-					// Reactive: commit on every change
 					slider.onChange(async (newValue) => {
 						await this.updateSetting(key, newValue);
+						onChanged?.();
 					});
 				} else {
-					// Commit only when user finishes dragging
 					const commit = async (newValue: number) => {
 						try {
 							await this.updateSetting(key, newValue);
+							onChanged?.();
 						} catch (error) {
 							new Notice(`Invalid input: ${error}`, 5000);
 						}
 					};
 
-					// Update tooltip during drag for visual feedback
 					slider.onChange((newValue) => {
 						slider.sliderEl.setAttribute("aria-valuenow", String(newValue));
 					});
 
-					// Commit on mouse up
-					slider.sliderEl.addEventListener("mouseup", () => {
-						void commit(Number(slider.sliderEl.value));
-					});
-
-					// Commit on keyboard navigation
-					slider.sliderEl.addEventListener("keyup", (e: KeyboardEvent) => {
-						if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(e.key)) {
-							void commit(Number(slider.sliderEl.value));
-						}
-					});
+					this.attachDeferredSliderCommit(slider.sliderEl, commit);
 				}
 
 				return slider;
 			});
 	}
 
+	addSliderWithInput(containerEl: HTMLElement, config: SliderSettingConfig): void {
+		const { key, name, desc, onChanged } = config;
+		const { value, min, max, step } = this.resolveSliderConfig(config);
+
+		const setting = new Setting(containerEl).setName(name).setDesc(desc);
+
+		let sliderInputEl: HTMLInputElement | null = null;
+		let numberInputEl: HTMLInputElement | null = null;
+
+		const commit = async (newValue: number) => {
+			const clamped = Math.min(max, Math.max(min, newValue));
+			try {
+				await this.updateSetting(key, clamped);
+				onChanged?.();
+			} catch (error) {
+				new Notice(`Invalid input: ${error}`, 5000);
+			}
+			return clamped;
+		};
+
+		setting.addSlider((slider) => {
+			sliderInputEl = slider.sliderEl;
+			slider.setLimits(min, max, step).setValue(value).setDynamicTooltip();
+
+			slider.onChange((newValue) => {
+				sliderInputEl!.setAttribute("aria-valuenow", String(newValue));
+				if (numberInputEl) numberInputEl.value = String(newValue);
+			});
+
+			this.attachDeferredSliderCommit(sliderInputEl, commit);
+
+			return slider;
+		});
+
+		numberInputEl = this.createNumberInput(setting.controlEl, { value, min, max, step }, async (v) => {
+			const clamped = await commit(v);
+			if (sliderInputEl) sliderInputEl.value = String(clamped);
+			return clamped;
+		});
+	}
+
+	addNumberInput(containerEl: HTMLElement, config: SliderSettingConfig): void {
+		const { key, name, desc, onChanged } = config;
+		const { value, min, max, step } = this.resolveSliderConfig(config);
+
+		const setting = new Setting(containerEl).setName(name).setDesc(desc);
+
+		this.createNumberInput(setting.controlEl, { value, min, max, step }, async (newValue) => {
+			const clamped = Math.min(max, Math.max(min, newValue));
+			try {
+				await this.updateSetting(key, clamped);
+				onChanged?.();
+			} catch (error) {
+				new Notice(`Invalid input: ${error}`, 5000);
+			}
+			return clamped;
+		});
+	}
+
 	addText(containerEl: HTMLElement, config: TextSettingConfig): void {
-		const { key, name, desc, placeholder = "", commitOnChange = false } = config;
+		const { key, name, desc, placeholder = "", commitOnChange = false, onChanged } = config;
 		const value = this.getNestedValue(key);
 
 		new Setting(containerEl)
@@ -338,12 +524,14 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 					// Reactive: commit on every change
 					text.onChange(async (newValue) => {
 						await this.updateSetting(key, newValue);
+						onChanged?.();
 					});
 				} else {
 					// Commit only on blur or Ctrl/Cmd+Enter
 					const commit = async (inputValue: string) => {
 						try {
 							await this.updateSetting(key, inputValue);
+							onChanged?.();
 						} catch (error) {
 							new Notice(`Invalid input: ${error}`, 5000);
 						}
@@ -361,7 +549,7 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 	}
 
 	addDropdown(containerEl: HTMLElement, config: DropdownSettingConfig): void {
-		const { key, name, desc, options } = config;
+		const { key, name, desc, options, onChanged } = config;
 		const value = this.getNestedValue(key);
 
 		new Setting(containerEl)
@@ -373,8 +561,55 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 					.setValue(String(value))
 					.onChange(async (newValue) => {
 						await this.updateSetting(key, newValue);
+						onChanged?.();
 					})
 			);
+	}
+
+	addColorPicker(containerEl: HTMLElement, config: ColorPickerSettingConfig): void {
+		const { key, name, desc, fallback, onChanged } = config;
+		const value = this.getNestedValue(key);
+
+		new Setting(containerEl)
+			.setName(name)
+			.setDesc(desc)
+			.addColorPicker((colorPicker) =>
+				colorPicker.setValue(String(value ?? fallback ?? "#000000")).onChange(async (newValue) => {
+					await this.updateSetting(key, newValue || fallback || "#000000");
+					onChanged?.();
+				})
+			);
+	}
+
+	addOptionalColorPicker(containerEl: HTMLElement, config: OptionalColorPickerSettingConfig): void {
+		const { key, name, descWhenSet, descWhenEmpty, fallback = "#000000" } = config;
+		const wrapper = containerEl.createDiv();
+
+		const render = (): void => {
+			wrapper.empty();
+			const color = String(this.getNestedValue(key) ?? "");
+
+			const setting = new Setting(wrapper).setName(name).addColorPicker((picker) => {
+				picker.setValue(color || fallback).onChange(async (value) => {
+					await this.updateSetting(key, value);
+					render();
+				});
+			});
+
+			if (color) {
+				setting.setDesc(descWhenSet);
+				setting.addButton((button) => {
+					button.setButtonText("Clear").onClick(async () => {
+						await this.updateSetting(key, "");
+						render();
+					});
+				});
+			} else {
+				setting.setDesc(descWhenEmpty);
+			}
+		};
+
+		render();
 	}
 
 	addTextArray<T = string>(containerEl: HTMLElement, config: ArraySettingConfig<T>): void {
@@ -386,6 +621,7 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 			arrayDelimiter = ", ",
 			multiline = false,
 			commitOnChange = false,
+			onChanged,
 		} = config;
 		const value = this.getNestedValue(key) as T[];
 
@@ -421,6 +657,7 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 					try {
 						const items = lines.map(parser).filter(validator);
 						await this.updateSetting(key, items);
+						onChanged?.();
 					} catch (error) {
 						new Notice(`Invalid input: ${error}`, 5000);
 					}
@@ -459,6 +696,7 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 					try {
 						const items = tokens.map(parser).filter(validator);
 						await this.updateSetting(key, items);
+						onChanged?.();
 					} catch (error) {
 						new Notice(`Invalid input: ${error}`, 5000);
 					}
@@ -617,5 +855,97 @@ export class SettingsUIBuilder<TSchema extends ZodObject<ZodRawShape>> {
 					})
 				);
 		}
+	}
+
+	addSchemaField(
+		containerEl: HTMLElement,
+		fieldEntry: Record<string, z.ZodType>,
+		overrides?: SchemaFieldOverrides
+	): void {
+		const [entryKey, field] = Object.entries(fieldEntry)[0];
+		const settingsKey = overrides?.key ?? entryKey;
+		const fieldKey = settingsKey.includes(".") ? settingsKey.split(".").pop()! : settingsKey;
+		const descriptor = introspectField(fieldKey, field);
+
+		const name = overrides?.label ?? descriptor.label;
+		const desc = overrides?.desc ?? descriptor.description ?? "";
+		const baseConfig = {
+			key: settingsKey,
+			name,
+			desc,
+			...(overrides?.onChanged !== undefined ? { onChanged: overrides.onChanged } : {}),
+		};
+
+		switch (descriptor.type) {
+			case "boolean":
+			case "toggle":
+				this.addToggle(containerEl, baseConfig);
+				break;
+			case "number":
+				this.renderSchemaNumber(containerEl, descriptor, baseConfig, overrides);
+				break;
+			case "enum":
+				this.renderSchemaEnum(containerEl, descriptor, baseConfig, overrides);
+				break;
+			case "string":
+				this.addText(containerEl, {
+					...baseConfig,
+					placeholder: overrides?.placeholder ?? descriptor.placeholder ?? "",
+					...(overrides?.commitOnChange !== undefined ? { commitOnChange: overrides.commitOnChange } : {}),
+				});
+				break;
+			case "array":
+				this.addTextArray(containerEl, {
+					...baseConfig,
+					...(overrides?.placeholder !== undefined ? { placeholder: overrides.placeholder } : {}),
+					itemType: descriptor.itemType,
+				});
+				break;
+			case "date":
+			case "datetime":
+				this.addText(containerEl, {
+					...baseConfig,
+					placeholder: overrides?.placeholder ?? (descriptor.type === "date" ? "YYYY-MM-DD" : "YYYY-MM-DDTHH:mm"),
+				});
+				break;
+		}
+	}
+
+	private renderSchemaNumber(
+		containerEl: HTMLElement,
+		descriptor: NumberFieldDescriptor,
+		baseConfig: BaseSettingConfig,
+		overrides?: SchemaFieldOverrides
+	): void {
+		const { min, max } = descriptor;
+		if (min !== undefined && max !== undefined) {
+			this.addSlider(containerEl, {
+				...baseConfig,
+				min,
+				max,
+				...(overrides?.step !== undefined ? { step: overrides.step } : {}),
+				...(overrides?.commitOnChange !== undefined ? { commitOnChange: overrides.commitOnChange } : {}),
+			});
+		} else {
+			this.addNumberInput(containerEl, {
+				...baseConfig,
+				...(min !== undefined ? { min } : {}),
+				...(max !== undefined ? { max } : {}),
+				...(overrides?.step !== undefined ? { step: overrides.step } : {}),
+			});
+		}
+	}
+
+	private renderSchemaEnum(
+		containerEl: HTMLElement,
+		descriptor: EnumFieldDescriptor,
+		baseConfig: BaseSettingConfig,
+		overrides?: SchemaFieldOverrides
+	): void {
+		const options =
+			overrides?.options ??
+			descriptor.enumLabels ??
+			Object.fromEntries(descriptor.enumValues.map((v) => [v, camelCaseToLabel(v)]));
+		this.addDropdown(containerEl, { ...baseConfig, options });
 	}
 }
