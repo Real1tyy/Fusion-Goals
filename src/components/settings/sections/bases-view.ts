@@ -1,9 +1,12 @@
 import type { SettingsUIBuilder } from "@real1ty-obsidian-plugins";
 import { Setting } from "obsidian";
+
 import type FusionGoalsPlugin from "../../../main";
-import type { BasesAdditionalView, FusionGoalsSettings, FusionGoalsSettingsSchema } from "../../../types/settings";
+import { type BasesAdditionalView, type FusionGoalsSettings, FusionGoalsSettingsSchema } from "../../../types/settings";
 import { createDeleteButton, createMoveButtons, createRuleInput } from "../controls";
 import type { SettingsSection } from "../types";
+
+const S = FusionGoalsSettingsSchema.shape;
 
 export class BasesViewSettingsSection implements SettingsSection {
 	readonly id = "bases-view";
@@ -13,7 +16,7 @@ export class BasesViewSettingsSection implements SettingsSection {
 
 	constructor(
 		private readonly plugin: FusionGoalsPlugin,
-		private readonly uiBuilder: SettingsUIBuilder<typeof FusionGoalsSettingsSchema>
+		private readonly ui: SettingsUIBuilder<typeof FusionGoalsSettingsSchema>
 	) {}
 
 	render(container: HTMLElement): void {
@@ -26,18 +29,13 @@ export class BasesViewSettingsSection implements SettingsSection {
 					"'file.name' is always included first, followed by the properties you specify below."
 			);
 
-		this.uiBuilder.addToggle(container, {
-			key: "excludeArchived",
-			name: "Enable archived filtering",
-			desc: "When enabled, shows the archived view option and filters non-archived items in other views. When disabled, shows all items without archived filtering.",
-		});
+		this.ui.addSchemaField(container, { excludeArchived: S.excludeArchived }, { label: "Enable archived filtering" });
 
-		this.uiBuilder.addText(container, {
-			key: "archivedProp",
-			name: "Archived property name",
-			desc: "Name of the frontmatter property used to mark files as archived (e.g., 'Archived', '_Archived').",
-			placeholder: "Archived",
-		});
+		this.ui.addSchemaField(
+			container,
+			{ archivedProp: S.archivedProp },
+			{ label: "Archived property name", placeholder: "Archived" }
+		);
 
 		new Setting(container).setName("Date Formulas").setHeading();
 
@@ -48,26 +46,26 @@ export class BasesViewSettingsSection implements SettingsSection {
 					"These formulas will add dynamic columns to all Bases view tables showing time relationships."
 			);
 
-		this.uiBuilder.addToggle(container, {
-			key: "basesDaysRemainingEnabled",
-			name: "Enable Days Remaining formula",
-			desc: "When enabled, adds a 'Days Remaining' column showing relative time until the end date (e.g., 'in 5 days', '2 days ago').",
-		});
+		this.ui.addSchemaField(
+			container,
+			{ basesDaysRemainingEnabled: S.basesDaysRemainingEnabled },
+			{ label: "Enable Days Remaining formula" }
+		);
 
-		this.uiBuilder.addText(container, {
+		this.ui.addText(container, {
 			key: "basesDaysRemainingProperty",
 			name: "End date property",
 			desc: "Name of the frontmatter property containing the end/due date (e.g., 'End Date', 'Due Date', 'Deadline').",
 			placeholder: "End Date",
 		});
 
-		this.uiBuilder.addToggle(container, {
-			key: "basesDaysSinceStartEnabled",
-			name: "Enable Days Since Start formula",
-			desc: "When enabled, adds a 'Days Since Start' column showing relative time from the start date (e.g., '5 days ago', 'in 2 days').",
-		});
+		this.ui.addSchemaField(
+			container,
+			{ basesDaysSinceStartEnabled: S.basesDaysSinceStartEnabled },
+			{ label: "Enable Days Since Start formula" }
+		);
 
-		this.uiBuilder.addText(container, {
+		this.ui.addText(container, {
 			key: "basesDaysSinceStartProperty",
 			name: "Start date property",
 			desc: "Name of the frontmatter property containing the start date (e.g., 'Start Date', 'Started', 'Begin Date').",
@@ -144,33 +142,29 @@ export class BasesViewSettingsSection implements SettingsSection {
 					"A view will be automatically created for each status value. These appear after additional custom views."
 			);
 
-		this.uiBuilder.addText(container, {
-			key: "basesStatusProperty",
-			name: "Status property name",
-			desc: "Name of the frontmatter property used for status filtering (e.g., 'Status', 'State', 'Progress')",
-			placeholder: "Status",
-		});
+		this.ui.addSchemaField(
+			container,
+			{ basesStatusProperty: S.basesStatusProperty },
+			{ label: "Status property name", placeholder: "Status" }
+		);
 
-		this.uiBuilder.addTextArray(container, {
-			key: "basesStatusValues",
-			name: "Status values",
-			desc: "Comma-separated list of status values. A view will be created for each value.",
-			placeholder: "In progress, Inbox, Planned, Next Up, Done, Icebox",
-		});
+		this.ui.addSchemaField(
+			container,
+			{ basesStatusValues: S.basesStatusValues },
+			{ label: "Status values", placeholder: "In progress, Inbox, Planned, Next Up, Done, Icebox" }
+		);
 
-		this.uiBuilder.addTextArray(container, {
-			key: "basesGoalsProperties",
-			name: "Goals properties",
-			desc: "Comma-separated list of frontmatter properties to show as columns when viewing Goals files (e.g., Status, Priority)",
-			placeholder: "Status, Priority",
-		});
+		this.ui.addSchemaField(
+			container,
+			{ basesGoalsProperties: S.basesGoalsProperties },
+			{ label: "Goals properties", placeholder: "Status, Priority" }
+		);
 
-		this.uiBuilder.addTextArray(container, {
-			key: "basesTasksProperties",
-			name: "Tasks properties",
-			desc: "Comma-separated list of frontmatter properties to show as columns when viewing Tasks files (e.g., Goal, Status, Priority)",
-			placeholder: "Goal, Status, Priority",
-		});
+		this.ui.addSchemaField(
+			container,
+			{ basesTasksProperties: S.basesTasksProperties },
+			{ label: "Tasks properties", placeholder: "Goal, Status, Priority" }
+		);
 
 		const infoBox = container.createDiv("fusion-bases-settings-info-box");
 		infoBox.createEl("strong", { text: "Column Order:" });
@@ -179,6 +173,10 @@ export class BasesViewSettingsSection implements SettingsSection {
 		orderList.createEl("li", {
 			text: "Properties specified above (in the order listed)",
 		});
+
+		new Setting(container).setName("Title Column").setHeading();
+
+		this.ui.addSchemaField(container, { titleColumnSize: S.titleColumnSize }, { step: 10 });
 	}
 
 	private renderAdditionalViews(container: HTMLElement): void {

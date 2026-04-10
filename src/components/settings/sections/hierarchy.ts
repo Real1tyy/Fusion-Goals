@@ -1,8 +1,11 @@
 import type { SettingsUIBuilder } from "@real1ty-obsidian-plugins";
 import { Notice, Setting } from "obsidian";
 import type FusionGoalsPlugin from "src/main";
-import type { FusionGoalsSettingsSchema } from "src/types/settings";
+import { FusionGoalsSettingsSchema } from "src/types/settings";
+
 import type { SettingsSection } from "../types";
+
+const S = FusionGoalsSettingsSchema.shape;
 
 export class HierarchySection implements SettingsSection {
 	id = "hierarchy";
@@ -10,7 +13,7 @@ export class HierarchySection implements SettingsSection {
 
 	constructor(
 		private plugin: FusionGoalsPlugin,
-		private uiBuilder: SettingsUIBuilder<typeof FusionGoalsSettingsSchema>
+		private ui: SettingsUIBuilder<typeof FusionGoalsSettingsSchema>
 	) {}
 
 	render(containerEl: HTMLElement): void {
@@ -20,19 +23,8 @@ export class HierarchySection implements SettingsSection {
 			.createDiv("setting-item-description")
 			.setText("Configure the two-level hierarchy: Goals → Tasks. Each level must have its own directory.");
 
-		this.uiBuilder.addText(containerEl, {
-			key: "goalsDirectory",
-			name: "Goals directory",
-			desc: "Directory where goal files are stored (required)",
-			placeholder: "Goals",
-		});
-
-		this.uiBuilder.addText(containerEl, {
-			key: "tasksDirectory",
-			name: "Tasks directory",
-			desc: "Directory where task files are stored (required)",
-			placeholder: "Tasks",
-		});
+		this.ui.addSchemaField(containerEl, { goalsDirectory: S.goalsDirectory }, { placeholder: "Goals" });
+		this.ui.addSchemaField(containerEl, { tasksDirectory: S.tasksDirectory }, { placeholder: "Tasks" });
 
 		new Setting(containerEl).setName("Hierarchical Properties").setHeading();
 
@@ -40,12 +32,11 @@ export class HierarchySection implements SettingsSection {
 			.createDiv("setting-item-description")
 			.setText("Property name used to link tasks to goals in the hierarchy.");
 
-		this.uiBuilder.addText(containerEl, {
-			key: "taskGoalProp",
-			name: "Task → Goal property",
-			desc: "Property name in tasks that links to their goal",
-			placeholder: "Goal",
-		});
+		this.ui.addSchemaField(
+			containerEl,
+			{ taskGoalProp: S.taskGoalProp },
+			{ label: "Task → Goal property", placeholder: "Goal" }
+		);
 
 		new Setting(containerEl).setName("Task Creation").setHeading();
 
@@ -53,15 +44,51 @@ export class HierarchySection implements SettingsSection {
 			.createDiv("setting-item-description")
 			.setText("Configure template for creating new tasks from goals. Leave empty to create tasks without a template.");
 
-		this.uiBuilder.addText(containerEl, {
-			key: "taskTemplatePath",
-			name: "Task template path",
-			desc: "Path to template file for new tasks (e.g., Templates/Task.md). Requires Templater plugin.",
-			placeholder: "Templates/Task.md",
-		});
+		this.ui.addSchemaField(containerEl, { taskTemplatePath: S.taskTemplatePath }, { placeholder: "Templates/Task.md" });
 
+		new Setting(containerEl).setName("Additional Properties").setHeading();
+
+		containerEl.createDiv("setting-item-description").setText("Property names for priority and progress tracking.");
+
+		this.ui.addSchemaField(
+			containerEl,
+			{ priorityProp: S.priorityProp },
+			{ label: "Priority property", placeholder: "Priority" }
+		);
+
+		this.ui.addSchemaField(
+			containerEl,
+			{ progressProp: S.progressProp },
+			{ label: "Progress property", placeholder: "Progress" }
+		);
+
+		this.renderTitlePropertySection(containerEl);
 		this.renderInheritanceSection(containerEl);
 		this.renderIndexingSection(containerEl);
+	}
+
+	private renderTitlePropertySection(containerEl: HTMLElement): void {
+		new Setting(containerEl).setName("Title Property").setHeading();
+
+		const descEl = containerEl.createDiv("setting-item-description");
+		descEl.createEl("p", {
+			text: "Automatically assign a Task Title property to task files with the goal name prefix stripped.",
+		});
+		descEl.createEl("p", {
+			text: 'For example, a task named "My Goal - Task Name" linked to "My Goal" will get a Task Title property of "Task Name". This title is used in the Graph and Bases views for cleaner display.',
+		});
+
+		this.ui.addSchemaField(
+			containerEl,
+			{ titlePropertyEnabled: S.titlePropertyEnabled },
+			{ label: "Enable title property" }
+		);
+
+		this.ui.addSchemaField(
+			containerEl,
+			{ titleProp: S.titleProp },
+			{ label: "Title property name", placeholder: "Task Title" }
+		);
 	}
 
 	private renderInheritanceSection(containerEl: HTMLElement): void {
@@ -75,18 +102,13 @@ export class HierarchySection implements SettingsSection {
 			text: "When you update a property in a goal, it will be inherited by all linked tasks. Relationship properties (Goal) are always excluded from inheritance.",
 		});
 
-		this.uiBuilder.addToggle(containerEl, {
-			key: "enableFrontmatterInheritance",
-			name: "Enable frontmatter inheritance",
-			desc: "When enabled, changes to goal frontmatter will automatically propagate to linked tasks",
-		});
+		this.ui.addSchemaField(containerEl, { enableFrontmatterInheritance: S.enableFrontmatterInheritance });
 
-		this.uiBuilder.addTextArray(containerEl, {
-			key: "inheritanceExcludedProperties",
-			name: "Excluded properties",
-			desc: "Property names to exclude from inheritance (e.g., 'tasks', 'CustomField'). Relationship properties are always excluded.",
-			placeholder: "Enter property name",
-		});
+		this.ui.addSchemaField(
+			containerEl,
+			{ inheritanceExcludedProperties: S.inheritanceExcludedProperties },
+			{ label: "Excluded properties", placeholder: "Enter property name" }
+		);
 	}
 
 	private renderIndexingSection(containerEl: HTMLElement): void {
@@ -112,7 +134,10 @@ export class HierarchySection implements SettingsSection {
 
 						try {
 							new Notice("Starting full rescan...");
-							await this.plugin.indexer.scanAllFiles();
+							this.plugin.goalsTable.stop();
+							this.plugin.tasksTable.stop();
+							await this.plugin.goalsTable.start();
+							await this.plugin.tasksTable.start();
 							new Notice("Rescan complete!");
 							button.setButtonText("✓ Complete!");
 							setTimeout(() => {

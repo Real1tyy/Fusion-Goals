@@ -1,38 +1,31 @@
 import type { SettingsUIBuilder } from "@real1ty-obsidian-plugins";
 import { Setting } from "obsidian";
-import type { FusionGoalsSettingsSchema } from "src/types/settings";
+import { FusionGoalsSettingsSchema } from "src/types/settings";
+
 import type { SettingsSection } from "../types";
+
+const S = FusionGoalsSettingsSchema.shape;
 
 export class UserInterfaceSettingsSection implements SettingsSection {
 	id = "user-interface";
 	label = "User Interface";
 
-	constructor(private uiBuilder: SettingsUIBuilder<typeof FusionGoalsSettingsSchema>) {}
+	constructor(private ui: SettingsUIBuilder<typeof FusionGoalsSettingsSchema>) {}
 
 	render(containerEl: HTMLElement): void {
 		new Setting(containerEl).setName("User Interface").setHeading();
 
-		this.uiBuilder.addToggle(containerEl, {
-			key: "showRibbonIcon",
-			name: "Show ribbon icon",
-			desc: "Display the relationship graph icon in the left ribbon. Restart Obsidian after changing this setting.",
-		});
-
-		this.uiBuilder.addToggle(containerEl, {
-			key: "showStartupOverview",
-			name: "Show deadlines overview on load",
-			desc: "Display the Goals & Projects deadlines overview modal when the plugin loads. You can always open it manually with the 'Show Deadlines Overview' command.",
-		});
-
-		this.uiBuilder.addToggle(containerEl, {
-			key: "showViewSwitcherHeader",
-			name: "Show view switcher header",
-			desc: "Display the header with toggle button in the Fusion Goals view. Changes apply immediately.",
-		});
+		this.ui.addSchemaField(containerEl, { showRibbonIcon: S.showRibbonIcon });
+		this.ui.addSchemaField(
+			containerEl,
+			{ showStartupOverview: S.showStartupOverview },
+			{ label: "Show deadlines overview on load" }
+		);
+		this.ui.addSchemaField(containerEl, { showViewSwitcherHeader: S.showViewSwitcherHeader });
 
 		new Setting(containerEl).setName("Deadlines Overview Filters").setHeading();
 
-		this.uiBuilder.addTextArray(containerEl, {
+		this.ui.addTextArray(containerEl, {
 			key: "deadlineFilterExpressions",
 			name: "Global filter expressions",
 			desc: "One per line. Changes apply on blur or Ctrl/Cmd+Enter. Only items matching all expressions will be shown in the Deadlines Overview modal. Leave empty to show all items.",
