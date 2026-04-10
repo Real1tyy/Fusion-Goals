@@ -1,22 +1,17 @@
 {
 	"name": "fusion-goals",
-	"version": "1.0.2",
+	"version": "1.0.0",
 	"description": "A hierarchical goal management plugin for Obsidian that visualizes goals, projects, and tasks in an interactive relationship graph.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
-		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"build": "pnpm build:css && tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"build:css": "sass src/styles/styles.scss styles.css --no-source-map",
 		"typecheck": "tsc -noEmit -skipLibCheck",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"clean": "rm -f main.js",
-		"version": "node version-bump.mjs && git add manifest.json versions.json",
-		"lint": "eslint .",
-		"lint:fix": "eslint --fix .",
-		"format": "prettier --check .",
-		"format:fix": "prettier --write .",
-		"check": "prettier --check . && eslint .",
-		"check:fix": "prettier --write . && eslint --fix ."
+		"lint:css": "stylelint \"src/styles/**/*.scss\"",
+		"clean": "rm -f main.js"
 	},
 	"keywords": [
 		"obsidian",
@@ -32,13 +27,8 @@
 		"url": "https://matejvavroproductivity.com/support/"
 	},
 	"author": "Real1tyy",
-	"license": "MIT",
+	"license": "AGPL-3.0",
 	"packageManager": "pnpm@9.0.0",
-	"pnpm": {
-		"overrides": {
-			"obsidian": "1.10.0"
-		}
-	},
 	"devDependencies": {
 		"@codemirror/autocomplete": "^6.18.6",
 		"@codemirror/commands": "^6.8.1",
@@ -46,34 +36,37 @@
 		"@codemirror/lint": "^6.8.5",
 		"@codemirror/state": "^6.5.2",
 		"@codemirror/view": "^6.36.8",
-		"@eslint/js": "^9.18.0",
 		"@types/cytoscape-dagre": "^2.3.4",
 		"@types/luxon": "^3.7.1",
 		"@types/node": "^24.10.9",
 		"@vitest/coverage-v8": "^2.1.9",
 		"builtin-modules": "5.0.0",
-		"chart.js": "^4.5.1",
 		"esbuild": "0.25.11",
-		"eslint": "^9.18.0",
-		"eslint-config-prettier": "^10.0.1",
-		"fast-check": "^4.5.3",
-		"globals": "^15.14.0",
+		"fast-check": "^4.3.0",
 		"jsdom": "^27.4.0",
-		"obsidian": "1.10.0",
-		"prettier": "^3.4.2",
+		"obsidian": "1.11.4",
+		"sass": "^1.87.0",
+		"stylelint": "^16.20.0",
+		"stylelint-config-standard-scss": "^15.0.1",
 		"tslib": "2.8.1",
 		"typescript": "5.9.3",
-		"typescript-eslint": "^8.20.0",
 		"vite-tsconfig-paths": "^5.1.2",
 		"vitest": "^3.2.4"
 	},
 	"dependencies": {
 		"@real1ty-obsidian-plugins": "file:./shared",
+		"@svgdotjs/svg.js": "^3.2.4",
+		"chart.js": "^4.5.1",
 		"colord": "^2.9.3",
 		"cytoscape": "^3.33.1",
 		"cytoscape-dagre": "^2.5.0",
+		"jose": "^6.2.1",
 		"luxon": "^3.7.2",
+		"obsidian": "^1.11.4",
 		"rxjs": "^7.8.2",
+		"tslib": "^2.8.1",
+		"vis-data": "^8.0.3",
+		"vis-timeline": "^8.5.0",
 		"yaml": "^2.8.2",
 		"zod": "^4.3.5"
 	}
