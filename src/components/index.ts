@@ -1,13 +1,8 @@
-// EdgeContextMenu removed - no property management
 export { GraphFilter } from "./graph-filter";
 export { GraphFilterPresetSelector } from "./graph-filter-preset-selector";
 export { GraphHeader } from "./graph-header";
 export { GraphSearch } from "./graph-search";
 export { GraphZoomPreview } from "./graph-zoom-preview";
-// NodeContextMenu and NodeEditModal removed - no property management
-export { NodePreviewModal } from "./node-preview-modal";
 export { PropertyTooltip } from "./property-tooltip";
-// RelationshipAdder removed - no property management
-export { FusionGoalsSettingsTab } from "./settings/core";
-export { BasesView, VIEW_TYPE_BASES } from "./views/bases-view";
-export { FusionViewSwitcher, VIEW_TYPE_FUSION_SWITCHER } from "./views/fusion-view-switcher";
+export { FusionGoalsSettingsTab } from "./settings/settings-tab";
+export { registerFusionGoalsView } from "./views/fusion-goals-view";
