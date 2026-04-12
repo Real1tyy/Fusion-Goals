@@ -50,7 +50,7 @@ export class MetricBlockRenderer extends MarkdownRenderChild {
 	}
 
 	private computeStats(): MetricStats {
-		const entries = metricRepository.getAll();
+		const entries = metricRepository.toArray().map((r) => r.data);
 		const now = Date.now();
 		const ms7d = 7 * 24 * 60 * 60 * 1000;
 		const ms30d = 30 * 24 * 60 * 60 * 1000;
@@ -73,7 +73,7 @@ export class MetricBlockRenderer extends MarkdownRenderChild {
 	}
 
 	private renderStats(el: HTMLElement): void {
-		if (metricRepository.getAll().length === 0) return;
+		if (metricRepository.toArray().map((r) => r.data).length === 0) return;
 
 		const stats = this.computeStats();
 		const statsRow = el.createDiv({ cls: "fusion-metric-stats" });
@@ -112,7 +112,7 @@ export class MetricBlockRenderer extends MarkdownRenderChild {
 			this.showCustomInput(actionsRow);
 		});
 
-		const entries = metricRepository.getAll();
+		const entries = metricRepository.toArray().map((r) => r.data);
 		if (entries.length > 0) {
 			const timelineBtn = actionsRow.createEl("button", {
 				text: "Timeline",
@@ -120,7 +120,11 @@ export class MetricBlockRenderer extends MarkdownRenderChild {
 			});
 			timelineBtn.addEventListener("click", () => {
 				const fileName = extractDisplayName(this.context.sourcePath);
-				new MetricTimelineModal(this.app, metricRepository.getAll(), `${fileName} — Timeline`).open();
+				new MetricTimelineModal(
+					this.app,
+					metricRepository.toArray().map((r) => r.data),
+					`${fileName} — Timeline`
+				).open();
 			});
 		}
 	}
@@ -208,7 +212,7 @@ export class MetricBlockRenderer extends MarkdownRenderChild {
 	}
 
 	private renderTable(el: HTMLElement): void {
-		const entries = metricRepository.getAll();
+		const entries = metricRepository.toArray().map((r) => r.data);
 		if (entries.length === 0) return;
 
 		const tableContainer = el.createDiv({ cls: "fusion-metric-table-container" });
