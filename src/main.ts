@@ -2,11 +2,11 @@ import {
 	buildUtmUrl,
 	generateUniqueFilePath,
 	SettingsStore,
+	showWhatsNewModal,
 	TemplaterService,
 	VaultTable,
 	type ViewActivator,
 	waitForCacheReady,
-	WhatsNewModal,
 	type WhatsNewModalConfig,
 } from "@real1ty-obsidian-plugins";
 import { MarkdownView, Notice, Plugin, type TFile, type WorkspaceLeaf } from "obsidian";
@@ -260,7 +260,6 @@ export default class FusionGoalsPlugin extends Plugin {
 
 		if (lastSeenVersion !== currentVersion) {
 			const config: WhatsNewModalConfig = {
-				slug: "fusion-goals",
 				cssPrefix: "fusion-goals",
 				pluginName: "Fusion Goals",
 				changelogContent: CHANGELOG_CONTENT,
@@ -296,7 +295,7 @@ export default class FusionGoalsPlugin extends Plugin {
 				},
 			};
 
-			new WhatsNewModal(this.app, this, config, lastSeenVersion, currentVersion).open();
+			showWhatsNewModal(this.app, this, config, lastSeenVersion, currentVersion);
 			await this.settingsStore.updateSettings((settings) => ({
 				...settings,
 				version: currentVersion,
