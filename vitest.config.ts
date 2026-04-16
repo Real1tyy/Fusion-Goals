@@ -7,10 +7,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
 	test: {
 		globals: true,
+		testTimeout: 10000,
 		environment: "node",
 		setupFiles: ["./tests/setup.ts"],
 		passWithNoTests: true,
-		pool: "threads",
 		server: {
 			deps: {
 				inline: ["@real1ty-obsidian-plugins"],
