@@ -18,6 +18,6 @@ Configure directories for each level of your hierarchy:
 - **Projects Directory** - Folder containing your project files
 - **Tasks Directory** - Folder containing your task files
 
-## License
+---
 
-MIT
+> **This repository is a public, read-only mirror.** Development happens in a private monorepo — this mirror exists for transparency and to follow the Obsidian convention of one repo per plugin. The code is licensed AGPL-3.0.
