@@ -81,5 +81,10 @@
 		"vis-timeline": "^8.5.0",
 		"yaml": "^2.8.2",
 		"zod": "^4.3.5"
+	},
+	"pnpm": {
+		"overrides": {
+			"esbuild": "0.25.11"
+		}
 	}
 }
