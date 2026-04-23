@@ -1,8 +1,10 @@
+export { MutuallyExclusiveToggles } from "./mutually-exclusive-toggles";
 export type { SchemaFieldOverride } from "./override";
 export type { WidgetKind } from "./resolve-widget";
 export { resolveWidget } from "./resolve-widget";
 export { SchemaField, useSchemaFieldDescriptor } from "./schema-field";
 export { SchemaSection } from "./schema-section";
+export * from "./settings-transfer";
 export type { WidgetProps } from "./widgets";
 export {
 	ArrayCsvWidget,
