@@ -1,6 +1,12 @@
+<div align="center">
+
 # Fusion Goals
 
-An Obsidian plugin for hierarchical goal management with interactive graph visualization.
+![Downloads](https://img.shields.io/github/downloads/Real1tyy/Fusion-Goals/total?label=Downloads&style=for-the-badge&color=238636) ![Release](https://img.shields.io/github/v/release/Real1tyy/Fusion-Goals?label=Latest%20Release&style=for-the-badge&color=1f6feb) ![Stars](https://img.shields.io/github/stars/Real1tyy/Fusion-Goals?style=for-the-badge&color=f0c830) [![Documentation](https://img.shields.io/badge/Documentation-238636?style=for-the-badge)](https://real1tyy.github.io/Fusion-Goals/?utm_campaign=fusion_goals&utm_source=github&utm_medium=repo&utm_content=readme_documentation)
+
+**Hierarchical goal management with interactive graph visualization for Obsidian.**
+
+</div>
 
 ## Features
 
