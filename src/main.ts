@@ -2,13 +2,12 @@ import {
 	buildUtmUrl,
 	generateUniqueFilePath,
 	SettingsStore,
-	showWhatsNewModal,
 	TemplaterService,
 	VaultTable,
 	type ViewActivator,
 	waitForCacheReady,
-	type WhatsNewModalConfig,
 } from "@real1ty-obsidian-plugins";
+import { showWhatsNewReactModal, type WhatsNewModalConfig } from "@real1ty-obsidian-plugins-react";
 import { MarkdownView, Notice, Plugin, type TFile, type WorkspaceLeaf } from "obsidian";
 
 import CHANGELOG_CONTENT from "../../docs-site/docs/changelog.md";
@@ -295,7 +294,7 @@ export default class FusionGoalsPlugin extends Plugin {
 				},
 			};
 
-			showWhatsNewModal(this.app, this, config, lastSeenVersion, currentVersion);
+			showWhatsNewReactModal(this.app, this, config, lastSeenVersion, currentVersion);
 			await this.settingsStore.updateSettings((settings) => ({
 				...settings,
 				version: currentVersion,
