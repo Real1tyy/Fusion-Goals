@@ -5,9 +5,10 @@ import {
 	type GridLayoutHandle,
 	type PieChartHandle,
 	registerGridCommands,
-	type TabDefinition,
 } from "@real1ty-obsidian-plugins";
+import { MountImperative, type TabEntry } from "@real1ty-obsidian-plugins-react";
 import type { Plugin } from "obsidian";
+import { createElement } from "react";
 
 import type { GoalsManager } from "../../core/goals-manager";
 import type { FusionGoalsSettingsStore } from "../../types/settings";
@@ -57,39 +58,41 @@ export function createDashboardTabDefinition(
 	goalsManager: GoalsManager,
 	chartRefs: PieChartHandle[],
 	gridHandleRef: { current: GridLayoutHandle | null }
-): TabDefinition {
+): TabEntry {
+	const render = (el: HTMLElement) => {
+		const allSpecs = buildDistributionSpecs();
+		const palette = allSpecs.map((s) => specToCellOption(s, goalsManager, chartRefs));
+		const savedState = settingsStore.currentSettings.dashboardLayout;
+
+		gridHandleRef.current = createGridLayout(el, {
+			app: plugin.app,
+			cssPrefix: "fusion-goals-chart-",
+			columns: 2,
+			rows: 3,
+			gap: "12px",
+			dividers: true,
+			cellPalette: palette,
+			cells: buildDefaultCells(palette),
+			...(savedState !== undefined ? { initialState: savedState } : {}),
+			onStateChange: (state) => {
+				void settingsStore.updateSettings((s) => ({ ...s, dashboardLayout: state }));
+			},
+		});
+
+		registerGridCommands(plugin, "fusion-dashboard", "Dashboard", gridHandleRef.current);
+	};
+	const cleanup = () => {
+		gridHandleRef.current?.destroy();
+		gridHandleRef.current = null;
+		for (const chart of chartRefs) {
+			chart.destroy();
+		}
+		chartRefs.length = 0;
+	};
+
 	return {
 		id: "dashboard",
 		label: "Dashboard",
-		render: (el) => {
-			const allSpecs = buildDistributionSpecs();
-			const palette = allSpecs.map((s) => specToCellOption(s, goalsManager, chartRefs));
-			const savedState = settingsStore.currentSettings.dashboardLayout;
-
-			gridHandleRef.current = createGridLayout(el, {
-				app: plugin.app,
-				cssPrefix: "fusion-goals-chart-",
-				columns: 2,
-				rows: 3,
-				gap: "12px",
-				dividers: true,
-				cellPalette: palette,
-				cells: buildDefaultCells(palette),
-				...(savedState !== undefined ? { initialState: savedState } : {}),
-				onStateChange: (state) => {
-					void settingsStore.updateSettings((s) => ({ ...s, dashboardLayout: state }));
-				},
-			});
-
-			registerGridCommands(plugin, "fusion-dashboard", "Dashboard", gridHandleRef.current);
-		},
-		cleanup: () => {
-			gridHandleRef.current?.destroy();
-			gridHandleRef.current = null;
-			for (const chart of chartRefs) {
-				chart.destroy();
-			}
-			chartRefs.length = 0;
-		},
+		content: createElement(MountImperative, { render, cleanup }),
 	};
 }

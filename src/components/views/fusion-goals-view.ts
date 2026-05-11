@@ -1,16 +1,20 @@
 import {
 	createPageHeader,
-	createTabbedContainer,
 	type GridLayoutHandle,
 	type PageHeaderHandle,
 	type PieChartHandle,
 	registerComponentView,
 	registerPageHeaderCommands,
-	registerTabCommands,
-	type TabbedContainerHandle,
 	type ViewActivator,
 } from "@real1ty-obsidian-plugins";
+import {
+	registerTabCommands,
+	renderReactInline,
+	TabbedContainer,
+	type TabbedContainerHandle,
+} from "@real1ty-obsidian-plugins-react";
 import type { Component } from "obsidian";
+import { createElement } from "react";
 
 import type { GoalsManager } from "../../core/goals-manager";
 import type FusionGoalsPlugin from "../../main";
@@ -31,7 +35,8 @@ export function registerFusionGoalsView(
 	const components: Component[] = [];
 	const chartRefs: PieChartHandle[] = [];
 	const gridHandleRef: { current: GridLayoutHandle | null } = { current: null };
-	let tabbedHandle: TabbedContainerHandle | null = null;
+	const tabbedHandleRef: { current: TabbedContainerHandle | null } = { current: null };
+	let tabbedUnmount: (() => void) | null = null;
 	let pageHeaderHandle: PageHeaderHandle | null = null;
 
 	return registerComponentView(plugin, {
@@ -50,26 +55,31 @@ export function registerFusionGoalsView(
 			const headerEl = ctx.type === "view" ? ctx.headerEl : undefined;
 			const titleContainer = headerEl?.querySelector(".view-header-title-container") ?? undefined;
 
-			tabbedHandle = createTabbedContainer(el, {
-				tabs,
-				cssPrefix: "fusion-goals-",
-				...(headerEl !== undefined ? { tabBarContainer: headerEl } : {}),
-				...(titleContainer !== undefined ? { tabBarInsertBefore: titleContainer } : {}),
-				editable: true,
-				app: plugin.app,
-				...(settingsStore.currentSettings.activeTab !== undefined
-					? { initialState: settingsStore.currentSettings.activeTab }
-					: {}),
-				onStateChange: (state) => {
-					void settingsStore.updateSettings((s) => ({ ...s, activeTab: state }));
-				},
-			});
+			tabbedUnmount = renderReactInline(
+				el,
+				createElement(TabbedContainer, {
+					tabs,
+					cssPrefix: "fusion-goals-",
+					...(headerEl !== undefined ? { tabBarContainer: headerEl } : {}),
+					...(titleContainer !== undefined ? { tabBarInsertBefore: titleContainer } : {}),
+					editable: true,
+					app: plugin.app,
+					...(settingsStore.currentSettings.activeTab !== undefined
+						? { initialState: settingsStore.currentSettings.activeTab }
+						: {}),
+					onStateChange: (state) => {
+						void settingsStore.updateSettings((s) => ({ ...s, activeTab: state }));
+					},
+					handleRef: tabbedHandleRef,
+				}),
+				plugin.app
+			);
 
 			registerTabCommands(
 				plugin,
 				"fusion-goals",
 				"Fusion Goals",
-				tabbedHandle,
+				() => tabbedHandleRef.current,
 				tabs.map((t) => t.label)
 			);
 
@@ -112,8 +122,9 @@ export function registerFusionGoalsView(
 		cleanup: () => {
 			pageHeaderHandle?.destroy();
 			pageHeaderHandle = null;
-			tabbedHandle?.destroy();
-			tabbedHandle = null;
+			tabbedUnmount?.();
+			tabbedUnmount = null;
+			tabbedHandleRef.current = null;
 			gridHandleRef.current?.destroy();
 			gridHandleRef.current = null;
 			for (const chart of chartRefs) {

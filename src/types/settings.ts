@@ -1,5 +1,6 @@
 import type { SettingsStore } from "@real1ty-obsidian-plugins";
-import { GridLayoutStateSchema, PageHeaderStateSchema, TabbedContainerStateSchema } from "@real1ty-obsidian-plugins";
+import { GridLayoutStateSchema, PageHeaderStateSchema } from "@real1ty-obsidian-plugins";
+import { TabbedContainerStateSchema } from "@real1ty-obsidian-plugins-react";
 import { z } from "zod";
 
 import { SETTINGS_DEFAULTS } from "./constants";
