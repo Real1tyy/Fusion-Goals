@@ -18,7 +18,14 @@ export { IconPickerButton, useIconPicker } from "./components/icon-picker-button
 export type { IconPickerGridProps } from "./components/icon-picker-grid";
 export { IconPickerGrid } from "./components/icon-picker-grid";
 export { LicenseSection } from "./components/license-section";
-export type { EditableItem as ManagerEditableItem, ManagerEditFormProps } from "./components/manager-edit-form";
+export type {
+	EditableItem as ManagerEditableItem,
+	ManagerEditActions,
+	ManagerEditController,
+	ManagerEditFormProps,
+	ManagerEditOverrides,
+	ManagerEditValues,
+} from "./components/manager-edit-form";
 export { ManagerEditForm } from "./components/manager-edit-form";
 export type { ManagerRowAction, ManagerRowProps } from "./components/manager-row";
 export type { EditableItem } from "./components/manager-row";
@@ -110,6 +117,24 @@ export { DEFAULT_WHATS_NEW_LINKS, showWhatsNewReactModal } from "./modals/whats-
 
 // ─── Onboarding ───
 export * from "./onboarding";
+
+// ─── Page Header (leaf toolbar manager) ───
+export type {
+	HeaderActionDefinition,
+	PageHeaderConfig,
+	PageHeaderHandle,
+	PageHeaderMode,
+	PageHeaderSnapshot,
+	PageHeaderState,
+} from "./page-header";
+export {
+	createPageHeader,
+	openPageHeaderActionManager,
+	PageHeaderActionBar,
+	PageHeaderStateSchema,
+	PageHeaderStore,
+	registerPageHeaderCommands,
+} from "./page-header";
 
 // ─── Mount bridges ───
 export { renderReactInline } from "./react-inline";
