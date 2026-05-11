@@ -1,3 +1,4 @@
+import { applyClsTokens } from "@real1ty-obsidian-plugins";
 import type { App } from "obsidian";
 import { Modal } from "obsidian";
 import type { ReactNode } from "react";
@@ -9,6 +10,7 @@ import { AppContext } from "./contexts/app-context";
 
 export interface ReactModalBaseConfig {
 	app: App;
+	/** Space-separated class tokens applied to the modal root. */
 	cls?: string | undefined;
 	title?: string | undefined;
 	testId?: string | undefined;
@@ -34,7 +36,7 @@ function mountReactModal(
 		override onOpen(): void {
 			const { contentEl, modalEl } = this;
 			contentEl.empty();
-			if (options.cls) modalEl.addClass(options.cls);
+			applyClsTokens(modalEl, options.cls);
 			if (options.title) this.setTitle(options.title);
 			if (options.testId) modalEl.setAttribute("data-testid", options.testId);
 

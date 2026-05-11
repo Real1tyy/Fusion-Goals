@@ -1,7 +1,11 @@
-import { injectStyleSheet } from "../../utils/styles/inject";
-
-function buildTabStyles(p: string): string {
+export function buildTabbedContainerStyles(p: string): string {
 	return `
+.${p}tabbed-container {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+}
 .${p}tab-bar {
 	display: flex;
 	align-items: center;
@@ -25,6 +29,8 @@ function buildTabStyles(p: string): string {
 	box-shadow: none;
 	white-space: nowrap;
 	line-height: 1.4;
+	display: inline-flex;
+	align-items: center;
 }
 .${p}tab:hover {
 	color: var(--text-normal);
@@ -65,51 +71,70 @@ function buildTabStyles(p: string): string {
 	width: 12px;
 	height: 12px;
 }
-.modal:has(.${p}tab-rename-modal) {
-	width: 300px;
+.${p}tab-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 14px;
+	height: 14px;
+	flex-shrink: 0;
+	margin-right: 5px;
+	vertical-align: middle;
 }
-.modal:has(.${p}tab-rename-modal) .modal-title {
-	text-align: center;
+.${p}tab-icon svg {
+	width: 13px;
+	height: 13px;
 }
-.${p}tab-rename-input {
-	width: 100%;
-	padding: 8px 12px;
-	font-size: var(--font-ui-medium);
+.${p}tab-group {
+	display: inline-flex;
+	align-items: center;
+	gap: 0;
+	padding-right: 6px;
+}
+.${p}tab-group-chevron {
+	display: inline-flex;
+	align-items: center;
+	opacity: 0.4;
+	margin-left: 4px;
+	transition: opacity 150ms ease;
+}
+.${p}tab-group:hover .${p}tab-group-chevron {
+	opacity: 0.9;
+}
+.${p}tab-group-chevron svg {
+	width: 10px;
+	height: 10px;
+}
+.${p}tab-group-dropdown {
+	position: fixed;
+	z-index: var(--layer-popover, 50);
+	min-width: 160px;
+	padding: 4px;
+	background: var(--background-secondary);
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 6px;
-	background: var(--background-secondary);
-	color: var(--text-normal);
-	margin-bottom: 12px;
-}
-.${p}tab-rename-input:focus {
-	border-color: var(--interactive-accent);
-	outline: none;
-}
-.${p}tab-rename-actions {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 	display: flex;
-	gap: 8px;
-	justify-content: flex-end;
+	flex-direction: column;
+	gap: 1px;
 }
-.${p}tab-rename-btn {
-	padding: 6px 16px;
+.${p}tab-group-dropdown-item {
+	padding: 6px 10px;
 	font-size: var(--font-ui-small);
-	font-weight: 600;
-	border-radius: 6px;
-	cursor: pointer;
+	color: var(--text-normal);
+	background: none;
 	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	text-align: left;
 	box-shadow: none;
 }
-.${p}tab-rename-btn-reset {
-	background: var(--background-secondary);
-	color: var(--text-muted);
-	border: 1px solid var(--background-modifier-border);
+.${p}tab-group-dropdown-item:hover {
+	background: var(--background-modifier-hover);
 }
-.${p}tab-rename-btn-save {
-	background: var(--interactive-accent);
-	color: var(--text-on-accent);
-}
+
 .modal:has(.${p}tab-manager-modal) {
-	width: 420px;
+	width: 480px;
 }
 .modal:has(.${p}tab-manager-modal) .modal-title {
 	text-align: center;
@@ -194,6 +219,18 @@ function buildTabStyles(p: string): string {
 	gap: 8px;
 	min-width: 0;
 }
+.${p}tab-manager-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+}
+.${p}tab-manager-icon svg {
+	width: 14px;
+	height: 14px;
+}
 .${p}tab-manager-label-text {
 	font-size: var(--font-ui-medium);
 	font-weight: 500;
@@ -249,26 +286,6 @@ function buildTabStyles(p: string): string {
 	font-size: var(--font-ui-small);
 	color: var(--text-muted);
 }
-.${p}tab-group {
-	display: inline-flex;
-	align-items: center;
-	gap: 0;
-	padding-right: 6px;
-}
-.${p}tab-group-chevron {
-	display: inline-flex;
-	align-items: center;
-	opacity: 0.4;
-	margin-left: 4px;
-	transition: opacity 150ms ease;
-}
-.${p}tab-group:hover .${p}tab-group-chevron {
-	opacity: 0.9;
-}
-.${p}tab-group-chevron svg {
-	width: 10px;
-	height: 10px;
-}
 .${p}tab-manager-group-toggle {
 	display: flex;
 	align-items: center;
@@ -305,19 +322,16 @@ function buildTabStyles(p: string): string {
 	padding: 6px 10px;
 	border-radius: 6px;
 }
-.${p}tab-manager-children .${p}tab-manager-row-hidden {
-	opacity: 0.5;
+.${p}tab-manager-row:has(.${p}tab-manager-edit-form) {
+	flex-wrap: wrap;
 }
-.${p}tab-manager-children .${p}tab-manager-row-dragging {
-	opacity: 0.4;
+.${p}tab-manager-edit-form {
+	flex-basis: 100%;
+	padding-top: 8px;
 }
-.${p}tab-manager-children .${p}tab-manager-row-dragover {
-	border-color: var(--interactive-accent);
-	background: hsla(var(--color-accent-hsl), 0.06);
+.${p}tab-manager-edit-form .setting-item {
+	padding: 6px 0;
+	border-top: none;
 }
 `;
-}
-
-export function injectTabStyles(prefix: string): void {
-	injectStyleSheet(`${prefix}tab-styles`, buildTabStyles(prefix));
 }

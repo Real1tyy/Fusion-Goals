@@ -1,17 +1,26 @@
-import { injectStyleSheet } from "../../utils/styles/inject";
-
-function buildWhatsNewStyles(p: string): string {
+export function buildWhatsNewStyles(p: string): string {
 	return `
 .modal-container.mod-dim .modal.${p}-whats-new-modal {
 	max-width: 750px;
 	width: 90%;
 	height: 80vh;
 }
+.${p}-whats-new-modal .modal-title {
+	text-align: center;
+	width: 100%;
+}
 .${p}-whats-new-modal .modal-content {
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
 	height: 100%;
+}
+.${p}-whats-new-modal .modal-content > [data-testid] {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
 }
 .${p}-whats-new-plugin-name {
 	color: var(--link-color);
@@ -143,13 +152,8 @@ function buildWhatsNewStyles(p: string): string {
 	margin-top: 1rem;
 	margin-bottom: 0.5rem;
 }
-.${p}-whats-new-content ul {
-	padding-left: 1.5rem;
-}
-.${p}-whats-new-content li {
-	margin-bottom: 0.5rem;
-	line-height: 1.6;
-}
+.${p}-whats-new-content ul { padding-left: 1.5rem; }
+.${p}-whats-new-content li { margin-bottom: 0.5rem; line-height: 1.6; }
 .${p}-whats-new-content code {
 	background: var(--code-background);
 	padding: 0.2em 0.4em;
@@ -165,9 +169,7 @@ function buildWhatsNewStyles(p: string): string {
 	border-radius: 6px;
 	overflow-x: auto;
 }
-.${p}-whats-new-modal .${p}-whats-new-content a {
-	color: var(--link-color);
-}
+.${p}-whats-new-modal .${p}-whats-new-content a { color: var(--link-color); }
 .${p}-whats-new-modal .${p}-whats-new-content a.external-link {
 	color: var(--link-external-color, var(--link-color));
 }
@@ -242,8 +244,4 @@ function buildWhatsNewStyles(p: string): string {
 	box-shadow: 0 1px 4px rgb(0 0 0 / 10%);
 }
 `;
-}
-
-export function injectWhatsNewStyles(prefix: string): void {
-	injectStyleSheet(`${prefix}-whats-new-styles`, buildWhatsNewStyles(prefix));
 }

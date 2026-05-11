@@ -1,18 +1,10 @@
-import type { LicenseManager, LicenseStatus } from "@real1ty-obsidian-plugins";
+import { getLicenseStatusText, type LicenseManager, type LicenseStatus } from "@real1ty-obsidian-plugins";
 import { memo, type ReactNode, useCallback, useState } from "react";
 
 import { useExternalSnapshot } from "../hooks/use-external-snapshot";
 import { useInjectedStyles } from "../hooks/use-injected-styles";
+import { buildLicenseStyles } from "./license-section.styles";
 import { SecretField } from "./secret-field";
-
-function buildLicenseStyles(p: string): string {
-	return `
-.${p}license-activations-badge {
-	display: inline-block; margin-left: 8px; padding: 2px 8px; font-size: 0.8em;
-	border-radius: 10px; background: var(--background-modifier-hover); color: var(--text-muted);
-}
-`;
-}
 import { SettingHeading, SettingItem } from "./setting-item";
 
 interface LicenseSectionProps {
@@ -23,30 +15,10 @@ interface LicenseSectionProps {
 	accountUrl?: string;
 }
 
-function formatStatusText(status: LicenseStatus): string {
-	if (status.state === "none") return "No license key configured";
-	if (status.state === "valid") {
-		if (status.expiresAt) {
-			const expiryDate = new Date(status.expiresAt).toLocaleDateString(undefined, {
-				year: "numeric",
-				month: "long",
-				day: "numeric",
-			});
-			return `License active — valid offline until ${expiryDate}`;
-		}
-		return "License active";
-	}
-	if (status.state === "expired") return "License expired. Click Verify to refresh.";
-	if (status.state === "invalid") return status.errorMessage ?? "Invalid license key.";
-	if (status.state === "device_limit") return status.errorMessage ?? "Device limit reached.";
-	if (status.state === "error") return status.errorMessage ?? "Could not verify license.";
-	return "";
-}
-
 function StatusDescription({ status, cssPrefix }: { status: LicenseStatus; cssPrefix: string }): ReactNode {
 	return (
 		<>
-			{formatStatusText(status)}
+			{getLicenseStatusText(status)}
 			{status.state === "valid" && (
 				<span className={`${cssPrefix}license-activations-badge`}>
 					{status.activationsCurrent}/{status.activationsLimit} devices
