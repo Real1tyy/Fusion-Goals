@@ -1,13 +1,13 @@
 import {
-	createPageHeader,
 	type GridLayoutHandle,
-	type PageHeaderHandle,
 	type PieChartHandle,
 	registerComponentView,
-	registerPageHeaderCommands,
 	type ViewActivator,
 } from "@real1ty-obsidian-plugins";
 import {
+	createPageHeader,
+	type PageHeaderHandle,
+	registerPageHeaderCommands,
 	registerTabCommands,
 	renderReactInline,
 	TabbedContainer,
