@@ -259,7 +259,7 @@ export default class FusionGoalsPlugin extends Plugin {
 
 		if (lastSeenVersion !== currentVersion) {
 			const config: WhatsNewModalConfig = {
-				cssPrefix: "fusion-goals",
+				cssPrefix: "fusion-goals-",
 				pluginName: "Fusion Goals",
 				changelogContent: CHANGELOG_CONTENT,
 				links: {
