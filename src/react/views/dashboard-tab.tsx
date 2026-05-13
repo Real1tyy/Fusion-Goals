@@ -1,12 +1,11 @@
 import {
 	type CellOption,
 	type CellPlacement,
-	createGridLayout,
 	type GridLayoutHandle,
 	type PieChartHandle,
 	registerGridCommands,
 } from "@real1ty-obsidian-plugins";
-import type { TabEntry } from "@real1ty-obsidian-plugins-react";
+import { createGridLayout, type TabEntry } from "@real1ty-obsidian-plugins-react";
 import { createElement, memo, useEffect, useRef } from "react";
 
 import { renderFusionPieChart } from "../../components/pie-chart";
