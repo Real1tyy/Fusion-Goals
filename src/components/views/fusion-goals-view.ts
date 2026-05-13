@@ -1,43 +1,19 @@
-import {
-	type GridLayoutHandle,
-	type PieChartHandle,
-	registerComponentView,
-	type ViewActivator,
-} from "@real1ty-obsidian-plugins";
-import {
-	createPageHeader,
-	type PageHeaderHandle,
-	registerPageHeaderCommands,
-	registerTabCommands,
-	renderReactInline,
-	TabbedContainer,
-	type TabbedContainerHandle,
-} from "@real1ty-obsidian-plugins-react";
-import type { Component } from "obsidian";
+import { registerComponentView, type ViewActivator } from "@real1ty-obsidian-plugins";
+import { renderReactInline } from "@real1ty-obsidian-plugins-react";
 import { createElement } from "react";
 
 import type { GoalsManager } from "../../core/goals-manager";
 import type FusionGoalsPlugin from "../../main";
+import { FusionGoalsViewApp } from "../../react/views/fusion-goals-view-app";
 import { FUSION_GOALS_VIEW_TYPE } from "../../types/constants";
 import type { FusionGoalsSettingsStore } from "../../types/settings";
-import { showGoalModal } from "../modals/goal-modal";
-import { showTaskModal } from "../modals/task-modal";
-import { createDashboardTabDefinition } from "./dashboard-tab";
-import { createGoalsTabDefinitions } from "./goals-tab";
-import { createGraphTabDefinition } from "./graph-tab";
-import { createTasksTabDefinitions } from "./tasks-tab";
 
 export function registerFusionGoalsView(
 	plugin: FusionGoalsPlugin,
 	settingsStore: FusionGoalsSettingsStore,
 	goalsManager: GoalsManager
 ): ViewActivator {
-	const components: Component[] = [];
-	const chartRefs: PieChartHandle[] = [];
-	const gridHandleRef: { current: GridLayoutHandle | null } = { current: null };
-	const tabbedHandleRef: { current: TabbedContainerHandle | null } = { current: null };
-	let tabbedUnmount: (() => void) | null = null;
-	let pageHeaderHandle: PageHeaderHandle | null = null;
+	let unmount: (() => void) | null = null;
 
 	return registerComponentView(plugin, {
 		viewType: FUSION_GOALS_VIEW_TYPE,
@@ -45,96 +21,26 @@ export function registerFusionGoalsView(
 		icon: "target",
 		cls: "fusion-goals-view-root",
 		render: (el, ctx) => {
-			const dashboardTab = createDashboardTabDefinition(plugin, settingsStore, goalsManager, chartRefs, gridHandleRef);
-			const goalsTabDefs = createGoalsTabDefinitions(plugin, settingsStore, components);
-			const tasksTabDefs = createTasksTabDefinitions(plugin, settingsStore, components);
-			const graphTab = createGraphTabDefinition(plugin, goalsManager);
-
-			const tabs = [dashboardTab, ...goalsTabDefs, ...tasksTabDefs, graphTab];
-
+			unmount?.();
 			const headerEl = ctx.type === "view" ? ctx.headerEl : undefined;
-			const titleContainer = headerEl?.querySelector(".view-header-title-container") ?? undefined;
-
-			tabbedUnmount = renderReactInline(
+			const leaf = ctx.type === "view" ? ctx.leaf : undefined;
+			unmount = renderReactInline(
 				el,
-				createElement(TabbedContainer, {
-					tabs,
-					cssPrefix: "fusion-goals-",
-					...(headerEl !== undefined ? { tabBarContainer: headerEl } : {}),
-					...(titleContainer !== undefined ? { tabBarInsertBefore: titleContainer } : {}),
-					editable: true,
-					app: plugin.app,
-					...(settingsStore.currentSettings.activeTab !== undefined
-						? { initialState: settingsStore.currentSettings.activeTab }
-						: {}),
-					onStateChange: (state) => {
-						void settingsStore.updateSettings((s) => ({ ...s, activeTab: state }));
-					},
-					handleRef: tabbedHandleRef,
+				createElement(FusionGoalsViewApp, {
+					plugin,
+					settingsStore,
+					goalsManager,
+					el,
+					headerEl,
+					leaf,
 				}),
-				plugin.app
+				ctx.app,
+				{ cssPrefix: "fusion-goals-" }
 			);
-
-			registerTabCommands(
-				plugin,
-				"fusion-goals",
-				"Fusion Goals",
-				() => tabbedHandleRef.current,
-				tabs.map((t) => t.label)
-			);
-
-			pageHeaderHandle = createPageHeader({
-				actions: [
-					{
-						id: "create-goal",
-						label: "Create Goal",
-						icon: "target",
-						onAction: () => {
-							showGoalModal(plugin.app, goalsManager, settingsStore);
-						},
-					},
-					{
-						id: "create-task",
-						label: "Create Task",
-						icon: "check-square",
-						onAction: () => {
-							showTaskModal(plugin.app, goalsManager, settingsStore);
-						},
-					},
-				],
-				cssPrefix: "fusion-goals-",
-				app: plugin.app,
-				editable: true,
-				...(settingsStore.currentSettings.pageHeaderState !== undefined
-					? { initialState: settingsStore.currentSettings.pageHeaderState }
-					: {}),
-				onStateChange: (state) => {
-					void settingsStore.updateSettings((s) => ({ ...s, pageHeaderState: state }));
-				},
-			});
-
-			if (ctx.type === "view" && ctx.leaf) {
-				pageHeaderHandle.apply(ctx.leaf);
-			}
-
-			registerPageHeaderCommands(plugin, "fusion-goals", "Fusion Goals", pageHeaderHandle);
 		},
 		cleanup: () => {
-			pageHeaderHandle?.destroy();
-			pageHeaderHandle = null;
-			tabbedUnmount?.();
-			tabbedUnmount = null;
-			tabbedHandleRef.current = null;
-			gridHandleRef.current?.destroy();
-			gridHandleRef.current = null;
-			for (const chart of chartRefs) {
-				chart.destroy();
-			}
-			chartRefs.length = 0;
-			for (const c of components) {
-				c.unload();
-			}
-			components.length = 0;
+			unmount?.();
+			unmount = null;
 		},
 	});
 }
