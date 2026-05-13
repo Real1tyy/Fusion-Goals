@@ -1,6 +1,7 @@
 import { showSchemaModal } from "@real1ty-obsidian-plugins";
 import type { App } from "obsidian";
 
+import { cls } from "../../constants";
 import type { GoalsManager } from "../../core/goals-manager";
 import type { GoalFrontmatter, GoalRow } from "../../types/frontmatter";
 import { GoalFrontmatterShape } from "../../types/frontmatter";
@@ -16,7 +17,7 @@ export function showGoalModal(
 
 	showSchemaModal<GoalFrontmatter>({
 		app,
-		cls: "fusion-goals-goal-modal",
+		cls: cls("goal-modal"),
 		title: existing ? "Edit Goal" : "Create Goal",
 		shape: GoalFrontmatterShape,
 		nameField: { placeholder: "Goal name" },

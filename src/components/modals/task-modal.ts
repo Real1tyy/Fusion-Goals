@@ -1,6 +1,7 @@
 import { showSchemaModal } from "@real1ty-obsidian-plugins";
 import type { App } from "obsidian";
 
+import { cls } from "../../constants";
 import type { GoalsManager } from "../../core/goals-manager";
 import type { TaskFrontmatter, TaskRow } from "../../types/frontmatter";
 import { TaskFrontmatterShape } from "../../types/frontmatter";
@@ -30,7 +31,7 @@ export function showTaskModal(
 
 	showSchemaModal<TaskFrontmatter>({
 		app,
-		cls: "fusion-goals-task-modal",
+		cls: cls("task-modal"),
 		title: existing ? "Edit Task" : "Create Task",
 		shape: TaskFrontmatterShape,
 		nameField: { placeholder: "Task name" },

@@ -10,6 +10,7 @@ import { MountImperative, type TabEntry } from "@real1ty-obsidian-plugins-react"
 import type { Plugin } from "obsidian";
 import { createElement } from "react";
 
+import { cls } from "../../constants";
 import type { GoalsManager } from "../../core/goals-manager";
 import type { FusionGoalsSettingsStore } from "../../types/settings";
 import { renderFusionPieChart } from "../pie-chart";
@@ -66,7 +67,7 @@ export function createDashboardTabDefinition(
 
 		gridHandleRef.current = createGridLayout(el, {
 			app: plugin.app,
-			cssPrefix: "fusion-goals-chart-",
+			cssPrefix: cls("chart-"),
 			columns: 2,
 			rows: 3,
 			gap: "12px",

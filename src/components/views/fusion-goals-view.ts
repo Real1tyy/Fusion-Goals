@@ -2,6 +2,7 @@ import { registerComponentView, type ViewActivator } from "@real1ty-obsidian-plu
 import { renderReactInline } from "@real1ty-obsidian-plugins-react";
 import { createElement } from "react";
 
+import { cls, CSS_PREFIX } from "../../constants";
 import type { GoalsManager } from "../../core/goals-manager";
 import type FusionGoalsPlugin from "../../main";
 import { FusionGoalsViewApp } from "../../react/views/fusion-goals-view-app";
@@ -19,7 +20,7 @@ export function registerFusionGoalsView(
 		viewType: FUSION_GOALS_VIEW_TYPE,
 		displayText: "Fusion Goals",
 		icon: "target",
-		cls: "fusion-goals-view-root",
+		cls: cls("view-root"),
 		render: (el, ctx) => {
 			unmount?.();
 			const headerEl = ctx.type === "view" ? ctx.headerEl : undefined;
@@ -35,7 +36,7 @@ export function registerFusionGoalsView(
 					leaf,
 				}),
 				ctx.app,
-				{ cssPrefix: "fusion-goals-" }
+				{ cssPrefix: CSS_PREFIX }
 			);
 		},
 		cleanup: () => {
