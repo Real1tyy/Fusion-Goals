@@ -20,7 +20,6 @@ import { registerFusionGoalsView } from "./components/views/fusion-goals-view";
 import { GoalsManager } from "./core/goals-manager";
 import { InheritanceManager } from "./core/inheritance-manager";
 import { metricRepository } from "./core/metric-repository";
-import { FUSION_GOALS_VIEW_TYPE } from "./types/constants";
 import type { GoalFrontmatter, TaskFrontmatter } from "./types/frontmatter";
 import { createGoalSchema, createTaskSchema } from "./types/frontmatter";
 import { METRIC_CODE_FENCE } from "./types/metric";
@@ -43,8 +42,8 @@ export default class FusionGoalsPlugin extends Plugin {
 		this.addSettingTab(new FusionGoalsSettingsTab(this.app, this));
 
 		this.addCommand({
-			id: "open-fusion-goals",
-			name: "Open Fusion Goals",
+			id: "open-view",
+			name: "Open view",
 			callback: () => {
 				void this.activateFusionGoals?.();
 			},
@@ -160,7 +159,6 @@ export default class FusionGoalsPlugin extends Plugin {
 		this.inheritanceManager?.stop();
 		this.tasksTable?.destroy();
 		this.goalsTable?.destroy();
-		this.app.workspace.detachLeavesOfType(FUSION_GOALS_VIEW_TYPE);
 	}
 
 	updateRibbonIcon(): void {

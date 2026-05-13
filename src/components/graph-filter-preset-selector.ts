@@ -90,7 +90,7 @@ export class GraphFilterPresetSelector {
 		// Try to open the dropdown
 		if (this.selectEl && "showPicker" in this.selectEl) {
 			try {
-				(this.selectEl as any).showPicker();
+				(this.selectEl as HTMLSelectElement & { showPicker: () => void }).showPicker();
 			} catch {
 				// Fallback silently if showPicker fails
 			}

@@ -1,7 +1,7 @@
 import { buildPropertyMapping, InputFilterManager, sanitizeExpression } from "@real1ty-obsidian-plugins";
 
-export class GraphFilter extends InputFilterManager<Record<string, any>> {
-	private compiledFunc: ((...args: any[]) => boolean) | null = null;
+export class GraphFilter extends InputFilterManager<Record<string, unknown>> {
+	private compiledFunc: ((...args: unknown[]) => boolean) | null = null;
 	private propertyMapping = new Map<string, string>();
 
 	constructor(
@@ -33,7 +33,7 @@ export class GraphFilter extends InputFilterManager<Record<string, any>> {
 		this.updateFilterValue(value);
 	}
 
-	shouldInclude(frontmatter: Record<string, any>): boolean {
+	shouldInclude(frontmatter: Record<string, unknown>): boolean {
 		if (!this.currentValue) return true;
 
 		try {
@@ -45,7 +45,7 @@ export class GraphFilter extends InputFilterManager<Record<string, any>> {
 				const sanitized = sanitizeExpression(this.currentValue, this.propertyMapping);
 				const params = Array.from(this.propertyMapping.values());
 				this.compiledFunc = new Function(...params, `"use strict"; return ${sanitized};`) as (
-					...args: any[]
+					...args: unknown[]
 				) => boolean;
 			}
 

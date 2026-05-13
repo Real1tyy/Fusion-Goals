@@ -1,13 +1,14 @@
 import type { Core } from "cytoscape";
 import type { App } from "obsidian";
 import { TFile } from "obsidian";
-import type { SettingsStore } from "../core/settings-store";
+
+import type { FusionGoalsSettingsStore } from "../types/settings";
 import type { GraphZoomPreview } from "./graph-zoom-preview";
 
 export interface ZoomConfig {
 	getCy: () => Core;
 	getPreviewWrapperEl: () => HTMLElement;
-	settingsStore: SettingsStore;
+	settingsStore: FusionGoalsSettingsStore;
 	onToggleStatesChange: (hideFrontmatter: boolean, hideContent: boolean) => void;
 }
 
@@ -123,7 +124,7 @@ export class GraphZoomManager {
 
 		const node = this.cy.nodes().filter((n) => n.id() === this.focusedNodeId);
 		if (node.length > 0) {
-			(this.cy as any).center(node);
+			this.cy.center(node);
 		}
 	}
 

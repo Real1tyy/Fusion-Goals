@@ -1,14 +1,14 @@
 import { filterPropertiesForDisplay } from "@real1ty-obsidian-plugins";
 import { type App, Component, MarkdownRenderer, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
-import type { SettingsStore } from "../core/settings-store";
-import type { FusionGoalsSettings } from "../types/settings";
+
+import type { FusionGoalsSettings, FusionGoalsSettingsStore } from "../types/settings";
 import { PropertyRenderer } from "./property-renderer";
 
 export interface GraphZoomPreviewProps {
 	file: TFile;
 	onExit: () => void;
-	settingsStore: SettingsStore;
+	settingsStore: FusionGoalsSettingsStore;
 	initialHideFrontmatter: boolean;
 	initialHideContent: boolean;
 	onToggleStatesChange?: (hideFrontmatter: boolean, hideContent: boolean) => void;
@@ -78,7 +78,7 @@ export class GraphZoomPreview {
 			}
 		});
 
-		this.render();
+		void this.render();
 	}
 
 	private async render(): Promise<void> {
@@ -94,7 +94,7 @@ export class GraphZoomPreview {
 		});
 
 		headerEl.onclick = () => {
-			this.app.workspace.openLinkText(this.props.file.path, "", false);
+			void this.app.workspace.openLinkText(this.props.file.path, "", false);
 			this.props.onExit();
 		};
 
@@ -198,6 +198,7 @@ export class GraphZoomPreview {
 
 		// Frontmatter section
 		const cache = this.app.metadataCache.getFileCache(this.props.file);
+		// biome-ignore lint/correctness/noUnusedVariables: Using rest operator to exclude position
 		const { position: _position, ...frontmatter } = cache?.frontmatter ?? {};
 
 		this.frontmatterSection = this.bodyContainer.createEl("div", {

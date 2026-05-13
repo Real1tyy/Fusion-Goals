@@ -22,7 +22,7 @@ export interface GraphBuilderOptions {
 	sourcePath: string;
 	startFromCurrent: boolean;
 	searchQuery?: string;
-	filterEvaluator?: (frontmatter: Record<string, any>) => boolean;
+	filterEvaluator?: (frontmatter: Record<string, unknown>) => boolean;
 }
 
 interface ValidFileContext extends FileContext {
@@ -264,7 +264,7 @@ export class GraphBuilder {
 	private applyGraphFilters(
 		graphData: GraphData,
 		searchQuery?: string,
-		filterEvaluator?: (frontmatter: Record<string, any>) => boolean
+		filterEvaluator?: (frontmatter: Record<string, unknown>) => boolean
 	): GraphData {
 		// Apply both search and expression filters here - frontmatter property filters are applied during graph building
 		if (!searchQuery && !filterEvaluator) return graphData;

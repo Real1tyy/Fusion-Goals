@@ -190,7 +190,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 
 		// Register event listeners
 		this.registerEvent(this.app.workspace, "file-open", (file) => {
-			this.onFileOpen(file);
+			this.onFileOpen(file as TFile | null);
 		});
 
 		this.eventsSubscription = this.goalsManager.events$.subscribe((event) => {
@@ -574,7 +574,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 
 			const searchQuery = this.graphSearch?.getCurrentValue() || "";
 			const filterEvaluator = this.graphFilter?.getCurrentValue()
-				? (frontmatter: Record<string, any>) => this.graphFilter!.shouldInclude(frontmatter)
+				? (frontmatter: Record<string, unknown>) => this.graphFilter!.shouldInclude(frontmatter)
 				: undefined;
 
 			const { nodes, edges } = this.graphBuilder.buildGraph({
@@ -862,7 +862,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 				const node = this.cy.nodes().filter((n) => n.id() === focusedNodeId);
 				if (node.length > 0) {
 					// Center on the focused node without changing zoom level
-					(this.cy as any).center(node);
+					this.cy.center(node);
 					return;
 				}
 			}

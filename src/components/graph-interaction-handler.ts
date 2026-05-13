@@ -1,6 +1,7 @@
-import type { Core } from "cytoscape";
+import type { Core, NodeSingular } from "cytoscape";
 import type { App } from "obsidian";
 import { TFile } from "obsidian";
+
 import type { PropertyTooltip } from "./property-tooltip";
 
 export interface GraphInteractionConfig {
@@ -74,7 +75,7 @@ export class GraphInteractionHandler {
 					sourcePath: this.config.getCurrentFile()?.path || "",
 				});
 
-				this.propertyTooltip.show(filePath, evt.originalEvent as MouseEvent);
+				this.propertyTooltip.show(filePath, evt.originalEvent);
 			}
 		});
 
@@ -88,11 +89,11 @@ export class GraphInteractionHandler {
 			const node = evt.target;
 			const filePath = node.id();
 			const file = this.app.vault.getAbstractFileByPath(filePath);
-			const originalEvent = evt.originalEvent as MouseEvent;
+			const originalEvent = evt.originalEvent;
 
 			if (file instanceof TFile) {
 				if (originalEvent && (originalEvent.ctrlKey || originalEvent.metaKey)) {
-					this.app.workspace.getLeaf("tab").openFile(file);
+					void this.app.workspace.getLeaf("tab").openFile(file);
 					return;
 				}
 
@@ -259,7 +260,7 @@ export class GraphInteractionHandler {
 		// Nodes within this range are considered at the same level
 		const VERTICAL_TOLERANCE = 50;
 
-		let closestNode: any = null;
+		let closestNode: NodeSingular | null = null;
 		let closestDistance = Number.POSITIVE_INFINITY;
 
 		otherNodes.forEach((node) => {
@@ -284,7 +285,8 @@ export class GraphInteractionHandler {
 			}
 		});
 
-		return closestNode ? closestNode.id() : null;
+		const resolvedNode = closestNode as NodeSingular | null;
+		return resolvedNode ? resolvedNode.id() : null;
 	}
 
 	cleanup(): void {

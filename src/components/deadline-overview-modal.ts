@@ -194,7 +194,7 @@ export class DeadlineOverviewModal extends Modal {
 				const propertyMapping = buildPropertyMapping(Object.keys(frontmatter));
 				const sanitized = sanitizeExpression(expression.trim(), propertyMapping);
 				const params = Array.from(propertyMapping.values());
-				const func = new Function(...params, `"use strict"; return ${sanitized};`) as (...args: any[]) => boolean;
+				const func = new Function(...params, `"use strict"; return ${sanitized};`) as (...args: unknown[]) => boolean;
 				const values = Array.from(propertyMapping.keys()).map((key) => frontmatter[key]);
 				return func(...values);
 			} catch (_error) {
