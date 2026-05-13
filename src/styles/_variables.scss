@@ -1,0 +1,68 @@
+$border-radius-sm: 3px;
+$border-radius-md: 4px;
+$border-radius-lg: 6px;
+$border-radius-xl: 8px;
+
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 20px;
+
+$font-size-xs: 0.75em;
+$font-size-sm: 0.85em;
+$font-size-md: 0.9em;
+$font-size-base: 0.95em;
+$font-size-lg: 1.1em;
+$font-size-xl: 1.3em;
+
+$transition-fast: 0.15s ease;
+$transition-base: 0.2s ease;
+$transition-slow: 0.3s ease;
+
+$shadow-sm: 0 2px 8px rgb(0 0 0 / 15%);
+$shadow-md: 0 4px 12px rgb(0 0 0 / 15%);
+$shadow-lg: 0 4px 12px rgb(0 0 0 / 20%);
+$shadow-tooltip: 0 4px 12px rgb(0 0 0 / 25%);
+
+$graph-input-height: 2.8em;
+$zoom-preview-max-height: 280px;
+$zoom-preview-frontmatter-height: 90px;
+
+$tooltip-max-width: 255px;
+$tooltip-z-index: 1000;
+
+$prop-grid-key-width: 150px;
+$edit-prop-key-width: 200px;
+$edit-props-max-height: 400px;
+
+$metric-table-max-height: 300px;
+$metric-custom-input-width: 80px;
+$metric-description-max-width: 200px;
+$metric-description-min-width: 140px;
+
+$deadline-modal-width: 90vw;
+$deadline-modal-max-width: 1600px;
+
+$whats-new-modal-max-width: 800px;
+$whats-new-content-max-height: 400px;
+
+$action-manager-modal-width: 420px;
+
+$metric-timeline-width: 98vw;
+$metric-timeline-height: 90vh;
+
+$metric-description-modal-width: 800px;
+$metric-description-modal-max-width: 90vw;
+
+$vis-tooltip-max-width: 350px;
+
+$page-input-width: 4em;
+
+$filter-preset-name-width: 180px;
+$excluded-properties-min-width: 200px;
+
+$settings-array-input-min-width: 400px;
+
+$responsive-breakpoint-sm: 400px;
+$responsive-breakpoint-md: 768px;
