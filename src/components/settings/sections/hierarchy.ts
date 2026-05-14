@@ -140,7 +140,7 @@ export class HierarchySection implements SettingsSection {
 							await this.plugin.tasksTable.start();
 							new Notice("Rescan complete!");
 							button.setButtonText("✓ Complete!");
-							setTimeout(() => {
+							window.setTimeout(() => {
 								button.setButtonText("Rescan Everything");
 								button.setDisabled(false);
 							}, 2000);
@@ -148,7 +148,7 @@ export class HierarchySection implements SettingsSection {
 							console.error("Error during rescan:", error);
 							new Notice("Error during rescan - check console");
 							button.setButtonText("✗ Error");
-							setTimeout(() => {
+							window.setTimeout(() => {
 								button.setButtonText("Rescan Everything");
 								button.setDisabled(false);
 							}, 2000);

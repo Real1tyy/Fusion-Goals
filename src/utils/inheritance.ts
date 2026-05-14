@@ -1,5 +1,6 @@
 import type { App } from "obsidian";
 import { TFile } from "obsidian";
+
 import type { Frontmatter, FusionGoalsSettings } from "../types/settings";
 
 export interface InheritanceUpdate {

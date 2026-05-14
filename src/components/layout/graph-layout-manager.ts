@@ -75,7 +75,7 @@ export class GraphLayoutManager {
 		});
 
 		if (animationDuration > 0) {
-			setTimeout(() => {
+			window.setTimeout(() => {
 				this.cy.fit(undefined, PADDING);
 			}, animationDuration);
 		} else {
@@ -137,7 +137,7 @@ export class GraphLayoutManager {
 		layout.run();
 
 		if (animationDuration === 0) {
-			setTimeout(() => {
+			window.setTimeout(() => {
 				this.cy.resize();
 				this.cy.fit();
 				this.cy.center();
@@ -152,7 +152,7 @@ export class GraphLayoutManager {
 			// ignore
 		}
 
-		requestAnimationFrame(() => {
+		window.requestAnimationFrame(() => {
 			this.cy.fit();
 			this.cy.center();
 		});

@@ -200,7 +200,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 			}
 		});
 
-		setTimeout(() => {
+		window.setTimeout(() => {
 			const activeFile = this.app.workspace.getActiveFile();
 			if (activeFile) {
 				this.onFileOpen(activeFile);
@@ -850,7 +850,7 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 		}
 
 		// Defer to next frame to allow any DOM/layout changes to settle
-		requestAnimationFrame(() => {
+		window.requestAnimationFrame(() => {
 			if (!this.cy) return;
 
 			if (!this.graphContainerEl?.isConnected || !document.body.contains(this.graphContainerEl)) {

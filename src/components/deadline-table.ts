@@ -1,4 +1,5 @@
 import type { App, TFile } from "obsidian";
+
 import { formatDaysRemaining, getDaysRemainingClass } from "../utils/date";
 import type { PropertyTooltip } from "./property-tooltip";
 

@@ -230,7 +230,7 @@ export default class FusionGoalsPlugin extends Plugin {
 	}
 
 	private async focusInlineTitleAtEnd(leaf: WorkspaceLeaf): Promise<void> {
-		await new Promise((resolve) => setTimeout(resolve, 30));
+		await new Promise((resolve) => window.setTimeout(resolve, 30));
 
 		const view = leaf.view;
 		if (!(view instanceof MarkdownView)) return;
