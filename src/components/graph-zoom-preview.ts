@@ -87,10 +87,9 @@ export class GraphZoomPreview {
 			cls: "fusion-graph-zoom-preview-controls",
 		});
 
-		// Clickable header (left side)
 		const headerEl = this.controlsContainer.createEl("h2", {
 			text: this.props.file.basename,
-			cls: "fusion-graph-zoom-preview-title clickable",
+			cls: "fusion-graph-zoom-preview-title",
 		});
 
 		headerEl.onclick = () => {

@@ -931,6 +931,19 @@
   background-color: var(--background-modifier-error-hover);
 }
 
+.fusion-goals-goal-modal,
+.fusion-goals-task-modal {
+  /* intentional stub — modal padding handled by Obsidian defaults */
+}
+
+.fusion-goals-view-root {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .fusion-graph-toggle-container {
   display: flex;
   align-items: center;
@@ -1007,6 +1020,24 @@
 .fusion-property-tooltip-value {
   color: var(--text-normal);
   word-break: break-word;
+}
+.fusion-property-tooltip-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+  margin-top: 0.4em;
+}
+.fusion-property-tooltip-date-item {
+  display: flex;
+  gap: 0.4em;
+  font-size: 0.85em;
+}
+.fusion-property-tooltip-date-label {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.fusion-property-tooltip-date-value {
+  color: var(--text-normal);
 }
 
 .fusion-property-link {
@@ -1597,6 +1628,15 @@
 }
 .deadline-overview-pagination-container {
   margin-bottom: 2em;
+}
+.deadline-overview-tabs-container {
+  margin-bottom: 1em;
+}
+.deadline-overview-sort-container {
+  margin-bottom: 1em;
+}
+.deadline-overview-table-container {
+  margin-bottom: 1em;
 }
 
 .fusion-metric-block {

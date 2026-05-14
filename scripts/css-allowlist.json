@@ -1,84 +1,16 @@
 {
 	"$schema": "../../scripts/utils/css-allowlist.schema.json",
-	"externalClasses": [],
+	"externalClasses": ["focused", "glow"],
 	"undefinedClasses": [
 		{
-			"pattern": "clickable",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/components/graph-zoom-preview.ts:93",
-			"bootstrap": true
-		},
-		{
-			"pattern": "deadline-overview-sort-container",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/components/deadline-overview-modal.ts:252",
-			"bootstrap": true
-		},
-		{
-			"pattern": "deadline-overview-table-container",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/components/deadline-overview-modal.ts:253",
-			"bootstrap": true
-		},
-		{
-			"pattern": "deadline-overview-tabs-container",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/components/deadline-overview-modal.ts:248",
-			"bootstrap": true
-		},
-		{
-			"pattern": "focused",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/components/graph-zoom-manager.ts:104",
-			"bootstrap": true
-		},
-		{
-			"pattern": "fusion-goals-chart-",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/components/views/dashboard-tab.ts:70",
-			"bootstrap": true
-		},
-		{
-			"pattern": "fusion-goals-goal-modal",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/components/modals/goal-modal.ts:20",
-			"bootstrap": true
-		},
-		{
-			"pattern": "fusion-goals-task-modal",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/components/modals/task-modal.ts:34",
-			"bootstrap": true
-		},
-		{
-			"pattern": "fusion-goals-view-root",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/components/views/fusion-goals-view.ts:23",
-			"bootstrap": true
+			"pattern": "fusion-goals-chart-*",
+			"reason": "Dynamic prefix passed to shared createGridLayout(cssPrefix) in dashboard-tab.ts — final classes (fusion-goals-chart-grid, -grid-cell, etc.) are injected at runtime by shared/grid-layout/styles.ts buildGridStyles(). The scanner's runtime builder picks up the literal '${prefix}grid' template but doesn't follow the chart- sub-prefix.",
+			"owner": "fusion-goals/dashboard"
 		},
 		{
 			"pattern": "fusion-metric-initialized",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/main.ts:133",
-			"bootstrap": true
-		},
-		{
-			"pattern": "fusion-property-tooltip-date-label",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/components/property-tooltip.ts:273",
-			"bootstrap": true
-		},
-		{
-			"pattern": "fusion-property-tooltip-date-value",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/components/property-tooltip.ts:277",
-			"bootstrap": true
-		},
-		{
-			"pattern": "glow",
-			"reason": "Bootstrap: pre-existing undefined class identified during reverse-check rollout. Either add a CSS rule under the canonical prefix, refactor the code to use a defined class, or replace this entry with a real reason if the class is intentionally external.",
-			"source": "src/components/graph-interaction-handler.ts:181",
-			"bootstrap": true
+			"reason": "Lifecycle state marker added by registerMarkdownCodeBlockProcessor in main.ts to deduplicate metric code-block initialization (same pattern as periodic-planner-*-initialized). Never styled.",
+			"owner": "fusion-goals/metrics"
 		}
 	]
 }

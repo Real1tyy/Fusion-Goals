@@ -1,0 +1,99 @@
+@use "variables" as *;
+
+.fusion-property-tooltip {
+	position: fixed;
+	z-index: $tooltip-z-index;
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: $border-radius-lg;
+	padding: 0.65em 0.85em;
+	box-shadow: $shadow-tooltip;
+	font-size: $font-size-sm;
+	max-width: $tooltip-max-width;
+	pointer-events: auto;
+
+	&-title {
+		margin-bottom: 0.5em;
+		word-wrap: break-word;
+		word-break: break-word;
+		overflow-wrap: break-word;
+
+		&-link {
+			color: var(--text-normal);
+			font-size: $font-size-lg;
+			font-weight: 600;
+			text-decoration: none;
+			cursor: pointer;
+			transition: color $transition-base;
+
+			&:hover {
+				color: var(--link-color);
+			}
+		}
+	}
+
+	&-separator {
+		height: 1px;
+		background-color: var(--background-modifier-border);
+		margin: 0.5em -0.85em 0.65em;
+	}
+
+	&-item {
+		display: flex;
+		gap: 0.5em;
+		margin-bottom: 0.25em;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	&-key {
+		color: var(--text-muted);
+		font-weight: 600;
+		flex-shrink: 0;
+	}
+
+	&-value {
+		color: var(--text-normal);
+		word-break: break-word;
+	}
+
+	&-dates {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2em;
+		margin-top: 0.4em;
+	}
+
+	&-date-item {
+		display: flex;
+		gap: 0.4em;
+		font-size: $font-size-sm;
+	}
+
+	&-date-label {
+		color: var(--text-muted);
+		font-weight: 600;
+	}
+
+	&-date-value {
+		color: var(--text-normal);
+	}
+}
+
+.fusion-property-link {
+	color: var(--link-color);
+	text-decoration: none;
+	cursor: pointer;
+	transition: color $transition-base;
+
+	&:hover {
+		color: var(--link-color-hover);
+		text-decoration: underline;
+	}
+}
+
+.fusion-property-separator {
+	color: var(--text-muted);
+}

@@ -1,0 +1,180 @@
+@use "variables" as *;
+
+.node-preview {
+	&-modal .modal-content {
+		max-width: 700px;
+	}
+
+	&-header h2 {
+		margin: 0 0 1.5em;
+		color: var(--text-normal);
+		cursor: pointer;
+		transition: color $transition-base;
+
+		&:hover {
+			color: var(--interactive-accent);
+		}
+	}
+
+	&-section {
+		margin-bottom: 1.5em;
+
+		&-title {
+			margin: 0 0 1em;
+			color: var(--text-muted);
+			font-size: $font-size-md;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+	}
+
+	&-props-grid {
+		display: grid;
+		gap: 1em;
+	}
+
+	&-prop {
+		&-item {
+			display: grid;
+			grid-template-columns: $prop-grid-key-width 1fr;
+			gap: 1em;
+			padding: 0.75em;
+			background-color: var(--background-secondary);
+			border-radius: $border-radius-lg;
+			border-left: 3px solid var(--background-modifier-border);
+		}
+
+		&-key {
+			font-weight: 600;
+			color: var(--text-normal);
+			word-break: break-word;
+		}
+
+		&-value {
+			color: var(--text-muted);
+			word-break: break-word;
+		}
+
+		&-link {
+			color: var(--link-color);
+			text-decoration: none;
+			cursor: pointer;
+			transition: color $transition-base;
+
+			&:hover {
+				color: var(--link-color-hover);
+				text-decoration: underline;
+			}
+		}
+
+		&-empty {
+			color: var(--text-faint);
+			font-style: italic;
+		}
+
+		&-separator {
+			color: var(--text-faint);
+			margin: 0 0.25em;
+		}
+	}
+
+	&-empty {
+		color: var(--text-muted);
+		font-style: italic;
+		text-align: center;
+		padding: 2em;
+	}
+}
+
+.node-edit {
+	&-modal .modal-content {
+		max-width: 800px;
+	}
+
+	&-section {
+		margin-bottom: 1.5em;
+	}
+
+	&-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1em;
+		padding-bottom: 0.5em;
+		border-bottom: 1px solid var(--background-modifier-border);
+	}
+
+	&-section-title {
+		margin: 0;
+		color: var(--text-normal);
+		font-size: 1em;
+		font-weight: 600;
+	}
+
+	&-props-container {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5em;
+		max-height: $edit-props-max-height;
+		overflow-y: auto;
+		padding: 0.5em;
+		background-color: var(--background-secondary);
+		border-radius: $border-radius-lg;
+	}
+
+	&-prop-row {
+		display: grid;
+		grid-template-columns: $edit-prop-key-width 1fr auto;
+		gap: 0.5em;
+		align-items: center;
+		padding: 0.5em;
+		background-color: var(--background-primary);
+		border-radius: $border-radius-md;
+	}
+
+	&-prop-key-input,
+	&-prop-value-input {
+		width: 100%;
+		padding: 0.5em;
+		background-color: var(--background-primary);
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		color: var(--text-normal);
+		font-family: var(--font-text);
+
+		&:focus {
+			outline: none;
+			border-color: var(--interactive-accent);
+		}
+	}
+
+	&-remove-button {
+		padding: 0.25em 0.5em;
+		background-color: var(--background-modifier-error);
+		color: var(--text-on-accent);
+		border: none;
+		border-radius: $border-radius-md;
+		cursor: pointer;
+		font-size: 1.2em;
+		line-height: 1;
+		transition: background-color $transition-base;
+
+		&:hover {
+			background-color: var(--background-modifier-error-hover);
+		}
+	}
+}
+
+.fusion-goals-goal-modal,
+.fusion-goals-task-modal {
+	/* intentional stub — modal padding handled by Obsidian defaults */
+}
+
+.fusion-goals-view-root {
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
