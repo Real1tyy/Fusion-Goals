@@ -1,12 +1,6 @@
-import {
-	type CellOption,
-	type CellPlacement,
-	type GridLayoutHandle,
-	type PieChartHandle,
-	registerGridCommands,
-} from "@real1ty-obsidian-plugins";
-import { createGridLayout, type TabEntry } from "@real1ty-obsidian-plugins-react";
-import { createElement, memo, useEffect, useRef } from "react";
+import { type CellOption, type CellPlacement, type PieChartHandle } from "@real1ty-obsidian-plugins";
+import { GridLayout, type TabEntry } from "@real1ty-obsidian-plugins-react";
+import { createElement, memo, useMemo } from "react";
 
 import { renderFusionPieChart } from "../../components/pie-chart";
 import type { GoalsManager } from "../../core/goals-manager";
@@ -30,15 +24,19 @@ const DISTRIBUTION_SPECS: DistributionSpec[] = [
 
 const DEFAULT_CELL_IDS = ["goal-status", "task-status", "goal-priority", "task-priority", "deadlines", "progress"];
 
-function specToCellOption(spec: DistributionSpec, manager: GoalsManager, chartRefs: PieChartHandle[]): CellOption {
+function specToCellOption(spec: DistributionSpec, manager: GoalsManager): CellOption {
+	let handle: PieChartHandle | null = null;
 	return {
 		id: spec.id,
 		label: spec.label,
 		enlargeable: true,
 		enlargeTitle: spec.label,
 		render: (cellEl: HTMLElement) => {
-			const dist = spec.compute(manager);
-			chartRefs.push(renderFusionPieChart(cellEl, spec.label, dist));
+			handle = renderFusionPieChart(cellEl, spec.label, spec.compute(manager));
+		},
+		cleanup: () => {
+			handle?.destroy();
+			handle = null;
 		},
 	};
 }
@@ -61,43 +59,28 @@ export const FusionGoalsDashboardTab = memo(function FusionGoalsDashboardTab({
 	settingsStore,
 	goalsManager,
 }: FusionGoalsDashboardTabProps) {
-	const containerRef = useRef<HTMLDivElement>(null);
+	const palette = useMemo(() => DISTRIBUTION_SPECS.map((s) => specToCellOption(s, goalsManager)), [goalsManager]);
+	const cells = useMemo(() => buildDefaultCells(palette), [palette]);
+	const savedState = settingsStore.currentSettings.dashboardLayout;
 
-	useEffect(() => {
-		const el = containerRef.current;
-		if (!el) return;
-
-		const chartRefs: PieChartHandle[] = [];
-		const palette = DISTRIBUTION_SPECS.map((s) => specToCellOption(s, goalsManager, chartRefs));
-		const savedState = settingsStore.currentSettings.dashboardLayout;
-
-		const gridHandle: GridLayoutHandle = createGridLayout(el, {
-			app: plugin.app,
-			cssPrefix: "fusion-goals-chart-",
-			columns: 2,
-			rows: 3,
-			gap: "12px",
-			dividers: true,
-			cellPalette: palette,
-			cells: buildDefaultCells(palette),
-			...(savedState !== undefined ? { initialState: savedState } : {}),
-			onStateChange: (state) => {
+	return (
+		<GridLayout
+			app={plugin.app}
+			cssPrefix="fusion-goals-chart-"
+			columns={2}
+			rows={3}
+			gap="12px"
+			dividers
+			cellPalette={palette}
+			cells={cells}
+			{...(savedState !== undefined ? { initialState: savedState } : {})}
+			onStateChange={(state) => {
 				void settingsStore.updateSettings((s) => ({ ...s, dashboardLayout: state }));
-			},
-		});
-
-		registerGridCommands(plugin, "fusion-dashboard", "Dashboard", gridHandle);
-
-		return () => {
-			for (const chart of chartRefs) {
-				chart.destroy();
-			}
-			chartRefs.length = 0;
-			gridHandle.destroy();
-		};
-	}, [plugin, settingsStore, goalsManager]);
-
-	return <div ref={containerRef} style={{ flex: "1 1 auto", minHeight: 0 }} />;
+			}}
+			commands={{ plugin, id: "fusion-dashboard", label: "Dashboard" }}
+			style={{ flex: "1 1 auto", minHeight: 0 }}
+		/>
+	);
 });
 
 export function fusionGoalsDashboardTabEntry(props: FusionGoalsDashboardTabProps): TabEntry {
