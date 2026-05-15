@@ -8,11 +8,11 @@ import {
 import type { App } from "obsidian";
 import type { Subscription } from "rxjs";
 import { extractDateInfo } from "src/utils/date";
-import type { SettingsStore } from "../core/settings-store";
-import type { FusionGoalsSettings } from "../types/settings";
+
+import type { FusionGoalsSettings, FusionGoalsSettingsStore } from "../types/settings";
 
 export interface PropertyTooltipOptions {
-	settingsStore: SettingsStore;
+	settingsStore: FusionGoalsSettingsStore;
 	currentFilePath?: string;
 	onFileOpen?: (filePath: string, event: MouseEvent) => void;
 	isZoomMode?: () => boolean;
@@ -230,7 +230,7 @@ export class PropertyTooltip {
 		for (const segment of segments) {
 			if (segment.type === "text") {
 				container.createSpan({ text: segment.content });
-			} else if (segment.type === "link" && segment.linkPath && segment.displayText) {
+			} else if (segment.linkPath && segment.displayText) {
 				const linkEl = container.createEl("a", {
 					text: segment.displayText,
 					cls: "fusion-property-link",

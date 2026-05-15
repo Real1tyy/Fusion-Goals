@@ -359,13 +359,9 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 
 		this.cleanupEvents();
 
-		if (this.zoomManager) {
-			this.zoomManager.cleanup();
-		}
+		this.zoomManager.cleanup();
 
-		if (this.propertyTooltip) {
-			this.propertyTooltip.destroy();
-		}
+		this.propertyTooltip.destroy();
 
 		if (this.graphSearch) {
 			this.graphSearch.destroy();
@@ -496,11 +492,6 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 			return;
 		}
 
-		if (!this.goalsManager) {
-			this.showEmptyState("Plugin is still initializing. Please wait...");
-			return;
-		}
-
 		if (!this.goalsManager.getFileType(file.path)) {
 			this.showEmptyState("This file is not in one of the hierarchical directories (Goals or Tasks).");
 			return;
@@ -586,14 +577,12 @@ export class RelationshipGraphView extends RegisteredEventsComponent {
 
 			this.destroyGraph();
 
-			if (this.graphContainerEl) {
-				this.graphContainerEl.empty();
-			}
+			this.graphContainerEl.empty();
 
 			this.initializeCytoscape();
 			this.renderGraph(nodes, edges);
 			// Ensure viewport aligns with container right after initial render
-			if (this.cy && this.graphContainerEl?.isConnected && document.body.contains(this.graphContainerEl)) {
+			if (this.cy && document.body.contains(this.graphContainerEl)) {
 				this.cy.resize();
 				this.cy.fit();
 				this.cy.center();

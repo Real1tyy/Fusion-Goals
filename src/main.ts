@@ -45,7 +45,7 @@ export default class FusionGoalsPlugin extends Plugin {
 			id: "open-view",
 			name: "Open view",
 			callback: () => {
-				void this.activateFusionGoals?.();
+				void this.activateFusionGoals();
 			},
 		});
 
@@ -59,9 +59,7 @@ export default class FusionGoalsPlugin extends Plugin {
 			id: "create-goal",
 			name: "Create Goal",
 			callback: () => {
-				if (this.goalsManager) {
-					showGoalModal(this.app, this.goalsManager, this.settingsStore);
-				}
+				showGoalModal(this.app, this.goalsManager, this.settingsStore);
 			},
 		});
 
@@ -69,9 +67,7 @@ export default class FusionGoalsPlugin extends Plugin {
 			id: "create-task",
 			name: "Create Task",
 			callback: () => {
-				if (this.goalsManager) {
-					showTaskModal(this.app, this.goalsManager, this.settingsStore);
-				}
+				showTaskModal(this.app, this.goalsManager, this.settingsStore);
 			},
 		});
 
@@ -82,7 +78,7 @@ export default class FusionGoalsPlugin extends Plugin {
 				const activeFile = this.app.workspace.getActiveFile();
 				if (!activeFile) return false;
 
-				const fileType = this.goalsManager?.getFileType(activeFile.path);
+				const fileType = this.goalsManager.getFileType(activeFile.path);
 				if (fileType !== "goal") return false;
 
 				if (!checking) {
@@ -156,9 +152,9 @@ export default class FusionGoalsPlugin extends Plugin {
 	}
 
 	override onunload(): void {
-		this.inheritanceManager?.stop();
-		this.tasksTable?.destroy();
-		this.goalsTable?.destroy();
+		this.inheritanceManager.stop();
+		this.tasksTable.destroy();
+		this.goalsTable.destroy();
 	}
 
 	updateRibbonIcon(): void {
@@ -169,7 +165,7 @@ export default class FusionGoalsPlugin extends Plugin {
 
 		if (this.settingsStore.currentSettings.showRibbonIcon) {
 			this.ribbonIconEl = this.addRibbonIcon("target", "Fusion Goals", () => {
-				void this.activateFusionGoals?.();
+				void this.activateFusionGoals();
 			});
 		}
 	}
@@ -236,7 +232,7 @@ export default class FusionGoalsPlugin extends Plugin {
 		if (!(view instanceof MarkdownView)) return;
 
 		const inlineTitle = view.containerEl.querySelector(".inline-title") as HTMLElement;
-		if (!inlineTitle || inlineTitle.contentEditable !== "true") return;
+		if (inlineTitle.contentEditable !== "true") return;
 
 		inlineTitle.focus();
 

@@ -270,7 +270,7 @@ export class GraphBuilder {
 		if (!searchQuery && !filterEvaluator) return graphData;
 
 		const filteredNodes = graphData.nodes.filter((node) => {
-			const { isSource, label, id } = node.data || {};
+			const { isSource, label, id } = node.data;
 
 			// Always keep source node
 			if (isSource) return true;
@@ -294,10 +294,10 @@ export class GraphBuilder {
 			return true;
 		});
 
-		const keepNodeIds = new Set(filteredNodes.map((node) => node.data?.id as string));
+		const keepNodeIds = new Set(filteredNodes.map((node) => node.data.id as string));
 
 		const filteredEdges = graphData.edges.filter(
-			(edge) => keepNodeIds.has(edge.data?.source as string) && keepNodeIds.has(edge.data?.target as string)
+			(edge) => keepNodeIds.has(edge.data.source as string) && keepNodeIds.has(edge.data.target as string)
 		);
 
 		return { nodes: filteredNodes, edges: filteredEdges };

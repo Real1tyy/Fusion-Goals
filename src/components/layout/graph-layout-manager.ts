@@ -1,6 +1,18 @@
 import type cytoscape from "cytoscape";
 import type { Core, ElementDefinition } from "cytoscape";
 
+interface DagreLayoutOptions {
+	name: "dagre";
+	rankDir?: "TB" | "LR";
+	nodeSep?: number;
+	edgeSep?: number;
+	rankSep?: number;
+	ranker?: "network-simplex" | "tight-tree" | "longest-path";
+	animate?: boolean;
+	fit?: boolean;
+	padding?: number;
+}
+
 import { NodeOrganizer } from "./node-organizer";
 
 export interface LayoutConfig {
@@ -49,7 +61,7 @@ export class GraphLayoutManager {
 		}
 
 		const singleNodeIds = new Set(singleNodeTrees.flat());
-		const connectedNodeIds = nodes.map((n) => n.data?.id as string).filter((id) => !singleNodeIds.has(id));
+		const connectedNodeIds = nodes.map((n) => n.data.id as string).filter((id) => !singleNodeIds.has(id));
 
 		const connectedBounds = this.nodeOrganizer.calculateBounds(this.cy, connectedNodeIds);
 
@@ -90,10 +102,9 @@ export class GraphLayoutManager {
 		nodes?: ElementDefinition[],
 		edges?: ElementDefinition[]
 	): void {
-		const layout = this.cy.layout({
+		const dagreOptions: DagreLayoutOptions = {
 			name: "dagre",
 			rankDir: "TB",
-			align: undefined,
 			nodeSep: 80,
 			rankSep: 120,
 			edgeSep: 50,
@@ -101,7 +112,8 @@ export class GraphLayoutManager {
 			animate: false,
 			fit: false,
 			padding: 80,
-		} as any);
+		};
+		const layout = this.cy.layout(dagreOptions as cytoscape.LayoutOptions);
 
 		layout.run();
 
@@ -111,7 +123,7 @@ export class GraphLayoutManager {
 
 		this.runLayoutWithAnimationHandling(
 			() =>
-				this.cy?.layout({
+				this.cy.layout({
 					name: "preset",
 					fit: true,
 					padding: 80,
@@ -177,8 +189,8 @@ export class GraphLayoutManager {
 		const parentToChildren = new Map<string, string[]>();
 
 		edges.forEach((edge) => {
-			const source = edge.data?.source as string;
-			const target = edge.data?.target as string;
+			const source = edge.data.source as string;
+			const target = edge.data.target as string;
 
 			if (!parentToChildren.has(source)) {
 				parentToChildren.set(source, []);
@@ -189,7 +201,7 @@ export class GraphLayoutManager {
 		// Group nodes by level
 		const nodesByLevel = new Map<number, ElementDefinition[]>();
 		nodes.forEach((node) => {
-			const level = (node.data?.["level"] as number) ?? 0;
+			const level = node.data["level"] as number;
 			if (!nodesByLevel.has(level)) {
 				nodesByLevel.set(level, []);
 			}
@@ -202,7 +214,7 @@ export class GraphLayoutManager {
 		const maxLevel = Math.max(...levels);
 
 		const getNodeIdsAtLevel = (level: number): string[] =>
-			(nodesByLevel.get(level) ?? []).map((n) => n.data?.id as string).filter(Boolean);
+			(nodesByLevel.get(level) ?? []).map((n) => n.data.id as string).filter(Boolean);
 
 		const getMaxYForIds = (ids: string[]): number => {
 			let maxY = -Infinity;

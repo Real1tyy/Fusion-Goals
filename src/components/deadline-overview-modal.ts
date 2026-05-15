@@ -82,9 +82,7 @@ export class DeadlineOverviewModal extends Modal {
 		contentEl.addClass("startup-overview-modal");
 
 		// Add class to modal container for CSS styling
-		if (modalEl) {
-			modalEl.addClass("startup-overview-modal-container");
-		}
+		modalEl.addClass("startup-overview-modal-container");
 
 		await this.setupAndRender();
 
@@ -197,7 +195,7 @@ export class DeadlineOverviewModal extends Modal {
 				const func = new Function(...params, `"use strict"; return ${sanitized};`) as (...args: unknown[]) => boolean;
 				const values = Array.from(propertyMapping.keys()).map((key) => frontmatter[key]);
 				return func(...values);
-			} catch (_error) {
+			} catch {
 				return true;
 			}
 		});
@@ -267,7 +265,6 @@ export class DeadlineOverviewModal extends Modal {
 
 	private updateTabs(): void {
 		const container = this.contentEl.querySelector(".deadline-overview-tabs-container") as HTMLElement;
-		if (!container) return;
 
 		container.empty();
 		const tabsContainer = container.createEl("div", {
@@ -379,7 +376,6 @@ export class DeadlineOverviewModal extends Modal {
 
 	private updateSortControls(): void {
 		const container = this.contentEl.querySelector(".deadline-overview-sort-container") as HTMLElement;
-		if (!container) return;
 
 		container.empty();
 		const sortContainer = container.createEl("div", {
@@ -433,7 +429,6 @@ export class DeadlineOverviewModal extends Modal {
 
 	private updateTable(): void {
 		const container = this.contentEl.querySelector(".deadline-overview-table-container") as HTMLElement;
-		if (!container) return;
 
 		if (!this.deadlineTable) {
 			this.deadlineTable = new DeadlineTable({
@@ -470,7 +465,6 @@ export class DeadlineOverviewModal extends Modal {
 
 	private updatePagination(): void {
 		const container = this.contentEl.querySelector(".deadline-overview-pagination-container") as HTMLElement;
-		if (!container) return;
 
 		container.empty();
 		const totalPages = this.getTotalPages();

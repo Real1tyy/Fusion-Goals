@@ -7,13 +7,9 @@ export interface Bounds {
 	maxY: number;
 }
 
-export interface TreeBounds extends Bounds {
-	tree: string[];
-}
-
 export class NodeOrganizer {
 	identifyConnectedComponents(nodes: ElementDefinition[], edges: ElementDefinition[]): string[][] {
-		const nodeIds = new Set(nodes.map((n) => n.data?.id as string));
+		const nodeIds = new Set(nodes.map((n) => n.data.id as string));
 		const adjacency = new Map<string, Set<string>>();
 
 		// Build adjacency list (undirected)
@@ -21,8 +17,8 @@ export class NodeOrganizer {
 			adjacency.set(id, new Set());
 		});
 		edges.forEach((edge) => {
-			const source = edge.data?.source as string;
-			const target = edge.data?.target as string;
+			const source = edge.data.source as string;
+			const target = edge.data.target as string;
 			adjacency.get(source)?.add(target);
 			adjacency.get(target)?.add(source);
 		});

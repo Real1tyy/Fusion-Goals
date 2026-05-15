@@ -92,7 +92,7 @@ export class GraphInteractionHandler {
 			const originalEvent = evt.originalEvent;
 
 			if (file instanceof TFile) {
-				if (originalEvent && (originalEvent.ctrlKey || originalEvent.metaKey)) {
+				if (originalEvent.ctrlKey || originalEvent.metaKey) {
 					void this.app.workspace.getLeaf("tab").openFile(file);
 					return;
 				}
@@ -129,7 +129,6 @@ export class GraphInteractionHandler {
 
 			const now = Date.now();
 			const renderedPos = evt.renderedPosition;
-			if (!renderedPos) return;
 
 			const DOUBLE_TAP_MS = 300;
 			const MAX_DISTANCE_PX = 24;
@@ -152,7 +151,6 @@ export class GraphInteractionHandler {
 				const ZOOM_FACTOR = 1.6; // slightly aggressive to feel faster than wheel
 				const targetZoom = Math.min(currentZoom * ZOOM_FACTOR, this.cy.maxZoom());
 				const modelPos = evt.position;
-				if (!modelPos) return;
 
 				const viewportCenter = {
 					x: this.cy.width() / 2,
@@ -180,7 +178,7 @@ export class GraphInteractionHandler {
 			if (Math.random() < 0.4) {
 				node.addClass("glow");
 				const pulse = (): void => {
-					if (!node.cy() || this.config.isUpdating()) {
+					if (this.config.isUpdating()) {
 						return;
 					}
 					node.animate({ style: { "overlay-opacity": 0.35 } }, { duration: 1500, easing: "ease-in-out" }).animate(
@@ -251,7 +249,6 @@ export class GraphInteractionHandler {
 		if (!currentNode.length) return null;
 
 		const currentPos = currentNode.renderedPosition();
-		if (!currentPos) return null;
 
 		// Get all other nodes
 		const otherNodes = this.cy.nodes().filter((n) => n.id() !== currentNodeId);
@@ -265,7 +262,6 @@ export class GraphInteractionHandler {
 
 		otherNodes.forEach((node) => {
 			const pos = node.renderedPosition();
-			if (!pos) return;
 
 			// Check if node is at approximately the same vertical level
 			const verticalDist = Math.abs(pos.y - currentPos.y);

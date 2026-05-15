@@ -51,7 +51,7 @@ export class GraphFilter extends InputFilterManager<Record<string, unknown>> {
 
 			const values = Array.from(this.propertyMapping.keys()).map((key) => frontmatter[key]);
 			return this.compiledFunc(...values);
-		} catch (_error) {
+		} catch {
 			return true;
 		}
 	}

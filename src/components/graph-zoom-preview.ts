@@ -111,7 +111,7 @@ export class GraphZoomPreview {
 			type: "checkbox",
 		});
 		this.hideFrontmatterCheckbox.addClass("fusion-graph-toggle-checkbox");
-		this.hideFrontmatterCheckbox.checked = this.props.initialHideFrontmatter ?? false;
+		this.hideFrontmatterCheckbox.checked = this.props.initialHideFrontmatter;
 
 		hideFmContainer.createEl("label", {
 			text: "Hide Frontmatter",
@@ -140,7 +140,7 @@ export class GraphZoomPreview {
 			type: "checkbox",
 		});
 		this.hideContentCheckbox.addClass("fusion-graph-toggle-checkbox");
-		this.hideContentCheckbox.checked = this.props.initialHideContent ?? false;
+		this.hideContentCheckbox.checked = this.props.initialHideContent;
 
 		hideContentContainer.createEl("label", {
 			text: "Hide Content",

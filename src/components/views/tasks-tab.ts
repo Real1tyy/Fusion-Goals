@@ -60,11 +60,8 @@ export function createTasksTabDefinitions(
 			await MarkdownRenderer.render(plugin.app, markdown, el.createDiv(), "", component);
 		};
 		const cleanup = () => {
-			const idx = components.findIndex((c) => c);
-			if (idx >= 0) {
-				components[idx].unload();
-				components.splice(idx, 1);
-			}
+			const component = components.shift();
+			component?.unload();
 		};
 		return {
 			id: spec.id,

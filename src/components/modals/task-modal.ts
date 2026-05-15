@@ -18,7 +18,7 @@ function buildGoalOptions(goalsManager: GoalsManager): Record<string, string> {
 
 function unwrapGoal(goal: string | string[] | undefined): string {
 	if (Array.isArray(goal)) return goal[0] ?? "";
-	return (goal as string) ?? "";
+	return goal ?? "";
 }
 
 export function showTaskModal(
