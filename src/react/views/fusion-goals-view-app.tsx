@@ -8,6 +8,8 @@ import {
 	type TabbedContainerHandle,
 	type TabEntry,
 	useApp,
+	usePersistedPageHeaderState,
+	usePersistedTabbedContainerState,
 } from "@real1ty-obsidian-plugins-react";
 import type { Component } from "obsidian";
 import { type WorkspaceLeaf } from "obsidian";
@@ -42,6 +44,8 @@ export const FusionGoalsViewApp = memo(function FusionGoalsViewApp({
 }: FusionGoalsViewAppProps) {
 	const app = useApp();
 	const tabbedHandleRef = useRef<TabbedContainerHandle | null>(null);
+	const tabState = usePersistedTabbedContainerState(settingsStore, "activeTab");
+	const pageHeaderState = usePersistedPageHeaderState(settingsStore, "pageHeaderState");
 
 	useEffect(() => {
 		const components: Component[] = [];
@@ -69,12 +73,7 @@ export const FusionGoalsViewApp = memo(function FusionGoalsViewApp({
 				...(titleContainer !== null ? { tabBarInsertBefore: titleContainer } : {}),
 				editable: true,
 				app,
-				...(settingsStore.currentSettings.activeTab !== undefined
-					? { initialState: settingsStore.currentSettings.activeTab }
-					: {}),
-				onStateChange: (state) => {
-					void settingsStore.updateSettings((s) => ({ ...s, activeTab: state }));
-				},
+				...tabState,
 				handleRef: tabbedHandleRef,
 			}),
 			app
@@ -110,12 +109,7 @@ export const FusionGoalsViewApp = memo(function FusionGoalsViewApp({
 			cssPrefix: "fusion-goals-",
 			app,
 			editable: true,
-			...(settingsStore.currentSettings.pageHeaderState !== undefined
-				? { initialState: settingsStore.currentSettings.pageHeaderState }
-				: {}),
-			onStateChange: (state) => {
-				void settingsStore.updateSettings((s) => ({ ...s, pageHeaderState: state }));
-			},
+			...pageHeaderState,
 		});
 
 		if (leaf) {
@@ -134,7 +128,7 @@ export const FusionGoalsViewApp = memo(function FusionGoalsViewApp({
 			}
 			components.length = 0;
 		};
-	}, [app, plugin, settingsStore, goalsManager, el, headerEl, leaf]);
+	}, [app, plugin, settingsStore, goalsManager, el, headerEl, leaf, tabState, pageHeaderState]);
 
 	return null;
 });

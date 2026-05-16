@@ -1,5 +1,11 @@
 import type { PieChartHandle } from "@real1ty-obsidian-plugins";
-import { Cell, GridLayout, ImperativeCellHost, type TabEntry } from "@real1ty-obsidian-plugins-react";
+import {
+	Cell,
+	GridLayout,
+	ImperativeCellHost,
+	type TabEntry,
+	usePersistedGridState,
+} from "@real1ty-obsidian-plugins-react";
 import { createElement, memo, useCallback, useRef } from "react";
 
 import { renderFusionPieChart } from "../../components/pie-chart";
@@ -53,7 +59,7 @@ export const FusionGoalsDashboardTab = memo(function FusionGoalsDashboardTab({
 	settingsStore,
 	goalsManager,
 }: FusionGoalsDashboardTabProps) {
-	const savedState = settingsStore.currentSettings.dashboardLayout;
+	const gridState = usePersistedGridState(settingsStore, "dashboardLayout");
 
 	return (
 		<GridLayout
@@ -63,10 +69,7 @@ export const FusionGoalsDashboardTab = memo(function FusionGoalsDashboardTab({
 			rows={3}
 			gap="12px"
 			dividers
-			{...(savedState !== undefined ? { initialState: savedState } : {})}
-			onStateChange={(state) => {
-				void settingsStore.updateSettings((s) => ({ ...s, dashboardLayout: state }));
-			}}
+			{...gridState}
 			commands={{ plugin, id: "fusion-dashboard", label: "Dashboard" }}
 			style={{ flex: "1 1 auto", minHeight: 0 }}
 		>

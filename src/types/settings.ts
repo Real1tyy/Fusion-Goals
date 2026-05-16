@@ -1,9 +1,5 @@
 import type { SettingsStore } from "@real1ty-obsidian-plugins";
-import {
-	GridLayoutStateSchema,
-	PageHeaderStateSchema,
-	TabbedContainerStateSchema,
-} from "@real1ty-obsidian-plugins-react";
+import { gridStateField, pageHeaderField, tabbedContainerField } from "@real1ty-obsidian-plugins-react";
 import { z } from "zod";
 
 import { SETTINGS_DEFAULTS } from "./constants";
@@ -63,11 +59,11 @@ export const FusionGoalsSettingsSchema = z.object({
 		.describe("Property name for progress percentage (0-100)"),
 
 	// Dashboard layout state
-	dashboardLayout: GridLayoutStateSchema.optional(),
+	dashboardLayout: gridStateField({ columns: 2, rows: 3 }),
 
 	// Tab & header persistence
-	activeTab: TabbedContainerStateSchema.optional().catch(undefined),
-	pageHeaderState: PageHeaderStateSchema.optional().catch(undefined),
+	activeTab: tabbedContainerField(),
+	pageHeaderState: pageHeaderField(),
 
 	taskTemplatePath: z
 		.string()
