@@ -5,7 +5,7 @@ import { memo, useCallback, useMemo, useReducer } from "react";
 
 import { ObsidianIcon } from "../components/obsidian-icon";
 import { useApp } from "../contexts/app-context";
-import { useScopedStyles } from "../hooks/use-scoped-styles";
+import { useScopedStyles } from "../hooks/styles/use-styles";
 import { showReactModal } from "../show-react-modal";
 import { openCellPicker } from "./cell-picker-modal";
 import { adjustSizes } from "./engine-state";
