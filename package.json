@@ -54,7 +54,6 @@
 		"@vitejs/plugin-react": "^6.0.1",
 		"@vitest/coverage-v8": "^2.1.9",
 		"babel-plugin-react-compiler": "^1.0.0",
-		"builtin-modules": "5.0.0",
 		"fake-indexeddb": "^6.0.0",
 		"fast-check": "^4.3.0",
 		"jsdom": "^27.4.0",
