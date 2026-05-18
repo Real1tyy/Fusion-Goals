@@ -53,11 +53,15 @@ jobs:
         env:
           TAG_NAME: ${{ github.ref_name }}
         run: |
-          if [ -f .github/scripts/extract-changelog-entry.py ]; then
-            python3 .github/scripts/extract-changelog-entry.py \
-              "$TAG_NAME" \
-              docs-site/docs/changelog.md \
-              > release-notes.md
+          # extract-changelog-entry.py exits non-zero when the version section
+          # is absent — that's a fallback signal, not a failure. Guard the
+          # python invocation inside the if-condition so `bash -e` doesn't
+          # kill the step before we can set have_notes=0.
+          if [ -f .github/scripts/extract-changelog-entry.py ] && \
+             python3 .github/scripts/extract-changelog-entry.py \
+               "$TAG_NAME" \
+               docs-site/docs/changelog.md \
+               > release-notes.md; then
             echo "have_notes=1" >> "$GITHUB_OUTPUT"
           else
             echo "have_notes=0" >> "$GITHUB_OUTPUT"
