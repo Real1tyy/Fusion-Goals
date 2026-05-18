@@ -2,9 +2,12 @@ import type { SettingsUIBuilder } from "@real1ty-obsidian-plugins";
 import { Setting } from "obsidian";
 import type FusionGoalsPlugin from "src/main";
 import { SETTINGS_DEFAULTS } from "src/types/constants";
-import type { FusionGoalsSettingsSchema } from "src/types/settings";
+import { FusionGoalsSettingsSchema } from "src/types/settings";
+
 import { createDeleteButton, createMoveButtons, createRuleInput, createRuleToggle, swapRules } from "../controls";
 import type { SettingsSection } from "../types";
+
+const S = FusionGoalsSettingsSchema.shape;
 
 export class RulesSection implements SettingsSection {
 	readonly id = "rules";
@@ -16,7 +19,7 @@ export class RulesSection implements SettingsSection {
 
 	constructor(
 		private readonly plugin: FusionGoalsPlugin,
-		private readonly uiBuilder: SettingsUIBuilder<typeof FusionGoalsSettingsSchema>
+		private readonly ui: SettingsUIBuilder<typeof FusionGoalsSettingsSchema>
 	) {}
 
 	render(container: HTMLElement): void {
@@ -165,13 +168,11 @@ export class RulesSection implements SettingsSection {
 			text: "Access frontmatter properties directly by name. Invalid expressions will be ignored. All expressions must evaluate to true for a node to be shown.",
 		});
 
-		this.uiBuilder.addTextArray(container, {
-			key: "filterExpressions",
-			name: "Filter expressions",
-			desc: "One per line. Changes apply on blur or Ctrl/Cmd+Enter. Only nodes matching all expressions are shown in the graph.",
-			placeholder: "Status === 'Active'\nPriority === 'High'",
-			multiline: true,
-		});
+		this.ui.addSchemaField(
+			container,
+			{ filterExpressions: S.filterExpressions },
+			{ placeholder: "Status === 'Active'\nPriority === 'High'" }
+		);
 
 		this.addPreFillPresetSelector(container);
 
