@@ -95,5 +95,12 @@
 		"vis-timeline": "^8.5.0",
 		"yaml": "^2.8.2",
 		"zod": "^4.3.5"
+	},
+	"pnpm": {
+		"overrides": {
+			"obsidian": "1.11.4",
+			"@codemirror/state": "^6.5.2",
+			"@codemirror/view": "^6.36.8"
+		}
 	}
 }
