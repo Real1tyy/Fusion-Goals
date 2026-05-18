@@ -2,9 +2,9 @@ import {
 	ColorEvaluator,
 	extractDisplayName,
 	extractFilePath,
-	type FileContext,
 	FilterEvaluator,
 	getFileContext,
+	type FileContext,
 } from "@real1ty-obsidian-plugins";
 import type { ElementDefinition } from "cytoscape";
 import type { App } from "obsidian";

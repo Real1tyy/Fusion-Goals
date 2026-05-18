@@ -1,0 +1,42 @@
+@use "variables" as *;
+
+.fusion-view-switcher {
+	&-content {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		width: 100%;
+	}
+
+	&-header {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: $spacing-sm $spacing-md;
+		border-bottom: 1px solid var(--background-modifier-border);
+		background-color: var(--background-primary);
+	}
+}
+
+.fusion-view-toggle-button {
+	padding: 6px $spacing-md;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	font-size: $font-size-md;
+	font-weight: 500;
+	transition: background-color $transition-base;
+
+	&:hover {
+		background-color: var(--interactive-accent-hover);
+	}
+}
+
+.fusion-bases-view-content {
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+	overflow: auto;
+}

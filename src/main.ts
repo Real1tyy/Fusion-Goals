@@ -4,8 +4,8 @@ import {
 	SettingsStore,
 	TemplaterService,
 	VaultTable,
-	type ViewActivator,
 	waitForCacheReady,
+	type ViewActivator,
 } from "@real1ty-obsidian-plugins";
 import { showWhatsNewReactModal, type WhatsNewModalConfig } from "@real1ty-obsidian-plugins-react";
 import { MarkdownView, Notice, Plugin, type TFile, type WorkspaceLeaf } from "obsidian";
@@ -20,8 +20,7 @@ import { registerFusionGoalsView } from "./components/views/fusion-goals-view";
 import { GoalsManager } from "./core/goals-manager";
 import { InheritanceManager } from "./core/inheritance-manager";
 import { metricRepository } from "./core/metric-repository";
-import type { GoalFrontmatter, TaskFrontmatter } from "./types/frontmatter";
-import { createGoalSchema, createTaskSchema } from "./types/frontmatter";
+import { createGoalSchema, createTaskSchema, type GoalFrontmatter, type TaskFrontmatter } from "./types/frontmatter";
 import { METRIC_CODE_FENCE } from "./types/metric";
 import { FusionGoalsSettingsSchema, type FusionGoalsSettingsStore } from "./types/settings";
 import { getInheritableProperties } from "./utils/inheritance";

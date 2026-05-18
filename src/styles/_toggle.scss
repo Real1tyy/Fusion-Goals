@@ -1,0 +1,30 @@
+@use "variables" as *;
+
+.fusion-graph-toggle-container {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 0.4em 0.8em;
+	background-color: var(--background-primary);
+	border-radius: $border-radius-lg;
+	border: 1px solid var(--background-modifier-border);
+	box-shadow: $shadow-sm;
+	font-size: $font-size-sm;
+	cursor: pointer;
+	transition: all $transition-base;
+	user-select: none;
+
+	&:hover {
+		background-color: var(--background-secondary);
+		box-shadow: $shadow-lg;
+	}
+
+	&:active {
+		transform: scale(0.98);
+	}
+
+	.fusion-graph-toggle-label {
+		cursor: pointer;
+		user-select: none;
+	}
+}

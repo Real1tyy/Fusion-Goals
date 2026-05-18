@@ -1,0 +1,17 @@
+@use "variables" as *;
+
+.fusion-goals-header-settings {
+	padding: $spacing-xs $spacing-sm;
+	color: var(--text-faint);
+	opacity: 0.5;
+
+	&:hover {
+		opacity: 1;
+		color: var(--text-normal);
+	}
+
+	svg {
+		width: 12px;
+		height: 12px;
+	}
+}

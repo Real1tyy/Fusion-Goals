@@ -2,7 +2,7 @@ import type { SettingsUIBuilder } from "@real1ty-obsidian-plugins";
 import { Setting } from "obsidian";
 
 import type FusionGoalsPlugin from "../../../main";
-import { type BasesAdditionalView, type FusionGoalsSettings, FusionGoalsSettingsSchema } from "../../../types/settings";
+import { FusionGoalsSettingsSchema, type BasesAdditionalView, type FusionGoalsSettings } from "../../../types/settings";
 import { createDeleteButton, createMoveButtons, createRuleInput } from "../controls";
 import type { SettingsSection } from "../types";
 

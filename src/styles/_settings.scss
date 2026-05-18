@@ -1,0 +1,494 @@
+@use "variables" as *;
+
+.fusion-settings-nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: $spacing-sm;
+	margin: 1.5em 0;
+	padding-bottom: 1em;
+	border-bottom: 2px solid var(--background-modifier-border);
+
+	&-button {
+		padding: $spacing-sm $spacing-lg;
+		background-color: var(--background-secondary);
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-lg;
+		color: var(--text-normal);
+		cursor: pointer;
+		font-size: $font-size-base;
+		font-weight: 500;
+		transition: all $transition-base;
+
+		&:hover {
+			background-color: var(--background-modifier-hover);
+			border-color: var(--interactive-accent);
+		}
+
+		&-active {
+			background-color: var(--interactive-accent);
+			color: var(--text-on-accent);
+			border-color: var(--interactive-accent);
+
+			&:hover {
+				background-color: var(--interactive-accent-hover);
+				border-color: var(--interactive-accent-hover);
+			}
+		}
+	}
+}
+
+.fusion-settings-section-container {
+	margin-top: 1em;
+}
+
+.settings-footer {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 2em;
+	padding-top: 1.5em;
+	border-top: 2px solid var(--background-modifier-border);
+}
+
+.settings-support-link {
+	color: var(--interactive-accent);
+	text-decoration: none;
+	font-weight: 600;
+	font-size: $font-size-base;
+	padding: 0.75em 1.5em;
+	background-color: var(--background-secondary);
+	border: 2px solid var(--interactive-accent);
+	border-radius: $border-radius-xl;
+	transition: all $transition-base;
+	display: inline-block;
+
+	&:hover {
+		background-color: var(--interactive-accent);
+		color: var(--text-on-accent);
+		transform: translateY(-2px);
+		box-shadow: $shadow-md;
+	}
+}
+
+.settings-info-box {
+	margin: 1em 0;
+	padding: 1em;
+	background-color: var(--background-secondary);
+	border-radius: $border-radius-lg;
+	border-left: 3px solid var(--interactive-accent);
+
+	h3,
+	h4 {
+		margin-top: 0.5em;
+		margin-bottom: 0.5em;
+		color: var(--text-normal);
+	}
+
+	p {
+		margin: 0.5em 0;
+		color: var(--text-muted);
+		line-height: 1.5;
+	}
+
+	&-example {
+		background-color: var(--background-primary);
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		padding: 1em;
+		margin: 0.5em 0;
+		font-family: var(--font-monospace);
+		font-size: $font-size-md;
+		overflow-x: auto;
+		white-space: pre;
+	}
+}
+
+.example-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1em;
+	margin: 1em 0;
+}
+
+.example-section h4 {
+	margin-top: 0;
+	color: var(--text-normal);
+	font-size: $font-size-base;
+}
+
+@media (max-width: $responsive-breakpoint-md) {
+	.example-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+.setting-item.setting-item-heading {
+	border-top: 1px solid var(--background-modifier-border);
+	margin-top: 1.5em;
+	padding-top: 1.5em;
+
+	&:first-child {
+		border-top: none;
+		margin-top: 0;
+		padding-top: 0;
+	}
+}
+
+.setting-item-description {
+	color: var(--text-muted);
+	font-size: $font-size-md;
+	line-height: 1.4;
+}
+
+.directories-list {
+	margin-bottom: 1em;
+}
+
+.settings-info-note {
+	margin-top: 1em;
+	padding: 1em;
+	background-color: var(--background-secondary);
+	border-radius: $border-radius-md;
+}
+
+.settings-warning-box {
+	margin: 1em 0;
+	padding: 1em;
+	background-color: var(--background-modifier-error-hover);
+	border-radius: $border-radius-md;
+	border-left: 3px solid var(--text-error);
+
+	p {
+		margin: 0.5em 0 0;
+		color: var(--text-normal);
+		line-height: 1.5;
+	}
+}
+
+.color-example-item {
+	display: flex;
+	align-items: center;
+	gap: $spacing-sm;
+	margin-bottom: 6px;
+
+	.settings-info-box-example {
+		flex: 0 0 auto;
+	}
+}
+
+.color-arrow {
+	flex-shrink: 0;
+	color: var(--text-muted);
+}
+
+.color-example-dot {
+	display: inline-block;
+	width: $spacing-lg;
+	height: $spacing-lg;
+	border-radius: $border-radius-sm;
+	background-color: var(--example-color);
+	border: 1px solid var(--background-modifier-border);
+	vertical-align: middle;
+	flex-shrink: 0;
+}
+
+.color-example-description {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}
+
+.color-rule {
+	&-item {
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-lg;
+		padding: $spacing-sm $spacing-md;
+		margin-bottom: $spacing-sm;
+		background-color: var(--background-secondary);
+	}
+
+	&-main-row {
+		display: flex;
+		align-items: center;
+		gap: $spacing-md;
+	}
+
+	&-left {
+		display: flex;
+		align-items: center;
+		gap: $spacing-sm;
+		flex: 1;
+		min-width: 0;
+
+		input[type="checkbox"] {
+			flex-shrink: 0;
+			cursor: pointer;
+		}
+	}
+
+	&-order {
+		font-size: 11px;
+		font-weight: bold;
+		color: var(--text-muted);
+		min-width: $spacing-xl;
+		flex-shrink: 0;
+	}
+
+	&-expression-input {
+		flex: 1;
+		min-width: 0;
+		padding: $spacing-xs $spacing-sm;
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		background-color: var(--background-primary);
+		color: var(--text-normal);
+		font-family: var(--font-monospace);
+		font-size: var(--font-ui-small);
+
+		&:focus {
+			outline: none;
+			border-color: var(--interactive-accent);
+		}
+	}
+
+	&-right {
+		display: flex;
+		align-items: center;
+		gap: $spacing-sm;
+		flex-shrink: 0;
+	}
+
+	&-picker-wrapper {
+		display: flex;
+		align-items: center;
+
+		.setting-item {
+			border: none;
+			padding: 0;
+			margin: 0;
+			background: transparent;
+		}
+
+		.setting-item-control {
+			display: flex;
+			align-items: center;
+		}
+	}
+
+	&-controls {
+		display: flex;
+		gap: $spacing-xs;
+	}
+
+	&-btn {
+		padding: $spacing-xs $spacing-sm;
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		background-color: var(--background-primary);
+		color: var(--text-normal);
+		cursor: pointer;
+		font-size: $font-size-md;
+		transition: all $transition-base;
+		min-width: 28px;
+		height: 28px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		&:hover {
+			background-color: var(--interactive-hover);
+			border-color: var(--interactive-accent);
+		}
+
+		&:active {
+			background-color: var(--interactive-accent);
+			color: var(--text-on-accent);
+		}
+
+		&-delete {
+			color: var(--text-error);
+
+			&:hover {
+				background-color: var(--background-modifier-error);
+				border-color: var(--text-error);
+			}
+		}
+	}
+}
+
+.excluded-properties-input {
+	min-width: $excluded-properties-min-width;
+	padding: $spacing-xs $spacing-sm;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: $border-radius-md;
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	font-family: var(--font-monospace);
+	font-size: $font-size-md;
+	margin-right: $spacing-sm;
+
+	&:focus {
+		outline: none;
+		border-color: var(--interactive-accent);
+	}
+}
+
+.filter-preset {
+	&-item {
+		display: flex;
+		align-items: center;
+		gap: $spacing-sm;
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-lg;
+		padding: $spacing-sm $spacing-md;
+		margin-bottom: $spacing-sm;
+		background-color: var(--background-secondary);
+	}
+
+	&-name-input {
+		flex: 0 0 $filter-preset-name-width;
+		padding: 6px 10px;
+		background-color: var(--background-primary);
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		color: var(--text-normal);
+		font-family: var(--font-text);
+		font-size: $font-size-md;
+		transition: border-color $transition-base;
+
+		&:focus {
+			outline: none;
+			border-color: var(--interactive-accent);
+		}
+	}
+
+	&-expression-input {
+		flex: 1;
+		min-width: 0;
+		padding: 6px 10px;
+		background-color: var(--background-primary);
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		color: var(--text-normal);
+		font-family: var(--font-monospace);
+		font-size: $font-size-sm;
+		transition: border-color $transition-base;
+
+		&:focus {
+			outline: none;
+			border-color: var(--interactive-accent);
+		}
+	}
+
+	&-btn-delete {
+		padding: $spacing-xs 10px;
+		background-color: transparent;
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		color: var(--text-error);
+		cursor: pointer;
+		font-size: $spacing-lg;
+		font-weight: bold;
+		transition: all $transition-base;
+		flex-shrink: 0;
+
+		&:hover {
+			background-color: var(--background-modifier-error);
+			border-color: var(--text-error);
+		}
+	}
+}
+
+.settings-array-manager-list {
+	margin-bottom: 1em;
+
+	& + .setting-item .setting-item-control input[type="text"] {
+		min-width: $settings-array-input-min-width;
+		flex: 1;
+	}
+}
+
+.vertical-tab-content-container {
+	padding: 2em;
+}
+
+.fusion-hidden {
+	display: none;
+}
+
+.fusion-graph-toggle-container.fusion-hidden {
+	display: none;
+}
+
+.fusion-additional-views-list {
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-md;
+	margin-top: $spacing-sm;
+}
+
+.fusion-rule {
+	&-item {
+		display: flex;
+		flex-direction: column;
+		gap: $spacing-sm;
+		padding: $spacing-md;
+		background-color: var(--background-secondary);
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-lg;
+	}
+
+	&-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: $spacing-sm;
+
+		strong {
+			flex: 1;
+			font-size: $font-size-base;
+			color: var(--text-normal);
+		}
+	}
+
+	&-controls {
+		display: flex;
+		gap: $spacing-xs;
+		align-items: center;
+	}
+
+	&-content {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+}
+
+.fusion-view-name-input,
+.fusion-view-filter-input {
+	width: 100%;
+	padding: $spacing-sm $spacing-md;
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: $border-radius-md;
+	color: var(--text-normal);
+	font-size: $font-size-md;
+	font-family: var(--font-monospace);
+	transition: border-color $transition-base;
+
+	&:focus {
+		outline: none;
+		border-color: var(--interactive-accent);
+	}
+
+	&::placeholder {
+		color: var(--text-muted);
+		opacity: 0.6;
+	}
+}
+
+.fusion-bases-settings-info-box {
+	margin-top: 1em;
+	padding: 1em;
+	background-color: var(--background-secondary);
+	border-radius: $border-radius-md;
+}

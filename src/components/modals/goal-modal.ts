@@ -3,8 +3,7 @@ import type { App } from "obsidian";
 
 import { cls } from "../../constants";
 import type { GoalsManager } from "../../core/goals-manager";
-import type { GoalFrontmatter, GoalRow } from "../../types/frontmatter";
-import { GoalFrontmatterShape } from "../../types/frontmatter";
+import { GoalFrontmatterShape, type GoalFrontmatter, type GoalRow } from "../../types/frontmatter";
 import type { FusionGoalsSettingsStore } from "../../types/settings";
 
 export function showGoalModal(

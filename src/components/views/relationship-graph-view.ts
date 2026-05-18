@@ -1,6 +1,6 @@
 import cytoscape, { type Core, type ElementDefinition, type NodeSingular } from "cytoscape";
 import cytoscapeDagre from "cytoscape-dagre";
-import { type App, TFile } from "obsidian";
+import { TFile, type App } from "obsidian";
 import type { Subscription } from "rxjs";
 import type FusionGoalsPlugin from "src/main";
 

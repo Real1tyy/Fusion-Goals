@@ -3,8 +3,7 @@ import type { App } from "obsidian";
 
 import { cls } from "../../constants";
 import type { GoalsManager } from "../../core/goals-manager";
-import type { TaskFrontmatter, TaskRow } from "../../types/frontmatter";
-import { TaskFrontmatterShape } from "../../types/frontmatter";
+import { TaskFrontmatterShape, type TaskFrontmatter, type TaskRow } from "../../types/frontmatter";
 import type { FusionGoalsSettingsStore } from "../../types/settings";
 
 function buildGoalOptions(goalsManager: GoalsManager): Record<string, string> {

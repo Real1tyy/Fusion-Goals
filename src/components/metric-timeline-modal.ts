@@ -1,4 +1,4 @@
-import { type App, Modal } from "obsidian";
+import { Modal, type App } from "obsidian";
 import { DataSet } from "vis-data";
 import { Timeline, type TimelineOptions } from "vis-timeline";
 

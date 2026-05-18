@@ -1,5 +1,5 @@
 import { buildPropertyMapping, sanitizeExpression } from "@real1ty-obsidian-plugins";
-import { type App, Modal, TFile } from "obsidian";
+import { Modal, TFile, type App } from "obsidian";
 import type { Subscription } from "rxjs";
 import type { GoalsManager } from "src/core/goals-manager";
 import { parseDaysFromString } from "src/utils/date";

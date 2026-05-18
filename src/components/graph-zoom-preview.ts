@@ -1,5 +1,5 @@
 import { filterPropertiesForDisplay } from "@real1ty-obsidian-plugins";
-import { type App, Component, MarkdownRenderer, type TFile } from "obsidian";
+import { Component, MarkdownRenderer, type App, type TFile } from "obsidian";
 import type { Subscription } from "rxjs";
 
 import type { FusionGoalsSettings, FusionGoalsSettingsStore } from "../types/settings";

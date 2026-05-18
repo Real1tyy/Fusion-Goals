@@ -1,12 +1,12 @@
 import { extractDisplayName, formatDateTimeForInput, inputValueToISOString } from "@real1ty-obsidian-plugins";
 import {
-	type App,
 	Component,
-	type MarkdownPostProcessorContext,
 	MarkdownRenderChild,
 	MarkdownRenderer,
 	Modal,
 	TFile,
+	type App,
+	type MarkdownPostProcessorContext,
 } from "obsidian";
 
 import { metricRepository } from "../core/metric-repository";

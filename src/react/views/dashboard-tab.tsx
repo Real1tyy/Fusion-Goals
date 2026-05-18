@@ -3,8 +3,8 @@ import {
 	Cell,
 	GridLayout,
 	ImperativeCellHost,
-	type TabEntry,
 	usePersistedGridState,
+	type TabEntry,
 } from "@real1ty-obsidian-plugins-react";
 import { createElement, memo, useCallback, useRef } from "react";
 

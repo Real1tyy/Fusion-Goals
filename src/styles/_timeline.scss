@@ -1,0 +1,41 @@
+@use "variables" as *;
+
+.fusion-metric-timeline-modal {
+	.vis-timeline {
+		border: 1px solid var(--background-modifier-border);
+		background: var(--background-primary);
+		font-family: var(--font-interface);
+	}
+
+	.vis-item {
+		background-color: var(--interactive-accent);
+		border-color: var(--interactive-accent);
+		color: var(--text-on-accent);
+		border-radius: $border-radius-md;
+
+		&.vis-selected {
+			background-color: var(--interactive-accent-hover);
+			border-color: var(--interactive-accent-hover);
+		}
+	}
+
+	.vis-time-axis {
+		.vis-text {
+			color: var(--text-normal);
+		}
+
+		.vis-grid.vis-minor {
+			border-color: var(--background-modifier-border);
+		}
+
+		.vis-grid.vis-major {
+			border-color: var(--background-modifier-border-hover);
+		}
+	}
+
+	.vis-tooltip {
+		max-width: $vis-tooltip-max-width;
+		white-space: pre-wrap;
+		word-break: break-word;
+	}
+}

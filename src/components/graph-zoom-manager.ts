@@ -1,6 +1,5 @@
 import type { Core } from "cytoscape";
-import type { App } from "obsidian";
-import { TFile } from "obsidian";
+import { TFile, type App } from "obsidian";
 
 import type { FusionGoalsSettingsStore } from "../types/settings";
 import type { GraphZoomPreview } from "./graph-zoom-preview";

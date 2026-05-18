@@ -1,4 +1,4 @@
-import { type App, TFile as TFileType } from "obsidian";
+import { TFile as TFileType, type App } from "obsidian";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Frontmatter, FusionGoalsSettings } from "../src/types/settings";

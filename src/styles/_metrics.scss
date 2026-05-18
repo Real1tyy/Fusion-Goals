@@ -1,0 +1,208 @@
+@use "variables" as *;
+
+.fusion-metric {
+	&-block {
+		padding: $spacing-md;
+	}
+
+	&-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: $spacing-sm;
+		align-items: center;
+		margin-bottom: $spacing-md;
+	}
+
+	&-btn {
+		padding: 6px 14px;
+		background-color: var(--interactive-accent);
+		color: var(--text-on-accent);
+		border: none;
+		border-radius: $border-radius-lg;
+		cursor: pointer;
+		font-size: $font-size-md;
+		font-weight: 500;
+		transition: background-color $transition-fast;
+
+		&:hover {
+			background-color: var(--interactive-accent-hover);
+		}
+	}
+
+	&-custom-input-row {
+		display: flex;
+		gap: 6px;
+		align-items: center;
+	}
+
+	&-custom-input {
+		width: $metric-custom-input-width;
+		padding: 5px $spacing-sm;
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		background-color: var(--background-primary);
+		color: var(--text-normal);
+		font-size: $font-size-md;
+	}
+
+	&-table-container {
+		overflow: auto;
+		max-height: $metric-table-max-height;
+	}
+
+	&-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: $font-size-md;
+
+		th {
+			text-align: left;
+			padding: 6px 10px;
+			border-bottom: 2px solid var(--background-modifier-border);
+			color: var(--text-muted);
+			font-weight: 600;
+			position: sticky;
+			top: 0;
+			background-color: var(--background-primary);
+		}
+
+		td {
+			padding: 5px 10px;
+			border-bottom: 1px solid var(--background-modifier-border);
+			color: var(--text-normal);
+		}
+	}
+
+	&-stats {
+		display: flex;
+		flex-wrap: wrap;
+		gap: $spacing-lg;
+		margin-bottom: $spacing-md;
+		padding: $spacing-sm $spacing-md;
+		background-color: var(--background-secondary);
+		border-radius: $border-radius-lg;
+
+		&-item {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 2px;
+		}
+
+		&-label {
+			font-size: $font-size-xs;
+			color: var(--text-muted);
+			font-weight: 600;
+			text-transform: uppercase;
+		}
+
+		&-value {
+			font-size: $font-size-lg;
+			font-weight: 600;
+			color: var(--text-normal);
+		}
+	}
+
+	&-datetime-input {
+		padding: 5px $spacing-sm;
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		background-color: var(--background-primary);
+		color: var(--text-normal);
+		font-size: $font-size-md;
+	}
+
+	&-description-input {
+		padding: 5px $spacing-sm;
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		background-color: var(--background-primary);
+		color: var(--text-normal);
+		font-size: $font-size-md;
+		min-width: $metric-description-min-width;
+		resize: vertical;
+		font-family: inherit;
+	}
+
+	&-description-cell {
+		max-width: $metric-description-max-width;
+	}
+
+	&-description-snippet {
+		color: var(--text-muted);
+		font-size: $font-size-md;
+	}
+
+	&-description-view-btn {
+		margin-left: $spacing-xs;
+		font-size: 0.8em;
+	}
+
+	&-description-modal {
+		width: $metric-description-modal-width;
+		max-width: $metric-description-modal-max-width;
+	}
+
+	&-description-full {
+		color: var(--text-normal);
+		line-height: 1.6;
+		user-select: text;
+	}
+
+	&-row-actions {
+		display: flex;
+		gap: $spacing-xs;
+	}
+
+	&-row-btn {
+		padding: 2px $spacing-sm;
+		background: none;
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		cursor: pointer;
+		color: var(--text-muted);
+		font-size: $font-size-sm;
+		transition: all $transition-fast;
+
+		&:hover {
+			background-color: var(--background-modifier-hover);
+			color: var(--text-normal);
+		}
+
+		&-delete:hover {
+			color: var(--text-error);
+			border-color: var(--text-error);
+		}
+	}
+
+	&-timeline-modal {
+		width: $metric-timeline-width;
+		max-width: none;
+		height: $metric-timeline-height;
+
+		.modal-content {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+			padding: 0;
+		}
+
+		&-header {
+			padding: 1.5rem 2rem 1rem;
+			border-bottom: 1px solid var(--background-modifier-border);
+		}
+
+		&-container {
+			flex: 1;
+			padding: 1.5rem 2rem;
+			overflow: auto;
+			min-height: 0;
+		}
+
+		&-empty {
+			color: var(--text-muted);
+			text-align: center;
+			padding: 2rem;
+		}
+	}
+}

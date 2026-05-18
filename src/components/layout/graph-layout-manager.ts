@@ -1,6 +1,8 @@
 import type cytoscape from "cytoscape";
 import type { Core, ElementDefinition } from "cytoscape";
 
+import { NodeOrganizer } from "./node-organizer";
+
 interface DagreLayoutOptions {
 	name: "dagre";
 	rankDir?: "TB" | "LR";
@@ -12,8 +14,6 @@ interface DagreLayoutOptions {
 	fit?: boolean;
 	padding?: number;
 }
-
-import { NodeOrganizer } from "./node-organizer";
 
 export interface LayoutConfig {
 	animationDuration: number;

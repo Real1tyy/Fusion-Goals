@@ -1,5 +1,4 @@
-import type { PieChartHandle } from "@real1ty-obsidian-plugins";
-import { renderPieChart } from "@real1ty-obsidian-plugins";
+import { renderPieChart, type PieChartHandle } from "@real1ty-obsidian-plugins";
 import Chart from "chart.js/auto";
 
 import { CSS_PREFIX } from "../constants";

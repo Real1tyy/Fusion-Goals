@@ -1,18 +1,17 @@
 import {
 	createPageHeader,
-	type PageHeaderHandle,
 	registerPageHeaderCommands,
 	registerTabCommands,
 	renderReactInline,
 	TabbedContainer,
-	type TabbedContainerHandle,
-	type TabEntry,
 	useApp,
 	usePersistedPageHeaderState,
 	usePersistedTabbedContainerState,
+	type PageHeaderHandle,
+	type TabbedContainerHandle,
+	type TabEntry,
 } from "@real1ty-obsidian-plugins-react";
-import type { Component } from "obsidian";
-import { type WorkspaceLeaf } from "obsidian";
+import { type Component, type WorkspaceLeaf } from "obsidian";
 import { createElement, memo, useEffect, useRef } from "react";
 
 import { showGoalModal } from "../../components/modals/goal-modal";

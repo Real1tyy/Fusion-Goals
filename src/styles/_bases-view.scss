@@ -1,0 +1,287 @@
+@use "variables" as *;
+
+.fusion-bases {
+	&-view {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		width: 100%;
+		height: 100%;
+	}
+
+	&-top-level-selector {
+		padding: $spacing-sm;
+		border-bottom: 1px solid var(--background-modifier-border);
+		background-color: var(--background-secondary);
+	}
+
+	&-view-selector {
+		padding: $spacing-sm;
+		border-bottom: 1px solid var(--background-modifier-border);
+		background-color: var(--background-secondary);
+	}
+
+	&-select {
+		width: 100%;
+		padding: 6px $spacing-sm;
+		background: var(--background-primary);
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		color: var(--text-normal);
+		font-size: 12px;
+		font-weight: 500;
+		cursor: pointer;
+		transition:
+			background-color $transition-base,
+			border-color $transition-base;
+		pointer-events: auto;
+		position: relative;
+
+		&:hover {
+			background: var(--background-primary-alt);
+			border-color: var(--interactive-accent);
+		}
+
+		&:focus {
+			outline: none;
+			background: var(--background-primary-alt);
+			border-color: var(--interactive-accent);
+			box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+		}
+
+		option {
+			background: var(--background-primary);
+			color: var(--text-normal);
+			padding: $spacing-xs $spacing-sm;
+		}
+	}
+
+	&-markdown-container {
+		flex: 1;
+		overflow: auto;
+		padding: $spacing-sm;
+		padding-right: $spacing-xs;
+		color: var(--text-normal);
+		font-size: 16px;
+		line-height: 1.5;
+
+		&::-webkit-scrollbar {
+			width: 6px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: var(--background-secondary);
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--background-modifier-border);
+			border-radius: $border-radius-sm;
+
+			&:hover {
+				background: var(--text-muted);
+			}
+		}
+
+		h1,
+		h2,
+		h3,
+		h4,
+		h5,
+		h6 {
+			margin-top: 0;
+			margin-bottom: $spacing-sm;
+			color: var(--text-normal);
+		}
+
+		p {
+			margin-bottom: $spacing-sm;
+		}
+
+		ul,
+		ol {
+			margin-bottom: $spacing-sm;
+			padding-left: $spacing-lg;
+		}
+
+		li {
+			margin-bottom: $spacing-xs;
+		}
+
+		pre {
+			background: var(--background-secondary);
+			border: 1px solid var(--background-modifier-border);
+			border-radius: $border-radius-md;
+			padding: $spacing-sm;
+			margin: $spacing-sm 0;
+			overflow-x: auto;
+			font-size: 12px;
+		}
+
+		code {
+			background: var(--background-secondary);
+			padding: 2px $spacing-xs;
+			border-radius: $border-radius-sm;
+			font-size: $font-size-md;
+		}
+
+		blockquote {
+			border-left: 3px solid var(--text-accent);
+			margin: $spacing-sm 0;
+			padding: 6px 10px;
+			background: var(--background-secondary);
+			border-radius: 0 $border-radius-md $border-radius-md 0;
+		}
+
+		img {
+			max-width: 100%;
+			height: auto;
+			border-radius: $border-radius-md;
+			margin: $spacing-sm 0;
+		}
+
+		a {
+			color: var(--text-accent);
+			text-decoration: none;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+
+		button,
+		.clickable-icon,
+		.internal-link,
+		.external-link,
+		input,
+		select,
+		textarea {
+			pointer-events: auto;
+			position: relative;
+		}
+
+		button {
+			background: var(--interactive-normal);
+			border: 1px solid var(--background-modifier-border);
+			border-radius: $border-radius-md;
+			padding: $spacing-xs $spacing-sm;
+			color: var(--text-normal);
+			cursor: pointer;
+			transition: background-color $transition-base;
+			font-size: 12px;
+
+			&:hover {
+				background: var(--interactive-hover);
+			}
+
+			&:active {
+				background: var(--interactive-active);
+			}
+		}
+
+		.dataview {
+			margin: 1em 0;
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+
+			th,
+			td {
+				padding: 0.5em;
+				border: 1px solid var(--background-modifier-border);
+				text-align: left;
+			}
+
+			th {
+				background-color: var(--background-secondary);
+				font-weight: 600;
+			}
+		}
+	}
+
+	&-empty-state {
+		text-align: center;
+		color: var(--text-muted);
+		font-style: italic;
+		padding: $spacing-xl;
+		border: 2px dashed var(--background-modifier-border);
+		border-radius: $border-radius-xl;
+		background: var(--background-secondary);
+		margin: $spacing-lg;
+	}
+
+	&-section {
+		margin-bottom: 2em;
+		padding: 0 1em;
+
+		&-header {
+			margin: 0 0 1em;
+			padding-bottom: 0.5em;
+			font-size: $font-size-lg;
+			font-weight: 600;
+			color: var(--text-normal);
+			border-bottom: 2px solid var(--background-modifier-border);
+		}
+	}
+
+	&-empty-section {
+		padding: 1em;
+		color: var(--text-muted);
+		font-style: italic;
+		text-align: center;
+		background-color: var(--background-secondary);
+		border-radius: $border-radius-md;
+	}
+
+	&-file-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5em;
+	}
+
+	&-file-item {
+		padding: 0.6em 1em;
+		background-color: var(--background-primary-alt);
+		border: 1px solid var(--background-modifier-border);
+		border-radius: $border-radius-md;
+		transition:
+			background-color $transition-base,
+			border-color $transition-base,
+			transform 0.1s;
+
+		&:hover {
+			background-color: var(--background-secondary);
+			border-color: var(--interactive-accent);
+			transform: translateX(2px);
+		}
+	}
+
+	&-file-link {
+		color: var(--text-normal);
+		text-decoration: none;
+		font-size: $font-size-base;
+		display: block;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--interactive-accent);
+		}
+	}
+}
+
+@media (max-width: $responsive-breakpoint-sm) {
+	.fusion-bases-top-level-selector,
+	.fusion-bases-view-selector {
+		padding: 6px;
+	}
+
+	.fusion-bases-markdown-container {
+		font-size: 12px;
+		padding: 6px;
+	}
+
+	.fusion-bases-select {
+		font-size: 11px;
+	}
+}
