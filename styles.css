@@ -1160,7 +1160,12 @@
 .fusion-bases-markdown-container::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
-.fusion-bases-markdown-container h1, .fusion-bases-markdown-container h2, .fusion-bases-markdown-container h3, .fusion-bases-markdown-container h4, .fusion-bases-markdown-container h5, .fusion-bases-markdown-container h6 {
+.fusion-bases-markdown-container h1,
+.fusion-bases-markdown-container h2,
+.fusion-bases-markdown-container h3,
+.fusion-bases-markdown-container h4,
+.fusion-bases-markdown-container h5,
+.fusion-bases-markdown-container h6 {
   margin-top: 0;
   margin-bottom: 8px;
   color: var(--text-normal);
@@ -1168,7 +1173,8 @@
 .fusion-bases-markdown-container p {
   margin-bottom: 8px;
 }
-.fusion-bases-markdown-container ul, .fusion-bases-markdown-container ol {
+.fusion-bases-markdown-container ul,
+.fusion-bases-markdown-container ol {
   margin-bottom: 8px;
   padding-left: 16px;
 }
