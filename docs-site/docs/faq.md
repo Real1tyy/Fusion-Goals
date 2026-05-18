@@ -2,325 +2,206 @@
 sidebar_position: 98
 ---
 
-# Frequently Asked Questions
+# FAQ
 
-Common questions about Nexus Properties and their answers.
+## Getting Started
 
-## General Questions
+<details>
+<summary>What is Fusion Goals?</summary>
 
-### What is Nexus Properties?
+Fusion Goals is an Obsidian plugin that automatically manages bidirectional property relationships (parent-child, related) and provides an interactive relationship graph to visualize and navigate your knowledge network. It helps you build goal hierarchies, track metrics, and explore connections across your vault.
 
-Nexus Properties is an Obsidian plugin that automatically manages bidirectional relationships (parent-child, related) and provides an interactive relationship graph to visualize and navigate your knowledge network.
+</details>
 
-### Is it free?
+<details>
+<summary>Is it free?</summary>
 
-Yes! Nexus Properties is completely free and open source under the MIT license.
+Yes! Fusion Goals is completely free and open source under the AGPL-3.0 license. All features are available at no cost.
 
-### Does it work on mobile?
+</details>
 
-The plugin is currently focused on desktop use. Mobile support is not guaranteed but may work with limitations.
+<details>
+<summary>Does it work on mobile?</summary>
 
-### What's the difference between this and Obsidian's built-in graph?
+Fusion Goals is currently focused on desktop use. Mobile support is not guaranteed but may work with limitations. If you run into anything, please open a [GitHub issue](https://github.com/Real1tyy/Fusion-Goals/issues).
 
-Obsidian's graph shows backlinks. Nexus Properties shows **frontmatter-based relationships** with automatic bidirectional sync, multiple view modes, color rules, filtering, and zoom previews.
+</details>
 
-## Relationship Management
+<details>
+<summary>How do I get started after installing?</summary>
 
-### Why use frontmatter relationships instead of backlinks?
+See the [Quick Start guide](/quickstart) for detailed instructions on configuring your directories, setting up relationships, and opening the graph view.
 
-- **Explicit structure**: Define clear parent-child hierarchies
-- **Bidirectional sync**: Set once, updates both sides automatically
-- **Typed relationships**: Distinguish between parent, child, and related
-- **Queryable**: Filter and search based on relationship properties
+</details>
 
-### Can I use both backlinks and Nexus Properties?
+<details>
+<summary>What's the difference between this and Obsidian's built-in graph?</summary>
 
-Yes! They complement each other. Use backlinks for general references, Nexus Properties for structured relationships.
+Obsidian's graph shows backlinks between notes. Fusion Goals shows **frontmatter-based relationships** with automatic bidirectional sync, multiple view modes (hierarchical, related, all related), color rules, filtering, zoom previews, and metric tracking.
 
-### What happens if I manually edit relationships in both files?
+</details>
 
-The plugin will sync them on next file change. However, it's best to let the plugin handle bidirectional sync automatically.
+---
 
-### Can I have multiple parents?
+## Goals & Metrics
 
-By default, a file can have one parent. If you need multiple, you can manually add them, but the plugin is designed for tree hierarchies (single parent).
+<details>
+<summary>How do I create a goal hierarchy?</summary>
 
-### How do I break a relationship?
+Set parent-child relationships in your note frontmatter. When you set a child in one file, the parent is automatically updated in the other. You can also use the "Create Child Node" or "Create Parent Node" commands from the command palette for instant node creation with bidirectional links.
 
-1. Delete the relationship from one file's frontmatter
-2. Plugin automatically removes it from the other file
-3. Or use context menu: Right-click edge → "Remove Relationship"
+</details>
+
+<details>
+<summary>Can I have multiple parents for a single goal?</summary>
+
+By default, a file can have one parent. The plugin is designed for tree hierarchies (single parent). You can manually add multiple parents, but the graph will treat the first as primary.
+
+</details>
+
+<details>
+<summary>How does metric tracking work?</summary>
+
+Metric tracking lets you monitor quantitative data associated with your goals. Configure metric properties in your frontmatter, and Fusion Goals will display and aggregate them across your hierarchy. See [Metric Tracking](features/metric-tracking) for details.
+
+</details>
+
+<details>
+<summary>How does bidirectional sync work?</summary>
+
+When you set a relationship in one direction (e.g., add a child to a goal), Fusion Goals automatically updates the reverse relationship in the other file. This keeps your entire vault consistent without manual maintenance. See [Bidirectional Sync](features/bidirectional-sync) for details.
+
+</details>
+
+<details>
+<summary>How do I break a relationship between goals?</summary>
+
+You have two options:
+1. Delete the relationship from one file's frontmatter -- the plugin automatically removes it from the other file
+2. Right-click an edge in the graph and select "Remove Relationship"
+
+</details>
+
+<details>
+<summary>Why use frontmatter relationships instead of backlinks?</summary>
+
+Frontmatter relationships give you explicit structure (clear parent-child hierarchies), bidirectional sync (set once, updates both sides), typed relationships (distinguish parent, child, and related), and queryability (filter and search based on relationship properties).
+
+</details>
+
+---
 
 ## Graph Features
 
-### Why isn't my file showing in the graph?
+<details>
+<summary>What view modes are available?</summary>
 
-Check:
+Fusion Goals provides four view modes:
+- **Hierarchical** -- Parent-child tree structures
+- **Related** -- Direct related connections
+- **All Related** -- Entire constellations of related notes
+- **Start from Current** -- Focus on the currently active file
 
-1. File is in an [indexed directory](configuration#directory-scanning)
-2. File has relationships (`Parent`, `Child`, or `Related`)
-3. Filters aren't hiding it
-4. View mode is appropriate (Hierarchical vs Related)
+See [Graph Views](features/graph-views) for details.
 
-### How do I see all my notes in the graph?
+</details>
 
-- Switch to "All Related" mode
-- Ensure directories are scanned
-- Clear any active filters
-- Check that notes have relationships
+<details>
+<summary>How do color rules work?</summary>
 
-### Can I customize the graph layout?
+Color rules are evaluated top-to-bottom. The first JavaScript expression that evaluates to true sets the node color. For example, `Status === 'Active'` could map to green, while `type === 'project'` maps to blue. See [Color Rules](features/color-rules) for details.
 
-Layout is automatic, but you can:
+</details>
 
-- Manually drag nodes (positions not saved)
-- Adjust view mode for different layouts
-- Use filtering to focus on subsets
-- Configure [animation duration](configuration#graph-animation-duration)
+<details>
+<summary>How does filtering work?</summary>
 
-### How do I save the graph as an image?
+You can filter graph nodes using JavaScript expressions based on frontmatter properties. Fusion Goals supports named filter presets for quick access, multi-expression AND logic, and persistent filters across sessions. See [Filtering](features/filtering) for details.
 
-Use standard screenshot tools (Snipping Tool, macOS screenshots, etc.) to capture the graph view.
+</details>
+
+<details>
+<summary>Can I customize the graph layout?</summary>
+
+Layout is automatic, but you can manually drag nodes, switch between view modes for different layouts, use filtering to focus on subsets, and configure the animation duration. Node positions are not saved between sessions.
+
+</details>
+
+<details>
+<summary>What is Zoom Mode?</summary>
+
+Zoom Mode lets you click any node in the graph to see a detailed inline preview of the note's frontmatter and content, without leaving the graph view. You can toggle visibility of each section independently. See [Zoom Mode](features/zoom-mode) for details.
+
+</details>
+
+<details>
+<summary>Can I save filter presets?</summary>
+
+Yes! Use [Filter Presets](features/filtering#filter-presets) to save commonly-used filters with names for quick access from a dropdown selector.
+
+</details>
+
+---
 
 ## Performance
 
-### The graph is slow with many notes. How can I improve it?
+<details>
+<summary>The graph is slow with many notes. How can I improve it?</summary>
 
-1. **Reduce recursion depth**: Lower [All Related Max Depth](configuration#all-related-recursion-depth)
-2. **Limit directory scanning**: Only scan [relevant folders](configuration#directory-scanning)
-3. **Disable animations**: Set [animation duration](configuration#graph-animation-duration) to 0ms
-4. **Use filtering**: Show only [relevant nodes](features/filtering)
-5. **Use "Start from Current"**: Focus on subtrees
+1. Reduce recursion depth in settings (All Related Max Depth and Hierarchy Traversal Depth)
+2. Limit directory scanning to only the folders you need
+3. Disable animations by setting animation duration to 0ms
+4. Use filtering to show only relevant nodes
+5. Use "Start from Current" mode to focus on subtrees
+6. Disable tooltips if you don't need them
 
-### How many notes can the plugin handle?
+See [Configuration](configuration#performance-tips) for more details.
 
-- **Small vaults** (< 500 notes): Excellent performance
+</details>
+
+<details>
+<summary>How many notes can the plugin handle?</summary>
+
+- **Small vaults** (under 500 notes): Excellent performance
 - **Medium vaults** (500-2000 notes): Good performance with optimizations
-- **Large vaults** (2000+ notes): May require [performance tuning](#the-graph-is-slow-with-many-notes-how-can-i-improve-it)
+- **Large vaults** (2000+ notes): May require performance tuning (reduce recursion depth, limit directory scanning, use filtering)
 
-### Does the plugin index my entire vault on startup?
+</details>
 
-Only files in [configured directories](configuration#directory-scanning) are indexed. Use specific directories to limit scope.
+<details>
+<summary>Does the plugin index my entire vault on startup?</summary>
 
-## Color Rules & Filtering
+Only files in your configured directories are indexed. Use specific directories instead of the wildcard (`*`) to limit scope and improve startup time.
 
-### My color rule isn't working. Why?
+</details>
 
-Check:
+---
 
-1. [Expression syntax](features/color-rules#expression-syntax) is valid JavaScript
-2. Property names match exactly (case-sensitive)
-3. Rule is [enabled](features/color-rules#enablingdisabling-rules)
-4. Rule [order](features/color-rules#rule-order--priority) (first match wins)
-5. Property exists in frontmatter (use [tooltips](features/tooltips) to verify)
+## Support
 
-### Can I have different colors for different note types?
+<details>
+<summary>How do I report a bug?</summary>
 
-Yes! Create color rules based on a `type` property:
+1. Check [GitHub Issues](https://github.com/Real1tyy/Fusion-Goals/issues) for existing reports
+2. If no duplicate exists, open a new issue with steps to reproduce, expected vs actual behavior, Obsidian and plugin versions, and any console errors
 
-```javascript
-type === "project"; // Blue
-type === "task"; // Green
-type === "note"; // Purple
-```
+</details>
 
-[Learn more about color rules →](features/color-rules)
+<details>
+<summary>How do I request a feature?</summary>
 
-### How do filters work with view modes?
+1. Check [GitHub Discussions](https://github.com/Real1tyy/Fusion-Goals/discussions) for existing requests
+2. Open a new discussion describing your feature, use case, and benefit
 
-Filters apply to all view modes. They hide nodes that don't match filter expressions, regardless of Hierarchical/Related/All Related mode.
+</details>
 
-### Can I save filter presets?
+<details>
+<summary>How can I support the project?</summary>
 
-Yes! Use [Filter Presets](features/filtering#filter-presets) to save commonly-used filters with names for quick access.
+- Star the repo on [GitHub](https://github.com/Real1tyy/Fusion-Goals)
+- Subscribe to the [YouTube channel](https://www.youtube.com/@real1tyy)
+- Share the plugin with others
+- [Donate](https://matejvavroproductivity.com/support/) to support continued development
+- Report bugs and improve documentation
 
-## Node Creation
-
-### Where are new nodes created?
-
-New nodes are created in the **same folder** as the source file.
-
-### Can I change where new nodes are created?
-
-Not currently. Future versions may support template folders or configurable locations.
-
-### Why is my property not being copied to new nodes?
-
-Check [Excluded Properties](features/excluded-properties):
-
-1. Property might be in [default exclusions](configuration#default-excluded-properties)
-2. Property might be in [path-based exclusion rule](features/excluded-properties#path-based-exclusion-rules)
-
-### What is a Zettel ID?
-
-A unique timestamp-based identifier (`YYYYMMDDHHmmss`) assigned to each new node. Useful for Zettelkasten workflows and ensuring unique node IDs.
-
-[Learn more →](features/node-creation#zettel-id-generation)
-
-### Can I disable Zettel ID generation?
-
-Yes! Set the [Zettel ID property](configuration#zettel-id-property) to an empty string in settings.
-
-## Zoom Mode
-
-### What's the difference between Zoom Mode and Tooltips?
-
-- **Tooltips**: Hover for quick property preview
-- **Zoom Mode**: Click for full content preview with navigation
-
-[Learn more →](features/zoom-mode)
-
-### Can I edit notes in Zoom Mode?
-
-No, Zoom Mode is read-only preview. Double-click a node or use context menu → "Open in New Tab" to edit.
-
-### How do I exit Zoom Mode?
-
-Click the focused node again, press Escape, or click outside the graph.
-
-## Troubleshooting
-
-### My relationships aren't syncing. What's wrong?
-
-1. Check [directory scanning](configuration#directory-scanning) includes both files
-2. Verify [property names](configuration#direct-relationship-properties) are correct
-3. Use wiki link format: `[[note name]]`
-4. Run [full rescan](configuration#indexing) to rebuild relationships
-
-### The plugin broke after updating. How do I fix it?
-
-1. **Check compatibility**: Ensure Obsidian is version 1.6.0+
-2. **Reload plugin**: Settings → Community plugins → Reload
-3. **Restart Obsidian**: Close and reopen completely
-4. **Check console**: `Ctrl/Cmd+Shift+I` for error messages
-5. **Report issue**: [GitHub Issues](https://github.com/Real1tyy/Nexus-Properties/issues)
-
-### How do I reset all settings to defaults?
-
-1. Close Obsidian
-2. Navigate to `<vault>/.obsidian/plugins/nexus-properties/`
-3. Delete or rename `data.json`
-4. Restart Obsidian
-
-:::warning Data Loss
-This resets ALL settings including color rules, filters, and exclusions. Export/backup settings first if needed.
-:::
-
-### Can I export/import settings?
-
-Not directly through the UI. Advanced users can:
-
-1. Copy `data.json` file between vaults
-2. Manually edit JSON (at your own risk)
-
-## Feature Requests & Support
-
-### How do I request a feature?
-
-1. Check [GitHub Discussions](https://github.com/Real1tyy/Nexus-Properties/discussions) for existing requests
-2. Open a new discussion describing your feature
-3. Explain use case and benefit
-
-### How do I report a bug?
-
-1. Check [GitHub Issues](https://github.com/Real1tyy/Nexus-Properties/issues) for duplicates
-2. Open a new issue with:
-   - Steps to reproduce
-   - Expected vs actual behavior
-   - Obsidian version and plugin version
-   - Console errors (if any)
-
-### Is there a community forum?
-
-Use [GitHub Discussions](https://github.com/Real1tyy/Nexus-Properties/discussions) for:
-
-- Questions
-- Feature requests
-- Use case sharing
-- Tips and tricks
-
-### How can I support the project?
-
-- ⭐ **Star on GitHub**: [Nexus Properties Repository](https://github.com/Real1tyy/Nexus-Properties)
-- 💰 **Support**: [Support My Work](https://matejvavroproductivity.com/support/)
-- 🐛 **Report bugs**: Help improve quality
-- 📖 **Improve docs**: Submit documentation PRs
-- 💬 **Help others**: Answer questions in Discussions
-
-## Advanced Questions
-
-### Can I use this with Dataview?
-
-Yes! Relationships are stored in frontmatter, so Dataview can query them:
-
-```dataview
-LIST
-WHERE Parent = [[Project Overview]]
-```
-
-### Can I use this with Templater?
-
-Yes! New nodes inherit properties, which can include Templater templates or Templater-created properties.
-
-### Does it work with Canvas?
-
-Canvas notes are regular files. If they're in indexed directories with relationships, they'll appear in the graph.
-
-### Can I script relationship creation?
-
-Yes, for advanced users:
-
-1. Modify frontmatter programmatically
-2. Plugin will detect changes
-3. Bidirectional sync happens automatically
-
-Use `app.fileManager.processFrontMatter()` API.
-
-### How does it handle file conflicts?
-
-If two users edit relationships simultaneously (e.g., in synced vaults):
-
-- Last write wins
-- May cause temporary inconsistency
-- Run [full rescan](configuration#indexing) to fix
-
-## Migration & Compatibility
-
-### Can I migrate from another system?
-
-If your previous system used frontmatter properties:
-
-1. Rename properties to match Nexus Properties names
-2. Run [full rescan](configuration#indexing)
-3. Relationships will be synced
-
-### Will it work with my existing notes?
-
-Yes! The plugin:
-
-- Doesn't modify notes without relationships
-- Only manages specified properties
-- Won't break existing structure
-
-### Can I uninstall without breaking my vault?
-
-Yes! Relationships are stored as frontmatter. If you uninstall:
-
-- Frontmatter remains
-- Relationships still readable by humans
-- You can reinstall later
-- Or use another tool that reads frontmatter
-
-### What happens to my relationships if I uninstall?
-
-They remain in frontmatter. You can:
-
-- Keep them for future use
-- Remove manually if desired
-- Use other tools that read frontmatter
-
-## Didn't find your answer?
-
-- Check [Troubleshooting](troubleshooting) for common issues
-- Search [GitHub Discussions](https://github.com/Real1tyy/Nexus-Properties/discussions)
-- Open a [new discussion](https://github.com/Real1tyy/Nexus-Properties/discussions/new) or [issue](https://github.com/Real1tyy/Nexus-Properties/issues/new)
+</details>

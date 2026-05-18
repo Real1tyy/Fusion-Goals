@@ -13,7 +13,6 @@ Nexus Properties automatically organizes nodes in the graph for optimal visualiz
 Used in **Hierarchical mode** for parent-child trees.
 
 **Characteristics**:
-
 - Top-to-bottom tree structure
 - Parent nodes at the top
 - Children arranged below
@@ -23,14 +22,12 @@ Used in **Hierarchical mode** for parent-child trees.
 **Algorithm**: Modified Dagre (Directed Acyclic Graph Rendering)
 
 **Best for**:
-
 - Project hierarchies
 - Organizational charts
 - Taxonomies
 - File system structures
 
 **Example**:
-
 ```
          Root
         /    \
@@ -44,7 +41,6 @@ Used in **Hierarchical mode** for parent-child trees.
 Used in **Related** and **All Related** modes for connected networks.
 
 **Characteristics**:
-
 - Groups of related notes form "constellations"
 - Organic, network-style positioning
 - Source node in center
@@ -53,14 +49,12 @@ Used in **Related** and **All Related** modes for connected networks.
 - Collision detection
 
 **Best for**:
-
 - Knowledge networks
 - Cross-referenced concepts
 - Interconnected notes
 - Lateral relationships
 
 **Example**:
-
 ```
     Node B   Node C
         \    /
@@ -76,7 +70,6 @@ Used in **Related** and **All Related** modes for connected networks.
 A **constellation** is a group of notes connected through the `Related` property. Notes in a constellation can reach each other by following related links.
 
 **Example constellation**:
-
 ```
 Note A ↔ Note B ↔ Note C
          ↓
@@ -100,59 +93,85 @@ Controlled by [All Related Max Depth](../configuration#all-related-recursion-dep
 **Depth examples**:
 
 **Depth 1** (Direct related only):
-
 ```
 Source → Note A
 Source → Note B
 ```
-
 Shows: Source, Note A, Note B
 
 **Depth 2** (One level deeper):
-
 ```
 Source → Note A → Note C
 Source → Note B → Note D
 ```
-
 Shows: Source, Note A, Note B, Note C, Note D
 
 **Depth 3+** (Multiple levels):
-
 ```
 Source → A → C → E
          ↓
          D → F
 ```
-
 Shows: Source, A, C, D, E, F
 
 :::tip Performance
 Higher depths show more connections but can impact performance. Start with depth 5-10 and adjust based on your vault size.
 :::
 
+## Multi-Row Layout
+
+When a goal has many tasks, the default dagre layout spreads children in a single wide row, making the graph hard to read. **Multi-row layout** solves this by distributing children across staggered rows.
+
+### How It Works
+
+Children are arranged in alternating rows: the first row holds up to the configured maximum, the next row holds one fewer (offset horizontally for a staggered effect), and so on.
+
+**Example** (max 5 per row, 12 children):
+```
+      Goal
+       |
+  1  2  3  4  5       ← row 1 (5 nodes)
+   6  7  8  9          ← row 2 (4 nodes, offset)
+  10 11 12             ← row 3 (3 nodes)
+```
+
+Each parent's children are kept together as a group, and groups are spaced apart so branches don't overlap.
+
+### Enabling Multi-Row Layout
+
+1. Open **Settings → Graph Display → Layout**
+2. Toggle **Use multi-row layout for large families** on
+3. Adjust **Max children per row** (3–30) to control how many nodes appear in each row
+
+:::tip When to Use
+Enable this when you have goals with 10+ tasks. For smaller hierarchies the default single-row layout works well.
+:::
+
+### Settings
+
+| Setting | Default | Range | Description |
+|---------|---------|-------|-------------|
+| Use multi-row layout | Off | On/Off | Distribute children across staggered rows |
+| Max children per row | 10 | 3–30 | Maximum nodes in the widest row |
+
 ## Node Positioning
 
 ### Hierarchical Positioning
 
 **Parent nodes**:
-
 - Positioned at top of tree
 - Centered above children
 
 **Child nodes**:
-
 - Positioned below parent
 - Horizontally distributed
 - Even spacing
 
 **Sibling nodes**:
-
 - Same vertical level
 - Spaced horizontally
 
 **Spacing rules**:
-
 - Vertical spacing: Fixed distance between levels
 - Horizontal spacing: Adjusted based on node count
 - Wider trees get more horizontal space
@@ -160,23 +179,19 @@ Higher depths show more connections but can impact performance. Start with depth
 ### Constellation Positioning
 
 **Source node**:
-
 - Positioned in center
 - Acts as anchor point
 
 **First-degree related**:
-
 - Arranged in circle around source
 - Even angular distribution
 
 **Multi-degree related**:
-
 - Clustered near their connection point
 - Organic distribution
 - Collision avoidance
 
 **Spacing rules**:
-
 - Minimum distance between nodes
 - Collision detection and resolution
 - Gravity towards connected nodes
@@ -204,7 +219,6 @@ Nexus Properties automatically prevents node overlap:
 ### Manual Adjustment
 
 You can drag nodes to reposition them manually:
-
 - Click and drag any node
 - Positions are temporary (not saved)
 - Reset by switching view modes
@@ -219,7 +233,6 @@ Layout changes are animated for smooth transitions.
 Controlled by [Graph Animation Duration](../configuration#graph-animation-duration).
 
 **Settings**:
-
 - **0ms** - Instant layout (no animation)
 - **400ms** - Fast, responsive
 - **800ms** - Smooth, balanced (default)
@@ -237,7 +250,6 @@ Controlled by [Graph Animation Duration](../configuration#graph-animation-durati
 ### Performance Considerations
 
 Animations can impact performance on:
-
 - Large graphs (100+ nodes)
 - Older hardware
 - Mobile devices
@@ -249,7 +261,6 @@ Set duration to `0ms` for instant layout if needed.
 ### Automatic Optimization
 
 The layout system automatically optimizes for:
-
 - Number of nodes
 - Screen size
 - View mode
@@ -266,12 +277,10 @@ The layout system automatically optimizes for:
 Edges (connections between nodes) are automatically routed:
 
 **Hierarchical mode**:
-
 - Straight lines from parent to child
 - Vertical orientation
 
 **Constellation mode**:
-
 - Curved lines between related nodes
 - Avoids overlapping edges where possible
 
@@ -280,36 +289,30 @@ Edges (connections between nodes) are automatically routed:
 ### Hierarchical Mode Layout
 
 **Root node**:
-
 - Top center position
 - Largest vertical space
 
 **Tree expansion**:
-
 - Grows vertically (downward)
 - Expands horizontally as needed
 - Balanced left-right distribution
 
 **Subtree positioning**:
-
 - Each subtree gets proportional space
 - Larger subtrees get more horizontal room
 
 ### Related Mode Layout
 
 **Source node**:
-
 - Center position
 - Fixed location
 
 **Related nodes**:
-
 - Circle around source
 - Equal angular spacing
 - Distance based on node count
 
 **Example** (3 related nodes):
-
 ```
       Node A
         ↑
@@ -317,24 +320,20 @@ Edges (connections between nodes) are automatically routed:
         ↓
       Node C
 ```
-
 120° spacing between nodes
 
 ### All Related Mode Layout
 
 **Source node**:
-
 - Center-left position
 - Anchor for constellation
 
 **Constellation clusters**:
-
 - Grouped by connection distance
 - Closely related nodes cluster together
 - Distinct groups separated
 
 **Multi-constellation**:
-
 - Each constellation gets a region
 - Minimal overlap between constellations
 

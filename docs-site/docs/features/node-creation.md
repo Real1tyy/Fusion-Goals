@@ -13,7 +13,6 @@ Create parent, child, or related nodes instantly from the command palette. New n
 **Command**: "Nexus Properties: Create Parent Node"
 
 **What it does**:
-
 1. Creates a new file in the same folder as current file
 2. Inherits frontmatter properties (except excluded)
 3. Sets new file as parent of current file
@@ -22,7 +21,6 @@ Create parent, child, or related nodes instantly from the command palette. New n
 6. Opens new file for editing
 
 **When to use**:
-
 - Creating a container/project for the current note
 - Building hierarchies bottom-up
 - Grouping related notes under a parent
@@ -34,7 +32,6 @@ Create parent, child, or related nodes instantly from the command palette. New n
 **Command**: "Nexus Properties: Create Child Node"
 
 **What it does**:
-
 1. Creates a new file in the same folder as current file
 2. Inherits frontmatter properties (except excluded)
 3. Sets new file as child of current file
@@ -43,7 +40,6 @@ Create parent, child, or related nodes instantly from the command palette. New n
 6. Opens new file for editing
 
 **When to use**:
-
 - Breaking down a note into smaller parts
 - Creating tasks for a project
 - Building hierarchies top-down
@@ -56,7 +52,6 @@ Create parent, child, or related nodes instantly from the command palette. New n
 **Command**: "Nexus Properties: Create Related Node"
 
 **What it does**:
-
 1. Creates a new file in the same folder as current file
 2. Inherits frontmatter properties (except excluded)
 3. Marks new file as related to current file
@@ -65,7 +60,6 @@ Create parent, child, or related nodes instantly from the command palette. New n
 6. Opens new file for editing
 
 **When to use**:
-
 - Creating companion notes
 - Adding related concepts
 - Expanding a constellation
@@ -80,7 +74,6 @@ Create parent, child, or related nodes instantly from the command palette. New n
 New nodes inherit frontmatter from the source file, except for **excluded properties**.
 
 **Example source file** (`project.md`):
-
 ```yaml
 ---
 type: project
@@ -94,7 +87,6 @@ _ZettelID: 20240115120000
 ```
 
 **New child node** (`project-child.md`):
-
 ```yaml
 ---
 type: project
@@ -109,7 +101,6 @@ _ZettelID: 20240125130000
 ```
 
 Notice:
-
 - All properties inherited
 - Old `_ZettelID` **not copied** (excluded by default)
 - New `_ZettelID` generated
@@ -122,17 +113,14 @@ Notice:
 Relationships are established bidirectionally:
 
 **For "Create Child"**:
-
 - New file gets `Parent: "[[source-file]]"`
 - Source file gets `[[new-file]]` added to `Child` array
 
 **For "Create Parent"**:
-
 - New file gets `Child: ["[[source-file]]"]`
 - Source file gets `Parent: "[[new-file]]"`
 
 **For "Create Related"**:
-
 - New file gets `Related: ["[[source-file]]"]`
 - Source file gets `[[new-file]]` added to `Related` array
 
@@ -147,7 +135,6 @@ Each new node gets a unique timestamp-based ID.
 **Property name**: Configured in [settings](../configuration#zettel-id-property) (default: `_ZettelID`)
 
 **Purpose**:
-
 - Unique identifier for each note
 - Track creation time
 - Link notes by ID (alternative to filename)
@@ -162,7 +149,6 @@ Set the Zettel ID property name to empty string in settings to disable automatic
 New files are named: `[source-name]-untitled-[number].md`
 
 **Examples**:
-
 - Source: `Project Overview.md`
 - New child: `Project Overview-untitled-1.md`
 - Next child: `Project Overview-untitled-2.md`
@@ -176,12 +162,10 @@ New files are named: `[source-name]-untitled-[number].md`
 New nodes are created in the **same folder** as the source file.
 
 **Example**:
-
 - Source: `Projects/Work/Main Project.md`
 - New child: `Projects/Work/Main Project-untitled-1.md`
 
 **Why?**
-
 - Keep related notes together
 - Maintain folder structure
 - Easy to find and organize
@@ -193,14 +177,12 @@ Certain properties are **not copied** to new nodes.
 ### Default Excluded Properties
 
 **Default exclusions** (always excluded):
-
 - `Parent`
 - `Child`
 - `Related`
 - `_ZettelID`
 
 **Why?**
-
 - **Relationship properties**: Would create incorrect links
 - **Zettel ID**: Each note needs unique ID
 
@@ -211,7 +193,6 @@ Certain properties are **not copied** to new nodes.
 Additional properties can be excluded for files in specific directories.
 
 **Example rule**:
-
 - **Path**: `Projects/`
 - **Excluded**: `status, progress, deadline`
 
@@ -310,13 +291,11 @@ Exclude different properties for different folders:
 Assign hotkeys for quick access:
 
 **Suggested hotkeys**:
-
 - `Ctrl+Shift+P` - Create Parent Node
 - `Ctrl+Shift+C` - Create Child Node
 - `Ctrl+Shift+R` - Create Related Node
 
 **To assign**:
-
 1. Settings → Hotkeys
 2. Search "Nexus Properties"
 3. Click + button next to command
@@ -327,7 +306,6 @@ Assign hotkeys for quick access:
 ### Project Management
 
 **Create project structure**:
-
 1. Create `Project Overview.md`
 2. Use "Create Child" repeatedly for phases
 3. From each phase, create tasks
@@ -337,7 +315,6 @@ Assign hotkeys for quick access:
 ### Zettelkasten
 
 **Build knowledge network**:
-
 1. Create literature note
 2. Use "Create Related" for permanent notes
 3. Link concepts bidirectionally
@@ -347,7 +324,6 @@ Assign hotkeys for quick access:
 ### Research Organization
 
 **Structure research**:
-
 1. Create main research note
 2. Use "Create Child" for sub-topics
 3. Use "Create Related" for cross-cutting themes
@@ -357,7 +333,6 @@ Assign hotkeys for quick access:
 ### Meeting Notes
 
 **From meeting note**:
-
 1. Create `Meeting 2024-01-15.md`
 2. Use "Create Child" for action items
 3. Each action gets its own note
@@ -369,64 +344,54 @@ Assign hotkeys for quick access:
 ### Command Not Available
 
 **Check current file**:
-
 - Must be viewing a file (not graph view)
 - File must be in indexed directory
 - Check [directory settings](../configuration#directory-scanning)
 
 **Check plugin enabled**:
-
 - Nexus Properties must be active
 - Try reloading plugin
 
 ### Properties Not Inherited
 
 **Check excluded properties**:
-
 - Property might be in exclusion list
 - Check [default exclusions](../configuration#default-excluded-properties)
 - Check [path-based rules](excluded-properties)
 
 **Check property exists**:
-
 - Verify property in source file's frontmatter
 - Check spelling and capitalization
 
 ### Relationship Not Created
 
 **Check bidirectional sync**:
-
 - Both files should update
 - Check frontmatter of both files
 - Run rescan if needed: Settings → Rescan Everything
 
 **Check file created**:
-
 - New file should exist in same folder
 - Check folder for new file
 
 ### Zettel ID Not Generated
 
 **Check setting**:
-
 - Zettel ID property must be set
 - Default: `_ZettelID`
 - If empty, IDs aren't generated
 
 **Check not excluded**:
-
 - Zettel ID property is auto-excluded (correct behavior)
 - New ID is generated, not copied
 
 ### File Name Conflicts
 
 **Auto-increment handles it**:
-
 - Numbers increase to avoid conflicts
 - `untitled-1`, `untitled-2`, etc.
 
 **Rename immediately**:
-
 - Files open for editing right away
 - Give meaningful names quickly
 

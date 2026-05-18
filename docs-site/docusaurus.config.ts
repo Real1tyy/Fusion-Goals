@@ -1,12 +1,13 @@
-import { themes as prismThemes } from "prism-react-renderer";
-import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import type { Config } from "@docusaurus/types";
+import { themes as prismThemes } from "prism-react-renderer";
 
 // Docusaurus config for Prisma Calendar docs
 
 const config: Config = {
 	title: "Nexus Properties",
-	tagline: "Automated property management and interactive relationship visualization for Obsidian.",
+	tagline:
+		"Automated property management and interactive relationship visualization for Obsidian.",
 	favicon: "img/nexus-properties.png",
 
 	// Set the production url of your site here
@@ -32,6 +33,8 @@ const config: Config = {
 		locales: ["en"],
 	},
 
+	clientModules: [require.resolve("./src/analytics")],
+
 	presets: [
 		[
 			"classic",
@@ -42,7 +45,8 @@ const config: Config = {
 					sidebarPath: "./sidebars.ts",
 					// Please change this to your repo.
 					// Remove this to remove the "edit this page" links.
-					editUrl: "https://github.com/Real1tyy/Nexus-Properties/edit/main/docs-site/",
+					editUrl:
+						"https://github.com/Real1tyy/Nexus-Properties/edit/main/docs-site/",
 					showLastUpdateAuthor: true,
 					showLastUpdateTime: true,
 				},
@@ -149,11 +153,15 @@ const config: Config = {
 					items: [
 						{
 							label: "Support",
-							href: "https://matejvavroproductivity.com/support/",
+							href: "https://matejvavroproductivity.com/support/?utm_campaign=fusion_goals&utm_source=docs&utm_medium=footer&utm_content=support",
 						},
 						{
 							label: "Buy Me a Coffee",
-							href: "https://www.buymeacoffee.com/real1ty",
+							href: "https://www.buymeacoffee.com/real1ty?utm_campaign=fusion_goals&utm_source=docs&utm_medium=footer&utm_content=buy_me_a_coffee",
+						},
+						{
+							label: "Privacy Policy",
+							to: "/privacy",
 						},
 					],
 				},

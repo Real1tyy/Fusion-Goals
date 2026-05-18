@@ -66,7 +66,6 @@ Both notes now show they're related to each other.
 A note can have zero or one parent. When you set a parent, the parent note automatically gets the child relationship.
 
 **Example hierarchy**:
-
 ```
 Project
 ├── Task 1
@@ -104,7 +103,6 @@ A note can have zero or many children. When you add children, each child note au
 Notes can be related to any number of other notes. Related relationships are symmetrical - if A is related to B, then B is related to A.
 
 **Use cases**:
-
 - Linking similar concepts
 - Cross-referencing between topics
 - Connecting notes in a network (not hierarchy)
@@ -118,7 +116,6 @@ Nexus Properties computes recursive relationships dynamically:
 Shows all ancestors in the hierarchy, not just the immediate parent.
 
 **Example**:
-
 ```
 Grandparent
 └── Parent
@@ -126,7 +123,6 @@ Grandparent
 ```
 
 When viewing `Child` in "All Related" mode, the graph will show:
-
 - Parent (direct parent)
 - Grandparent (indirect parent)
 
@@ -135,7 +131,6 @@ When viewing `Child` in "All Related" mode, the graph will show:
 Shows all descendants in the hierarchy, not just direct children.
 
 **Example**:
-
 ```
 Project
 ├── Phase 1
@@ -147,7 +142,6 @@ Project
 ```
 
 When viewing `Project` in "All Related" mode, the graph will show:
-
 - Phase 1, Phase 2 (direct children)
 - Task 1.1, Task 1.2, Task 2.1, Task 2.2 (indirect children)
 
@@ -156,7 +150,6 @@ When viewing `Project` in "All Related" mode, the graph will show:
 Shows all notes connected through the `Related` property, recursively.
 
 **Example**:
-
 ```
 Note A ↔ Note B ↔ Note C
          ↓
@@ -164,7 +157,6 @@ Note A ↔ Note B ↔ Note C
 ```
 
 When viewing `Note A` in "All Related" mode with sufficient depth, the graph will show all connected notes:
-
 - Note B (direct related)
 - Note C (related to B)
 - Note D (related to B)
@@ -180,7 +172,6 @@ The depth of recursion is controlled by the [All Related Max Depth](../configura
 When enabled, notes that share the same parent are automatically marked as related to each other.
 
 **Without auto-link**:
-
 ```yaml
 # Project.md
 Child:
@@ -199,7 +190,6 @@ Parent: "[[Project]]"
 ```
 
 **With auto-link** (enabled by default):
-
 ```yaml
 # Task 1.md
 Parent: "[[Project]]"
@@ -216,17 +206,15 @@ Related:
 
 :::tip When to Use
 Enable auto-link siblings when:
-
 - Tasks in the same project should be aware of each other
 - Siblings in an outline should cross-reference
 - Chapters in a book should link together
 
 Disable when:
-
 - Children are independent items
 - You want strict hierarchies without lateral connections
 - Performance is a concern with many siblings
-  :::
+:::
 
 ## Automatic Maintenance
 
@@ -237,7 +225,6 @@ Nexus Properties automatically maintains relationship consistency:
 When you delete a file, all references to it are automatically removed from other notes' frontmatter.
 
 **Before deletion**:
-
 ```yaml
 # Project.md
 Child:
@@ -246,7 +233,6 @@ Child:
 ```
 
 **After deleting Task 1.md**:
-
 ```yaml
 # Project.md
 Child:
@@ -258,7 +244,6 @@ Child:
 When you rename a file, all references are automatically updated.
 
 **Before rename** (`old-name.md` → `new-name.md`):
-
 ```yaml
 # Project.md
 Child:
@@ -266,7 +251,6 @@ Child:
 ```
 
 **After rename**:
-
 ```yaml
 # Project.md
 Child:
@@ -278,7 +262,6 @@ Child:
 When you remove a relationship from one side, the reverse relationship is automatically removed.
 
 **Remove child from parent**:
-
 ```yaml
 # Before (parent-note.md)
 Child:
@@ -291,11 +274,9 @@ Child:
 ```
 
 **Automatically updates child-note.md**:
-
 ```yaml
 # Before
 Parent: "[[parent-note]]"
-
 
 # After (Parent property removed)
 ---
@@ -308,7 +289,6 @@ Parent: "[[parent-note]]"
 Pick one direction to set relationships and let the plugin handle the rest:
 
 ✅ **Recommended**: Set relationships in parent notes
-
 ```yaml
 # Project.md
 Child:
@@ -317,7 +297,6 @@ Child:
 ```
 
 ❌ **Not recommended**: Setting both sides manually
-
 ```yaml
 # Project.md
 Child: ["[[Task 1]]"]
@@ -325,7 +304,6 @@ Child: ["[[Task 1]]"]
 # Task 1.md
 Parent: "[[Project]]"
 ```
-
 The plugin does this automatically!
 
 ### 2. Use Wiki Links
@@ -333,7 +311,6 @@ The plugin does this automatically!
 Always use Obsidian's wiki link format for relationships:
 
 ✅ **Correct**:
-
 ```yaml
 Parent: "[[note name]]"
 Child:
@@ -342,7 +319,6 @@ Child:
 ```
 
 ❌ **Incorrect**:
-
 ```yaml
 Parent: note name
 Child:
@@ -361,7 +337,6 @@ Don't try to manually sync relationships - the plugin handles it automatically. 
 ### 5. Use the Rescan Feature
 
 If relationships ever seem out of sync:
-
 1. Go to Settings → Nexus Properties
 2. Click "Index and assign properties to all files"
 3. Wait for the rescan to complete
@@ -448,7 +423,6 @@ All four concepts will show as related in "All Related" mode!
 ### Orphaned Relationships
 
 If you have relationships pointing to non-existent files:
-
 1. The plugin will show warnings in the console
 2. Run a full rescan to clean them up
 3. Check for typos in wiki links
@@ -456,7 +430,6 @@ If you have relationships pointing to non-existent files:
 ### Performance Issues
 
 With large networks (1000+ notes):
-
 1. Limit [recursion depth](../configuration#all-related-recursion-depth)
 2. Use [directory scanning](../configuration#directory-scanning) to limit scope
 3. Disable [auto-link siblings](../configuration#auto-link-siblings) if not needed

@@ -27,7 +27,6 @@ Set relationships in one direction, and Nexus Properties automatically updates t
 ### 📊 Interactive Relationship Graph
 
 Visualize your knowledge network with multiple view modes:
-
 - **Hierarchical** - See parent-child trees
 - **Related** - View direct related connections
 - **All Related** - Explore entire constellations of related notes
@@ -75,4 +74,4 @@ Ready to start building your knowledge network?
 
 ## License
 
-Nexus Properties is open source software licensed under the [MIT License](https://github.com/Real1tyy/Nexus-Properties/blob/main/LICENSE).
+Fusion Goals is open source software licensed under the [AGPL-3.0 License](https://github.com/Real1tyy/Fusion-Goals/blob/main/LICENSE).

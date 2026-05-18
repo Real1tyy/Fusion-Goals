@@ -4,428 +4,156 @@ sidebar_position: 100
 
 # Contributing
 
-Thank you for considering contributing to Nexus Properties! This document provides guidelines and information for contributors.
+I welcome contributions and feedback from the community! Here's how you can help make Fusion Goals better.
 
-## Ways to Contribute
+## Found a Bug?
 
-### 🐛 Report Bugs
+Before creating a new issue, please follow this process:
 
-Help improve quality by reporting issues:
+### 1. Check for Existing Issues
 
-1. **Search existing issues** first to avoid duplicates
-2. **Use the bug report template** when creating an issue
-3. **Provide detailed information**:
-   - Steps to reproduce
-   - Expected vs actual behavior
-   - Obsidian version and plugin version
-   - Console errors (if any)
-   - Screenshots (if visual)
+**Search first!** Your issue may already be reported:
 
-[Report a bug →](https://github.com/Real1tyy/Nexus-Properties/issues/new)
+1. Go to [GitHub Issues](https://github.com/Real1tyy/Fusion-Goals/issues)
 
-### 💡 Suggest Features
+2. Search for keywords related to your problem
 
-Share your ideas for improvements:
+3. Check both **open** and **closed** issues
 
-1. **Search discussions** for similar suggestions
-2. **Create a new discussion** with:
-   - Clear description of the feature
-   - Use cases and benefits
-   - Possible implementation approach (optional)
-3. **Engage with feedback** from maintainers and community
+**If the issue already exists:**
 
-[Suggest a feature →](https://github.com/Real1tyy/Nexus-Properties/discussions/new)
+- 👍 **Upvote it** by adding a 👍 reaction to raise its priority
 
-### 📖 Improve Documentation
+- 💬 **Add a comment** if you have additional information or context
 
-Documentation is crucial for adoption:
+- 📎 **Share your specific case** if it differs from the original report
 
-- **Fix typos or errors** in existing docs
-- **Add examples** to clarify concepts
-- **Write tutorials** for common workflows
-- **Translate** documentation (future)
-- **Improve clarity** of explanations
+**Don't create duplicates!** Upvoting existing issues helps prioritize better.
 
-Documentation lives in `docs-site/docs/`
+### 2. Verify You Have the Latest Version
 
-### 💻 Contribute Code
+Before reporting, ensure you're using the latest version:
 
-Contribute bug fixes, features, or improvements:
+1. Go to **Settings** → **Community plugins**
 
-1. **Fork the repository**
-2. **Create a feature branch**
-3. **Make your changes**
-4. **Write/update tests**
-5. **Submit a pull request**
+2. Check for available updates
 
-See [Development Setup](#development-setup) below.
+3. Update the plugin if a newer version exists
 
-### 🎨 Design Improvements
+4. Test if the issue still occurs
 
-Help improve the UI/UX:
+**Your issue may already be fixed in the latest release!**
 
-- **Graph styling** improvements
-- **Settings UI** enhancements
-- **Accessibility** improvements
-- **Theme compatibility** fixes
+### 3. Create a New Issue
 
-### 🧪 Testing
+If no existing issue matches and you're on the latest version, **[create a new bug report](https://github.com/Real1tyy/Fusion-Goals/issues/new/choose)**.
 
-Help ensure quality:
+The bug report template will guide you through providing all necessary information:
 
-- **Test new features** in beta/preview builds
-- **Report edge cases** and unexpected behavior
-- **Test on different platforms** (Windows, Mac, Linux)
-- **Test with different themes** and configurations
+- Operating System (with version/build)
 
-### 💬 Community Support
+- Obsidian Version
 
-Help others in the community:
+- Plugin Version
 
-- **Answer questions** in GitHub Discussions
-- **Share your workflows** and tips
-- **Write blog posts** or tutorials
-- **Create videos** demonstrating features
+- Steps to reproduce
 
-## Development Setup
+- Expected vs actual behavior
 
-### Prerequisites
+- Console errors/logs
 
-- **Node.js** 18+ (check with `node --version`)
-- **pnpm** (install with `npm install -g pnpm`)
-- **Git** for version control
-- **Obsidian** for testing
+- Screenshots/videos
 
-### Initial Setup
+- Severity level
 
-```bash
-# Clone your fork
-git clone https://github.com/YOUR_USERNAME/Nexus-Properties.git
-cd Nexus-Properties
+## Feature Requests
 
-# Install dependencies
-pnpm install
+Have an idea for a new feature? I'd love to hear it!
 
-# Build the plugin
-pnpm build
-```
+### Before Requesting
 
-### Development Workflow
+1. **Search existing requests** - Your idea may already be proposed
 
-**Hot reload development**:
+2. **Upvote existing requests** - Add 👍 to similar feature requests
 
-```bash
-# Watch for changes and rebuild automatically
-pnpm dev
-```
+3. **Comment on existing requests** - Share your specific use case
 
-This creates:
+### Submit a New Feature Request
 
-- `main.js` - Plugin code
-- `styles.css` - Styles
-- `manifest.json` - Plugin manifest
+**[Create a feature request](https://github.com/Real1tyy/Fusion-Goals/issues/new/choose)** using the structured template.
 
-**Link to Obsidian vault**:
+The feature request template will guide you through providing:
 
-```bash
-# Create symlink to your test vault
-# Windows (as Administrator):
-mklink /D "C:\Users\YourUser\YourVault\.obsidian\plugins\nexus-properties" "C:\path\to\Nexus-Properties"
+- Feature title and problem statement
 
-# Mac/Linux:
-ln -s /path/to/Nexus-Properties /path/to/YourVault/.obsidian/plugins/nexus-properties
-```
+- Proposed solution
 
-Then reload the plugin in Obsidian after changes.
+- Real-world use case
 
-### Running Tests
+- Alternatives you've considered
 
-```bash
-# Run all tests
-pnpm test
+- Examples/mockups
 
-# Run tests in watch mode
-pnpm test:watch
+- Priority and category
 
-# Run with coverage
-pnpm test:coverage
-```
+- Willingness to contribute
 
-### Linting and Formatting
+**Tips for Great Feature Requests:**
 
-```bash
-# Check for issues
-pnpm lint
+- ✅ **Be specific**: "Add ability to aggregate metrics across child goals"
 
-# Fix auto-fixable issues
-pnpm lint:fix
+- ❌ **Too vague**: "Make metrics better"
 
-# Format code
-pnpm format
-```
+- ✅ **Explain the why**: Share your workflow and how it helps
 
-### Building for Production
+- ❌ **Just the what**: Don't only describe what you want
 
-```bash
-# Create optimized build
-pnpm build
+## 📝 Documentation Contributions
 
-# Version bump (for maintainers)
-pnpm version:bump
-```
+### Help Improve the Docs
 
-## Code Guidelines
+Fusion Goals has documentation covering features and configurations. If you spot something that's incorrect, outdated, or unclear, **I'd love your help!**
 
-### TypeScript
+**How you can contribute:**
 
-- **Use TypeScript** for all code (strict mode)
-- **Define interfaces** for data structures
-- **Avoid `any`** - use proper types
-- **Use type inference** where possible
-- **Document complex types** with JSDoc
+- **Spot an error?** Create a PR to fix it
 
-### Code Style
+- **Found unclear explanations?** Suggest improvements
 
-- **2 spaces** for indentation
-- **Semicolons** required
-- **Single quotes** for strings
-- **Trailing commas** in multiline
-- **Arrow functions** preferred
-- Follow the existing code style
+- **Missing information?** Add what's needed
 
-### File Organization
+- **Better examples?** Share them
 
-```
-src/
-├── components/     # UI components
-├── core/          # Core business logic
-├── types/         # Type definitions
-└── utils/         # Utility functions
-```
+Documentation contributions are **highly appreciated** and help everyone in the community.
 
-- **Keep files focused** - single responsibility
-- **Extract reusable code** to utils
-- **Separate concerns** - UI vs logic
-- **Use barrel exports** (`index.ts`)
+**Where to contribute:**
 
-### Naming Conventions
+- Documentation source is in `docs-site/docs/`
 
-- **Classes**: PascalCase (`GraphBuilder`)
-- **Functions/methods**: camelCase (`buildGraph`)
-- **Constants**: UPPER_SNAKE_CASE (`DEFAULT_COLOR`)
-- **Files**: kebab-case (`graph-builder.ts`)
-- **Types/Interfaces**: PascalCase (`NodeData`)
+- Edit pages directly on GitHub or submit a PR
 
-### Comments
+- Follow the existing style and structure
 
-- **Document why**, not what
-- **Use JSDoc** for public APIs
-- **Explain complex logic**
-- **Keep comments up-to-date**
-- **Remove commented-out code**
+- No contribution is too small — typo fixes are welcome!
 
-### Testing
+## 🤝 Getting Help
 
-- **Write tests** for new features
-- **Update tests** when changing behavior
-- **Test edge cases** and error conditions
-- **Aim for high coverage** (80%+)
-- **Use descriptive test names**
+- **Documentation**: Check the [comprehensive docs](https://real1tyy.github.io/Fusion-Goals/)
 
-Example:
+- **FAQ**: Common questions are answered in the [FAQ section](/faq)
 
-```typescript
-describe("GraphBuilder", () => {
-	describe("buildHierarchy", () => {
-		it("should include all children recursively", () => {
-			// Test implementation
-		});
+- **Issues**: For bugs and feature requests, use [GitHub Issues](https://github.com/Real1tyy/Fusion-Goals/issues)
 
-		it("should handle circular relationships", () => {
-			// Test implementation
-		});
-	});
-});
-```
+## 🙏 Thank You!
 
-## Pull Request Process
-
-### Before Submitting
-
-1. **Create an issue** first for large changes
-2. **Fork and branch** from `main`
-3. **Follow code guidelines** above
-4. **Write/update tests** for your changes
-5. **Update documentation** if needed
-6. **Run all checks**:
-   ```bash
-   pnpm lint
-   pnpm test
-   pnpm build
-   ```
-7. **Test in Obsidian** with various scenarios
-
-### PR Guidelines
-
-**Good PR title examples**:
-
-- `fix: Circular relationship detection in parent-child links`
-- `feat: Add keyboard navigation to graph`
-- `docs: Add examples for color rule expressions`
-- `refactor: Extract graph layout logic to separate class`
-
-**PR description should include**:
-
-- **What** changed
-- **Why** it changed
-- **How** to test it
-- **Screenshots** (if visual changes)
-- **Breaking changes** (if any)
-
-### PR Template
-
-```markdown
-## Description
-
-Brief description of the changes
-
-## Type of Change
-
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Documentation update
-
-## Testing
-
-How to test the changes
-
-## Screenshots (if applicable)
-
-Add screenshots for visual changes
-
-## Checklist
-
-- [ ] Code follows style guidelines
-- [ ] Tests added/updated
-- [ ] Documentation updated
-- [ ] All tests pass
-- [ ] Tested in Obsidian
-```
-
-### Review Process
-
-1. **Automated checks** must pass (linting, tests, build)
-2. **Maintainer review** - may request changes
-3. **Address feedback** - update PR as needed
-4. **Approval** - maintainer approves when ready
-5. **Merge** - maintainer merges to main
-
-## Git Commit Guidelines
-
-### Commit Message Format
-
-```
-<type>: <subject>
-
-<body>
-
-<footer>
-```
-
-### Types
-
-- **feat**: New feature
-- **fix**: Bug fix
-- **docs**: Documentation only
-- **style**: Code style (formatting, no logic change)
-- **refactor**: Code refactoring
-- **test**: Adding/updating tests
-- **chore**: Build process, dependencies, etc.
-
-### Examples
-
-```
-feat: Add filter presets to graph header
-
-Add dropdown selector for quickly applying saved filter presets.
-Users can now switch between predefined filters without typing expressions.
-
-Closes #123
-```
-
-```
-fix: Prevent circular relationships in parent-child links
-
-Check for circular dependencies before establishing relationships.
-Show error notice when circular link would be created.
-
-Fixes #45
-```
-
-## Code of Conduct
-
-### Our Pledge
-
-We pledge to make participation in our community a harassment-free experience for everyone, regardless of:
-
-- Age, body size, disability
-- Ethnicity, gender identity
-- Level of experience
-- Nationality, personal appearance
-- Race, religion
-- Sexual identity and orientation
-
-### Our Standards
-
-**Positive behavior**:
-
-- Using welcoming and inclusive language
-- Being respectful of differing viewpoints
-- Gracefully accepting constructive criticism
-- Focusing on what's best for the community
-- Showing empathy towards others
-
-**Unacceptable behavior**:
-
-- Trolling, insulting/derogatory comments
-- Public or private harassment
-- Publishing others' private information
-- Other conduct inappropriate in a professional setting
-
-### Enforcement
-
-Instances of unacceptable behavior may be reported to the project maintainers. All complaints will be reviewed and investigated promptly and fairly.
-
-## Recognition
-
-Contributors will be recognized in:
-
-- **README.md** contributors section
-- **Release notes** for significant contributions
-- **Documentation** for doc contributors
-
-## Financial Support
-
-Support the project's development:
-
-- **Support**: [Support My Work](https://matejvavroproductivity.com/support/)
-- **Buy Me a Coffee**: [Support on Ko-fi](https://ko-fi.com/real1ty)
-
-## Questions?
-
-- **General questions**: [GitHub Discussions](https://github.com/Real1tyy/Nexus-Properties/discussions)
-- **Development questions**: Ask in issues or discussions
-- **Private inquiries**: Contact via GitHub profile
-
-## License
-
-By contributing, you agree that your contributions will be licensed under the **MIT License**.
-
-## Thank You!
-
-Your contributions make Nexus Properties better for everyone. Whether you're fixing a typo or adding a major feature, every contribution is valued and appreciated! 🙏
+Every contribution, no matter how small, makes Fusion Goals better for everyone. Thank you for helping improve the plugin!
 
 ---
 
-**Happy Contributing! 🚀**
+## License
+
+Fusion Goals is licensed under [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html). By submitting a pull request, you agree that your contribution is licensed under the same terms.
+
+---
+
+**Ready to contribute?** [Fork the repository](https://github.com/Real1tyy/Fusion-Goals) and start making improvements!

@@ -30,9 +30,9 @@ Inside expressions, you have direct access to frontmatter properties by name:
 // ---
 
 // You can write:
-status === "complete"; // true
-priority === "high"; // true
-tags.includes("project"); // true
+status === 'complete'          // true
+priority === 'high'            // true
+tags.includes('project')       // true
 ```
 
 ## Creating Color Rules
@@ -49,25 +49,21 @@ tags.includes("project"); // true
 Each rule consists of:
 
 **Expression** (Required)
-
 - JavaScript expression that returns boolean
 - Access properties directly by name
 - Must be valid JavaScript syntax
 
 **Color** (Required)
-
 - Any valid CSS color
 - Hex: `#3b82f6`
 - HSL: `hsl(200, 70%, 50%)`
 - Named: `steelblue`, `red`, `green`
 
 **Enabled** (Toggle)
-
 - Turn rules on/off without deleting
 - Useful for temporary rule changes
 
 **Order** (↑/↓ buttons)
-
 - Rules are evaluated top to bottom
 - First matching rule wins
 - Reorder with up/down buttons
@@ -76,53 +72,53 @@ Each rule consists of:
 
 ### Simple Status Colors
 
-| Expression                 | Color              | Description     |
-| -------------------------- | ------------------ | --------------- |
-| `status === 'complete'`    | `#22c55e` (green)  | Completed items |
-| `status === 'in-progress'` | `#f59e0b` (orange) | Active work     |
-| `status === 'pending'`     | `#ef4444` (red)    | Not started     |
+| Expression | Color | Description |
+|------------|-------|-------------|
+| `status === 'complete'` | `#22c55e` (green) | Completed items |
+| `status === 'in-progress'` | `#f59e0b` (orange) | Active work |
+| `status === 'pending'` | `#ef4444` (red) | Not started |
 
 **Result**: Nodes change color based on their `status` property.
 
 ### Type-Based Colors
 
-| Expression             | Color              | Description |
-| ---------------------- | ------------------ | ----------- |
-| `type === 'project'`   | `#3b82f6` (blue)   | Projects    |
-| `type === 'task'`      | `#10b981` (green)  | Tasks       |
-| `type === 'note'`      | `#6366f1` (purple) | Notes       |
-| `type === 'reference'` | `#8b5cf6` (violet) | References  |
+| Expression | Color | Description |
+|------------|-------|-------------|
+| `type === 'project'` | `#3b82f6` (blue) | Projects |
+| `type === 'task'` | `#10b981` (green) | Tasks |
+| `type === 'note'` | `#6366f1` (purple) | Notes |
+| `type === 'reference'` | `#8b5cf6` (violet) | References |
 
 **Result**: Different node types get distinct colors.
 
 ### Priority System
 
-| Expression              | Color                | Description     |
-| ----------------------- | -------------------- | --------------- |
-| `priority === 'urgent'` | `#dc2626` (dark red) | Urgent items    |
-| `priority === 'high'`   | `#f59e0b` (orange)   | High priority   |
-| `priority === 'medium'` | `#eab308` (yellow)   | Medium priority |
-| `priority === 'low'`    | `#6b7280` (gray)     | Low priority    |
+| Expression | Color | Description |
+|------------|-------|-------------|
+| `priority === 'urgent'` | `#dc2626` (dark red) | Urgent items |
+| `priority === 'high'` | `#f59e0b` (orange) | High priority |
+| `priority === 'medium'` | `#eab308` (yellow) | Medium priority |
+| `priority === 'low'` | `#6b7280` (gray) | Low priority |
 
 **Result**: Visual priority hierarchy.
 
 ### Tag-Based Colors
 
-| Expression                                          | Color             | Description     |
-| --------------------------------------------------- | ----------------- | --------------- |
-| `Array.isArray(tags) && tags.includes('important')` | `#ef4444` (red)   | Important notes |
-| `Array.isArray(tags) && tags.includes('archived')`  | `#9ca3af` (gray)  | Archived        |
-| `Array.isArray(tags) && tags.includes('public')`    | `#10b981` (green) | Public notes    |
+| Expression | Color | Description |
+|------------|-------|-------------|
+| `Array.isArray(tags) && tags.includes('important')` | `#ef4444` (red) | Important notes |
+| `Array.isArray(tags) && tags.includes('archived')` | `#9ca3af` (gray) | Archived |
+| `Array.isArray(tags) && tags.includes('public')` | `#10b981` (green) | Public notes |
 
 **Result**: Nodes colored by tags.
 
 ### Complex Conditions
 
-| Expression                                                             | Color                   | Description             |
-| ---------------------------------------------------------------------- | ----------------------- | ----------------------- |
-| `status === 'complete' && priority === 'high'`                         | `#059669` (dark green)  | Completed high-priority |
-| `status === 'pending' && priority === 'urgent'`                        | `#dc2626` (dark red)    | Urgent not started      |
-| `type === 'project' && Array.isArray(tags) && tags.includes('active')` | `#2563eb` (bright blue) | Active projects         |
+| Expression | Color | Description |
+|------------|-------|-------------|
+| `status === 'complete' && priority === 'high'` | `#059669` (dark green) | Completed high-priority |
+| `status === 'pending' && priority === 'urgent'` | `#dc2626` (dark red) | Urgent not started |
+| `type === 'project' && Array.isArray(tags) && tags.includes('active')` | `#2563eb` (bright blue) | Active projects |
 
 **Result**: Multi-condition colors.
 
@@ -131,48 +127,42 @@ Each rule consists of:
 ### Accessing Properties
 
 **Simple properties**:
-
 ```javascript
-status === "active";
-priority === "high";
-type === "project";
+status === 'active'
+priority === 'high'
+type === 'project'
 ```
 
 **Numeric properties**:
-
 ```javascript
-progress > 50;
-count <= 10;
-score >= 75;
+progress > 50
+count <= 10
+score >= 75
 ```
 
 **Boolean properties**:
-
 ```javascript
-completed === true;
-archived !== true;
-isPublic;
+completed === true
+archived !== true
+isPublic
 ```
 
 **Array properties**:
-
 ```javascript
-Array.isArray(tags);
-tags.includes("important");
-tags.length > 3;
+Array.isArray(tags)
+tags.includes('important')
+tags.length > 3
 ```
 
 **Nested properties** (objects):
-
 ```javascript
-metadata && metadata.category === "work";
-author && author.name === "John";
+metadata && metadata.category === 'work'
+author && author.name === 'John'
 ```
 
 ### Operators
 
 **Comparison**:
-
 - `===` - Exact equality
 - `!==` - Not equal
 - `>` - Greater than
@@ -181,26 +171,23 @@ author && author.name === "John";
 - `<=` - Less than or equal
 
 **Logical**:
-
 - `&&` - AND (both must be true)
 - `||` - OR (either can be true)
 - `!` - NOT (invert boolean)
 
 **String methods**:
-
 ```javascript
-title.includes("Project");
-title.startsWith("DRAFT");
-title.endsWith(".png");
-title.toLowerCase() === "important";
+title.includes('Project')
+title.startsWith('DRAFT')
+title.endsWith('.png')
+title.toLowerCase() === 'important'
 ```
 
 **Array methods**:
-
 ```javascript
-tags.includes("work");
-tags.some((t) => t.startsWith("priority-"));
-tags.every((t) => t !== "archived");
+tags.includes('work')
+tags.some(t => t.startsWith('priority-'))
+tags.every(t => t !== 'archived')
 ```
 
 ## Rule Order & Priority
@@ -210,13 +197,11 @@ Rules are evaluated **top to bottom**. The **first rule** that matches determine
 ### Example Rule Order
 
 **Rules defined (top to bottom)**:
-
 1. `status === 'urgent'` → Red
 2. `status === 'complete'` → Green
 3. `status !== ''` → Blue
 
 **Results**:
-
 - Note with `status: urgent` → Red (matches rule 1, stops)
 - Note with `status: complete` → Green (skips rule 1, matches rule 2)
 - Note with `status: pending` → Blue (skips rules 1-2, matches rule 3)
@@ -227,14 +212,12 @@ Rules are evaluated **top to bottom**. The **first rule** that matches determine
 Use the **↑** and **↓** buttons to change rule order:
 
 **Before reordering**:
-
 1. General rule (broad match)
 2. Specific rule (narrow match)
 
 **Problem**: Specific rule never triggers because general rule always matches first.
 
 **After reordering**:
-
 1. Specific rule (narrow match)
 2. General rule (broad match)
 
@@ -258,7 +241,6 @@ If no color rules match, nodes use the **default node color**.
 **Default**: `#e9f2ff` (light blue)
 
 **Recommendations**:
-
 - Use a neutral color
 - Ensure good contrast with text
 - Consider your theme (light vs. dark mode)
@@ -273,7 +255,6 @@ Toggle rules on/off without deleting them:
 4. Checked = enabled (rule is evaluated)
 
 **Use cases**:
-
 - Temporarily disable a rule for testing
 - Switch between different color schemes
 - Debug rule conflicts
@@ -296,64 +277,64 @@ Deleting a rule is permanent. Consider disabling it instead if you might want it
 
 ```javascript
 // ✅ Next Actions
-status === "next"; // → Green #22c55e
+status === 'next'  // → Green #22c55e
 
 // 🔶 Waiting
-status === "waiting"; // → Orange #f59e0b
+status === 'waiting'  // → Orange #f59e0b
 
 // 🟦 Someday/Maybe
-status === "someday"; // → Blue #3b82f6
+status === 'someday'  // → Blue #3b82f6
 
 // ⚪ Completed
-status === "done"; // → Gray #9ca3af
+status === 'done'  // → Gray #9ca3af
 ```
 
 ### Project Lifecycle
 
 ```javascript
 // Planning phase
-phase === "planning"; // → Yellow #eab308
+phase === 'planning'  // → Yellow #eab308
 
 // Active development
-phase === "active"; // → Green #10b981
+phase === 'active'  // → Green #10b981
 
 // Under review
-phase === "review"; // → Orange #f59e0b
+phase === 'review'  // → Orange #f59e0b
 
 // Completed
-phase === "complete"; // → Blue #3b82f6
+phase === 'complete'  // → Blue #3b82f6
 
 // Archived
-phase === "archived"; // → Gray #6b7280
+phase === 'archived'  // → Gray #6b7280
 ```
 
 ### Knowledge Maturity
 
 ```javascript
 // Seedling (new idea)
-maturity === "seedling"; // → Light green #86efac
+maturity === 'seedling'  // → Light green #86efac
 
 // Budding (developing)
-maturity === "budding"; // → Green #22c55e
+maturity === 'budding'  // → Green #22c55e
 
 // Evergreen (mature)
-maturity === "evergreen"; // → Dark green #15803d
+maturity === 'evergreen'  // → Dark green #15803d
 ```
 
 ### Confidence Levels
 
 ```javascript
 // High confidence
-confidence === "high"; // → Green #22c55e
+confidence === 'high'  // → Green #22c55e
 
 // Medium confidence
-confidence === "medium"; // → Yellow #eab308
+confidence === 'medium'  // → Yellow #eab308
 
 // Low confidence
-confidence === "low"; // → Orange #f59e0b
+confidence === 'low'  // → Orange #f59e0b
 
 // Needs verification
-confidence === "verify"; // → Red #ef4444
+confidence === 'verify'  // → Red #ef4444
 ```
 
 ## Troubleshooting
@@ -361,40 +342,34 @@ confidence === "verify"; // → Red #ef4444
 ### Rule Not Working
 
 **Check expression syntax**:
-
 - Must be valid JavaScript
 - Property names are case-sensitive
 - Strings need quotes: `'active'` not `active`
 - Use `===` not `=` for comparison
 
 **Check property exists**:
-
 - Open the node in Obsidian
 - Verify frontmatter spelling
 - Check for typos
 - Use [tooltips](tooltips) to see actual properties
 
 **Check rule order**:
-
 - Earlier rules take precedence
 - A broader rule might match before yours
 - Reorder rules with ↑/↓ buttons
 
 **Check rule is enabled**:
-
 - Look for the checkbox on the left
 - Disabled rules are skipped
 
 ### Wrong Color Applied
 
 **Multiple rules matching**:
-
 - First matching rule wins
 - Check rule order
 - Make rules more specific
 
 **Property value mismatch**:
-
 - Check actual property value in frontmatter
 - Case sensitivity matters
 - Extra spaces can break matches
@@ -406,26 +381,25 @@ confidence === "verify"; // → Red #ef4444
 
 ```javascript
 // ❌ Wrong: Missing quotes
-status === active;
+status === active
 
 // ✅ Correct
-status === "active";
+status === 'active'
 
 // ❌ Wrong: Using = instead of ===
-status = "active";
+status = 'active'
 
 // ✅ Correct
-status === "active";
+status === 'active'
 
 // ❌ Wrong: Forgetting Array.isArray check
-tags.includes("work");
+tags.includes('work')
 
 // ✅ Correct
-Array.isArray(tags) && tags.includes("work");
+Array.isArray(tags) && tags.includes('work')
 ```
 
 **Check console**:
-
 - Open developer console (`Ctrl/Cmd+Shift+I`)
 - Look for error messages
 - Invalid expressions are logged
@@ -444,7 +418,6 @@ Array.isArray(tags) && tags.includes("work");
 - **Evaluation frequency**: Rules run on every graph update
 
 **Optimization tips**:
-
 - Keep expressions simple
 - Disable unused rules
 - Put most common rules first
